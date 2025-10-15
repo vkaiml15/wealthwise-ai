@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/logo.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#4F46E5" />
+    <meta
+      name="description"
+      content="WealthWise AI - Your Intelligent Investment Companion. Get personalized portfolio analysis, market insights, and investment recommendations powered by AI."
+    />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo.svg" />
+    
+    <!-- Preconnect to Google Fonts for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Inter Font - Modern, professional font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Manifest for PWA support (optional) -->
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    
+    <title>WealthWise AI - Your Intelligent Investment Companion</title>
+    
+    <style>
+      /* Prevent flash of unstyled content */
+      body {
+        margin: 0;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+          'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+          sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      
+      code {
+        font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+          monospace;
+      }
+      
+      /* Loading screen */
+      #loading-screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        transition: opacity 0.5s ease-out;
+      }
+      
+      #loading-screen.fade-out {
+        opacity: 0;
+        pointer-events: none;
+      }
+      
+      .loading-logo {
+        width: 80px;
+        height: 80px;
+        margin-bottom: 20px;
+        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+      }
+      
+      .loading-text {
+        color: white;
+        font-size: 24px;
+        font-weight: 600;
+        margin-bottom: 10px;
+      }
+      
+      .loading-subtext {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 14px;
+      }
+      
+      @keyframes pulse {
+        0%, 100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.8;
+          transform: scale(1.05);
+        }
+      }
+      
+      .spinner {
+        width: 40px;
+        height: 40px;
+        margin-top: 20px;
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+    </style>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+      <svg class="loading-logo" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- WealthWise AI Logo -->
+        <circle cx="100" cy="100" r="90" fill="white" opacity="0.1"/>
+        <circle cx="100" cy="100" r="70" fill="white" opacity="0.2"/>
+        
+        <!-- Dollar sign with growth arrow -->
+        <path d="M100 40 L100 160 M80 60 L100 50 L120 60 M80 90 L100 80 L120 90 M80 120 L100 110 L120 120 M80 150 L100 140 L120 150" 
+              stroke="white" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+        
+        <!-- Upward arrow -->
+        <path d="M140 80 L160 60 L180 80 M160 60 L160 100" 
+              stroke="#4ADE80" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+        
+        <!-- Chart line -->
+        <path d="M30 150 L50 130 L70 140 L90 110 L110 120 L130 90 L150 100 L170 70" 
+              stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/>
+      </svg>
+      
+      <div class="loading-text">WealthWise AI</div>
+      <div class="loading-subtext">Your Intelligent Investment Companion</div>
+      <div class="spinner"></div>
+    </div>
+    
+    <!-- React App Root -->
+    <div id="root"></div>
+    
+    <script>
+      // Hide loading screen once app loads
+      window.addEventListener('load', function() {
+        setTimeout(function() {
+          const loadingScreen = document.getElementById('loading-screen');
+          if (loadingScreen) {
+            loadingScreen.classList.add('fade-out');
+            setTimeout(function() {
+              loadingScreen.style.display = 'none';
+            }, 500);
+          }
+        }, 1000); // Show loading for at least 1 second
+      });
+    </script>
+  </body>
+</html>

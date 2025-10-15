@@ -1,0 +1,85 @@
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circles for depth -->
+  <circle cx="100" cy="100" r="95" fill="url(#gradient1)" opacity="0.1"/>
+  <circle cx="100" cy="100" r="85" fill="url(#gradient1)" opacity="0.15"/>
+  <circle cx="100" cy="100" r="75" fill="url(#gradient1)" opacity="0.2"/>
+  
+  <!-- Main background circle -->
+  <circle cx="100" cy="100" r="90" fill="url(#gradient2)"/>
+  
+  <!-- Inner circle for contrast -->
+  <circle cx="100" cy="100" r="70" fill="white"/>
+  
+  <!-- Dollar sign (stylized) -->
+  <g transform="translate(100, 100)">
+    <!-- Vertical line of $ -->
+    <rect x="-4" y="-50" width="8" height="100" rx="4" fill="url(#gradient3)"/>
+    
+    <!-- Top curve of $ -->
+    <path d="M -25 -30 Q -25 -45, -10 -45 L 10 -45 Q 25 -45, 25 -30 Q 25 -15, 10 -15 L -15 -15" 
+          stroke="url(#gradient3)" stroke-width="8" stroke-linecap="round" fill="none"/>
+    
+    <!-- Bottom curve of $ -->
+    <path d="M 25 30 Q 25 45, 10 45 L -10 45 Q -25 45, -25 30 Q -25 15, -10 15 L 15 15" 
+          stroke="url(#gradient3)" stroke-width="8" stroke-linecap="round" fill="none"/>
+  </g>
+  
+  <!-- Growth arrow (top right) -->
+  <g transform="translate(145, 55)">
+    <!-- Arrow shaft -->
+    <line x1="0" y1="30" x2="0" y2="-10" stroke="#10B981" stroke-width="6" stroke-linecap="round"/>
+    
+    <!-- Arrow head -->
+    <path d="M -10 0 L 0 -10 L 10 0" stroke="#10B981" stroke-width="6" stroke-linecap="round" 
+          stroke-linejoin="round" fill="none"/>
+    
+    <!-- Sparkle effect -->
+    <circle cx="0" cy="-15" r="3" fill="#10B981" opacity="0.6"/>
+    <circle cx="-8" cy="-8" r="2" fill="#10B981" opacity="0.4"/>
+    <circle cx="8" cy="-8" r="2" fill="#10B981" opacity="0.4"/>
+  </g>
+  
+  <!-- Chart line (bottom - representing market trends) -->
+  <g opacity="0.4">
+    <path d="M 20 160 L 40 145 L 60 150 L 80 130 L 100 135 L 120 115 L 140 125 L 160 105 L 180 115" 
+          stroke="url(#gradient3)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    
+    <!-- Data points on chart -->
+    <circle cx="40" cy="145" r="3" fill="#4F46E5"/>
+    <circle cx="80" cy="130" r="3" fill="#4F46E5"/>
+    <circle cx="120" cy="115" r="3" fill="#4F46E5"/>
+    <circle cx="160" cy="105" r="3" fill="#4F46E5"/>
+  </g>
+  
+  <!-- Decorative elements (data/tech feel) -->
+  <g opacity="0.3">
+    <!-- Binary code aesthetic -->
+    <circle cx="25" cy="25" r="2" fill="#4F46E5"/>
+    <circle cx="35" cy="30" r="2" fill="#4F46E5"/>
+    <circle cx="175" cy="25" r="2" fill="#4F46E5"/>
+    <circle cx="165" cy="30" r="2" fill="#4F46E5"/>
+    <circle cx="25" cy="175" r="2" fill="#4F46E5"/>
+    <circle cx="35" cy="170" r="2" fill="#4F46E5"/>
+  </g>
+  
+  <!-- Gradients -->
+  <defs>
+    <!-- Background gradient -->
+    <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667EEA;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764BA2;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Main circle gradient -->
+    <linearGradient id="gradient2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4F46E5;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7C3AED;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Dollar sign gradient -->
+    <linearGradient id="gradient3" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#4F46E5;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#6366F1;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>
