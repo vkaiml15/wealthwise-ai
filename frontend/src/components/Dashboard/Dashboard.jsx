@@ -42,15 +42,15 @@ const Dashboard = () => {
     );
   }
 
-  const {
-    totalValue,
-    cashReserve,
-    invested,
-    returns,
-    riskScore,
-    allocation,
-    performance
-  } = portfolio;
+  // Safely extract portfolio data with default values
+  const totalValue = portfolio.totalValue ?? 0;
+  const cashReserve = portfolio.cashReserve ?? 0;
+  const invested = portfolio.invested ?? 0;
+  const returns = portfolio.returns ?? { value: 0, percentage: 0 };
+  const riskScore = portfolio.riskScore ?? 5;
+  const allocation = portfolio.allocation ?? [];
+  const performance = portfolio.performance ?? [];
+  const holdings = portfolio.holdings ?? [];
 
   // Calculate percentage changes (mock data - in real app would compare to previous period)
   const valueChange = 2.3; // percentage
@@ -101,11 +101,11 @@ const Dashboard = () => {
         <StatCard
           title="Cash Reserve"
           value={`$${cashReserve.toLocaleString()}`}
-          change={((cashReserve / totalValue) * 100).toFixed(1)}
+          change={totalValue > 0 ? ((cashReserve / totalValue) * 100).toFixed(1) : 0}
           isPercentage={true}
           icon={Wallet}
           iconColor="purple"
-          subtitle={`${((cashReserve / totalValue) * 100).toFixed(1)}% of portfolio`}
+          subtitle={totalValue > 0 ? `${((cashReserve / totalValue) * 100).toFixed(1)}% of portfolio` : '0% of portfolio'}
         />
         <StatCard
           title="Risk Score"
@@ -178,7 +178,7 @@ const Dashboard = () => {
               </tr>
             </thead>
             <tbody>
-              {portfolio.holdings?.slice(0, 5).map((holding, index) => {
+              {holdings.slice(0, 5).map((holding, index) => {
                 const returnPercent = ((holding.currentPrice - holding.avgPrice) / holding.avgPrice * 100);
                 const isPositiveReturn = returnPercent > 0;
                 
@@ -224,10 +224,10 @@ const Dashboard = () => {
         </div>
 
         {/* View All Button */}
-        {portfolio.holdings?.length > 5 && (
+        {holdings.length > 5 && (
           <div className="mt-4 text-center">
             <button className="text-sm text-indigo-600 hover:text-indigo-700 font-medium">
-              View all {portfolio.holdings.length} holdings →
+              View all {holdings.length} holdings →
             </button>
           </div>
         )}
