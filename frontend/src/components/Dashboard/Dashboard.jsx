@@ -1,11 +1,11 @@
 import React from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  DollarSign, 
-  Wallet, 
-  Shield, 
+import {
+  TrendingUp,
+  TrendingDown,
+  DollarSign,
+  Wallet,
+  Shield,
   Activity,
   ArrowUpRight,
   ArrowDownRight,
@@ -17,11 +17,11 @@ import { useNavigate } from 'react-router-dom';
 import StatCard from './StatCard';
 import PortfolioChart from './PortfolioChart';
 import PerformanceChart from './PerformanceChart';
-
+ 
 const Dashboard = () => {
   const { currentUser, portfolio } = useAuth();
   const navigate = useNavigate();
-
+ 
   if (!portfolio) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -41,21 +41,21 @@ const Dashboard = () => {
       </div>
     );
   }
-
-  const {
-    totalValue,
-    cashReserve,
-    invested,
-    returns,
-    riskScore,
-    allocation,
-    performance
-  } = portfolio;
-
+ 
+  // Safely extract portfolio data with default values
+  const totalValue = portfolio.totalValue ?? 0;
+  const cashReserve = portfolio.cashReserve ?? 0;
+  const invested = portfolio.invested ?? 0;
+  const returns = portfolio.returns ?? { value: 0, percentage: 0 };
+  const riskScore = portfolio.riskScore ?? 5;
+  const allocation = portfolio.allocation ?? [];
+  const performance = portfolio.performance ?? [];
+  const holdings = portfolio.holdings ?? [];
+ 
   // Calculate percentage changes (mock data - in real app would compare to previous period)
   const valueChange = 2.3; // percentage
   const isPositive = returns.value > 0;
-
+ 
   return (
     <div className="space-y-6">
       {/* Welcome Section */}
@@ -78,7 +78,7 @@ const Dashboard = () => {
           </button>
         </div>
       </div>
-
+ 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
@@ -101,11 +101,11 @@ const Dashboard = () => {
         <StatCard
           title="Cash Reserve"
           value={`$${cashReserve.toLocaleString()}`}
-          change={((cashReserve / totalValue) * 100).toFixed(1)}
+          change={totalValue > 0 ? ((cashReserve / totalValue) * 100).toFixed(1) : 0}
           isPercentage={true}
           icon={Wallet}
           iconColor="purple"
-          subtitle={`${((cashReserve / totalValue) * 100).toFixed(1)}% of portfolio`}
+          subtitle={totalValue > 0 ? `${((cashReserve / totalValue) * 100).toFixed(1)}% of portfolio` : '0% of portfolio'}
         />
         <StatCard
           title="Risk Score"
@@ -113,13 +113,13 @@ const Dashboard = () => {
           icon={Shield}
           iconColor="yellow"
           subtitle={
-            riskScore < 4 ? "Conservative" : 
-            riskScore < 7 ? "Moderate" : 
+            riskScore < 4 ? "Conservative" :
+            riskScore < 7 ? "Moderate" :
             "Aggressive"
           }
         />
       </div>
-
+ 
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Portfolio Allocation - Takes 1/3 width */}
@@ -135,7 +135,7 @@ const Dashboard = () => {
           </div>
           <PortfolioChart data={allocation} />
         </div>
-
+ 
         {/* Performance Chart - Takes 2/3 width */}
         <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-6">
@@ -150,7 +150,7 @@ const Dashboard = () => {
           <PerformanceChart data={performance} />
         </div>
       </div>
-
+ 
       {/* Holdings Table */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
         <div className="flex items-center justify-between mb-6">
@@ -162,7 +162,7 @@ const Dashboard = () => {
             <BarChart3 className="w-5 h-5 text-green-600" />
           </div>
         </div>
-
+ 
         {/* Table */}
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -178,10 +178,10 @@ const Dashboard = () => {
               </tr>
             </thead>
             <tbody>
-              {portfolio.holdings?.slice(0, 5).map((holding, index) => {
+              {holdings.slice(0, 5).map((holding, index) => {
                 const returnPercent = ((holding.currentPrice - holding.avgPrice) / holding.avgPrice * 100);
                 const isPositiveReturn = returnPercent > 0;
-                
+               
                 return (
                   <tr key={index} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
                     <td className="py-4 px-4">
@@ -222,17 +222,17 @@ const Dashboard = () => {
             </tbody>
           </table>
         </div>
-
+ 
         {/* View All Button */}
-        {portfolio.holdings?.length > 5 && (
+        {holdings.length > 5 && (
           <div className="mt-4 text-center">
             <button className="text-sm text-indigo-600 hover:text-indigo-700 font-medium">
-              View all {portfolio.holdings.length} holdings →
+              View all {holdings.length} holdings →
             </button>
           </div>
         )}
       </div>
-
+ 
       {/* Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <button
@@ -249,7 +249,7 @@ const Dashboard = () => {
             </div>
           </div>
         </button>
-
+ 
         <button className="p-6 bg-white rounded-xl shadow-sm border border-gray-200 hover:border-purple-300 hover:shadow-md transition-all group">
           <div className="flex items-center space-x-4">
             <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center group-hover:bg-purple-200 transition-colors">
@@ -261,7 +261,7 @@ const Dashboard = () => {
             </div>
           </div>
         </button>
-
+ 
         <button className="p-6 bg-white rounded-xl shadow-sm border border-gray-200 hover:border-green-300 hover:shadow-md transition-all group">
           <div className="flex items-center space-x-4">
             <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200 transition-colors">
@@ -277,5 +277,5 @@ const Dashboard = () => {
     </div>
   );
 };
-
+ 
 export default Dashboard;

@@ -89,12 +89,12 @@ class Holding(BaseModel):
     quantity: float
     avgPrice: float
 
-class OnboardingData(BaseModel):
+class CompleteOnboardingRequest(BaseModel):
+    userId: str  # Email
     name: str
     email: EmailStr
-    age: int
     password: str
-    confirmPassword: Optional[str] = None
+    age: int
     riskTolerance: str
     investmentGoal: str
     investmentHorizon: str
@@ -104,36 +104,7 @@ class OnboardingData(BaseModel):
     bonds: List[Holding] = []
     stocks: List[Holding] = []
     etfs: List[Holding] = []
-
-class UserProfile(BaseModel):
-    userId: Optional[str] = None
-    name: str
-    email: EmailStr
-    password: str
-    age: int
-    riskTolerance: str
-    investmentGoal: str
-    investmentHorizon: str
-    monthlyContribution: float
-    hasPortfolio: bool
-
-class Portfolio(BaseModel):
-    totalValue: float
-    cashReserve: float
-    invested: float
-    returns: Dict[str, float]
-    riskScore: float
-    allocation: List[Dict[str, Any]]
-    performance: List[Dict[str, Any]]
-    holdings: List[Dict[str, Any]]
-    onboardingData: Dict[str, Any]
-
-class CompleteOnboardingRequest(BaseModel):
-    userId: str
-    userProfile: UserProfile
-    portfolio: Portfolio
     timestamp: str
-    version: str
 
 class LoginRequest(BaseModel):
     email: EmailStr
@@ -246,10 +217,10 @@ async def login(request: LoginRequest):
 
 @app.post("/api/onboarding/complete")
 async def complete_onboarding(request: CompleteOnboardingRequest):
-    """Complete user onboarding and save portfolio"""
+    """Save user onboarding data - exactly what they entered"""
     user_email = request.userId
     
-    print(f"📝 Onboarding request for: {user_email}")
+    print(f"📝 Saving onboarding data for: {user_email}")
     
     # Check if user exists
     existing_user = users_table.get_item(Key={'userId': user_email})
@@ -262,51 +233,45 @@ async def complete_onboarding(request: CompleteOnboardingRequest):
     
     # Hash password
     print(f"🔒 Hashing password...")
-    password_hash = hash_password(request.userProfile.password)
+    password_hash = hash_password(request.password)
     
-    # Prepare user data
+    # Save user profile to Users table
     user_data = {
         'userId': user_email,
-        'email': request.userProfile.email,
-        'name': request.userProfile.name,
+        'email': request.email,
+        'name': request.name,
         'passwordHash': password_hash,
-        'age': request.userProfile.age,
-        'riskTolerance': request.userProfile.riskTolerance,
-        'investmentGoal': request.userProfile.investmentGoal,
-        'investmentHorizon': request.userProfile.investmentHorizon,
-        'monthlyContribution': convert_float_to_decimal(request.userProfile.monthlyContribution),
+        'age': request.age,
+        'riskTolerance': request.riskTolerance,
+        'investmentGoal': request.investmentGoal,
+        'investmentHorizon': request.investmentHorizon,
+        'monthlyContribution': convert_float_to_decimal(request.monthlyContribution),
         'hasPortfolio': True,
         'createdAt': datetime.utcnow().isoformat(),
-        'updatedAt': datetime.utcnow().isoformat(),
-        'version': request.version
+        'updatedAt': datetime.utcnow().isoformat()
     }
     
-    print(f"💾 Saving user to DynamoDB...")
+    print(f"💾 Saving user to WealthWiseUsers...")
     users_table.put_item(Item=user_data)
     print(f"✅ User saved: {user_email}")
     
-    # Prepare portfolio data
+    # Save portfolio data to Portfolios table - exactly what user entered
     portfolio_data = {
         'userId': user_email,
-        'totalValue': convert_float_to_decimal(request.portfolio.totalValue),
-        'cashReserve': convert_float_to_decimal(request.portfolio.cashReserve),
-        'invested': convert_float_to_decimal(request.portfolio.invested),
-        'returns': convert_float_to_decimal(request.portfolio.returns),
-        'riskScore': convert_float_to_decimal(request.portfolio.riskScore),
-        'allocation': convert_float_to_decimal(request.portfolio.allocation),
-        'performance': convert_float_to_decimal(request.portfolio.performance),
-        'holdings': convert_float_to_decimal(request.portfolio.holdings),
-        'onboardingData': convert_float_to_decimal(request.portfolio.onboardingData),
+        'initialInvestment': convert_float_to_decimal(request.initialInvestment),
+        'cashSavings': convert_float_to_decimal(request.cashSavings),
+        'bonds': convert_float_to_decimal([b.dict() for b in request.bonds]),
+        'stocks': convert_float_to_decimal([s.dict() for s in request.stocks]),
+        'etfs': convert_float_to_decimal([e.dict() for e in request.etfs]),
         'createdAt': datetime.utcnow().isoformat(),
-        'updatedAt': datetime.utcnow().isoformat(),
-        'version': request.version
+        'updatedAt': datetime.utcnow().isoformat()
     }
     
-    print(f"💾 Saving portfolio to DynamoDB...")
+    print(f"💾 Saving portfolio to WealthWisePortfolios...")
     portfolios_table.put_item(Item=portfolio_data)
     print(f"✅ Portfolio saved: {user_email}")
     
-    # Remove password hash
+    # Remove password hash from response
     if 'passwordHash' in user_data:
         del user_data['passwordHash']
     

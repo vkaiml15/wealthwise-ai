@@ -236,7 +236,7 @@ const LoginPage = () => {
             </form>
 
             {/* Demo Credentials */}
-            <div className="mt-8 pt-6 border-t border-gray-200">
+            {/* <div className="mt-8 pt-6 border-t border-gray-200">
               <p className="text-sm text-gray-600 mb-3">Quick demo access:</p>
               <div className="flex space-x-3">
                 <button
@@ -254,7 +254,7 @@ const LoginPage = () => {
                   New User
                 </button>
               </div>
-            </div>
+            </div> */}
 
             {/* Sign Up Link */}
             <div className="mt-6 text-center">
