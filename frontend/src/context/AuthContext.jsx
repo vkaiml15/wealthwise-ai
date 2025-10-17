@@ -1,8 +1,9 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { mockUsers } from '../data/mockUsers';
-import { mockPortfolios } from '../data/mockPortfolios';
 
 const AuthContext = createContext();
+
+// API Base URL - Change this if your backend runs on different port
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -21,58 +22,89 @@ export const AuthProvider = ({ children }) => {
   // Check for existing session on mount
   useEffect(() => {
     const storedUser = localStorage.getItem('currentUser');
+    const storedPortfolio = localStorage.getItem('currentPortfolio');
+    
     if (storedUser) {
       try {
         const user = JSON.parse(storedUser);
         setCurrentUser(user);
-        setIsAuthenticated(true);
         
-        // Load portfolio if user has one
-        if (user.hasPortfolio && user.userId) {
-          const userPortfolio = mockPortfolios[user.userId];
-          setPortfolio(userPortfolio || null);
+        // Only set authenticated if user has completed onboarding
+        if (user.hasPortfolio) {
+          setIsAuthenticated(true);
+        }
+        
+        // Load portfolio if exists
+        if (storedPortfolio) {
+          const userPortfolio = JSON.parse(storedPortfolio);
+          setPortfolio(userPortfolio);
         }
       } catch (error) {
         console.error('Error loading stored user:', error);
         localStorage.removeItem('currentUser');
+        localStorage.removeItem('currentPortfolio');
       }
     }
     setIsLoading(false);
   }, []);
 
-  // Login function
-  const login = (userId, password) => {
-    // Check in existing users
-    const existingUser = mockUsers.existing.find(
-      (u) => u.userId === userId && u.password === password
-    );
+  // Login function - connects to backend API
+  const login = async (email, password) => {
+    try {
+      console.log('Attempting login for:', email);
+      
+      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password })
+      });
 
-    if (existingUser) {
-      setCurrentUser(existingUser);
+      console.log('Login response status:', response.status);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Login failed:', errorData);
+        return { success: false, needsOnboarding: false };
+      }
+
+      const data = await response.json();
+      console.log('Login successful:', data);
+      
+      setCurrentUser(data.user);
       setIsAuthenticated(true);
-      localStorage.setItem('currentUser', JSON.stringify(existingUser));
+      localStorage.setItem('currentUser', JSON.stringify(data.user));
       
-      // Load portfolio
-      const userPortfolio = mockPortfolios[userId];
-      setPortfolio(userPortfolio || null);
+      // Load portfolio if exists
+      if (data.portfolio) {
+        setPortfolio(data.portfolio);
+        localStorage.setItem('currentPortfolio', JSON.stringify(data.portfolio));
+      }
       
-      return { success: true, needsOnboarding: false };
+      return { 
+        success: true, 
+        needsOnboarding: !data.user.hasPortfolio 
+      };
+    } catch (error) {
+      console.error('Login error:', error);
+      return { success: false, needsOnboarding: false };
     }
+  };
 
-    // Check in new users
-    const newUser = mockUsers.new.find(
-      (u) => u.userId === userId && u.password === password
-    );
-
-    if (newUser) {
-      setCurrentUser(newUser);
-      setIsAuthenticated(true);
-      localStorage.setItem('currentUser', JSON.stringify(newUser));
-      
-      return { success: true, needsOnboarding: true };
-    }
-
-    return { success: false, needsOnboarding: false };
+  // Signup/Register function - creates new user for onboarding
+  const signup = () => {
+    const newUser = {
+      userId: null, // Will be set to email during onboarding
+      isNewUser: true,
+      hasPortfolio: false,
+      createdAt: new Date().toISOString()
+    };
+    
+    setCurrentUser(newUser);
+    localStorage.setItem('currentUser', JSON.stringify(newUser));
+    
+    return { success: true };
   };
 
   // Logout function
@@ -81,43 +113,200 @@ export const AuthProvider = ({ children }) => {
     setPortfolio(null);
     setIsAuthenticated(false);
     localStorage.removeItem('currentUser');
+    localStorage.removeItem('currentPortfolio');
   };
 
-  // Complete onboarding
-  const completeOnboarding = (profileData) => {
-    const updatedUser = {
-      ...currentUser,
-      ...profileData,
-      hasPortfolio: true
-    };
+  // Complete onboarding - Saves to DynamoDB via backend API
+  const completeOnboarding = async (profileData) => {
+    try {
+      console.log('Starting onboarding completion...');
+      console.log('Profile data:', profileData);
 
-    // Create a basic portfolio for the new user
-    const newPortfolio = {
-      totalValue: Number(profileData.initialInvestment) || 0,
-      cashReserve: Number(profileData.initialInvestment) * 0.1 || 0,
-      invested: Number(profileData.initialInvestment) * 0.9 || 0,
-      returns: {
-        value: 0,
-        percentage: 0
-      },
-      riskScore: 
-        profileData.riskTolerance === 'conservative' ? 3.5 :
-        profileData.riskTolerance === 'aggressive' ? 8.5 : 6.0,
-      allocation: [
-        { name: "Cash", value: Number(profileData.initialInvestment) * 0.1, percentage: 10, color: "#F59E0B" },
-        { name: "Bonds", value: Number(profileData.initialInvestment) * 0.3, percentage: 30, color: "#10B981" },
-        { name: "Stocks", value: Number(profileData.initialInvestment) * 0.5, percentage: 50, color: "#4F46E5" },
-        { name: "ETFs", value: Number(profileData.initialInvestment) * 0.1, percentage: 10, color: "#8B5CF6" }
-      ],
-      performance: [
-        { month: "Week 1", value: Number(profileData.initialInvestment) }
-      ],
-      holdings: []
-    };
+      // Calculate total value from all holdings
+      const bondsValue = (profileData.bonds || []).reduce((sum, bond) => 
+        sum + (Number(bond.quantity || 0) * Number(bond.avgPrice || 0)), 0);
+      
+      const stocksValue = (profileData.stocks || []).reduce((sum, stock) => 
+        sum + (Number(stock.quantity || 0) * Number(stock.avgPrice || 0)), 0);
+      
+      const etfsValue = (profileData.etfs || []).reduce((sum, etf) => 
+        sum + (Number(etf.quantity || 0) * Number(etf.avgPrice || 0)), 0);
+      
+      const cashSavings = Number(profileData.cashSavings || 0);
+      const initialInvestment = Number(profileData.initialInvestment || 0);
+      
+      const totalHoldingsValue = bondsValue + stocksValue + etfsValue + cashSavings;
+      const totalValue = initialInvestment + totalHoldingsValue;
 
-    setCurrentUser(updatedUser);
-    setPortfolio(newPortfolio);
-    localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+      // Calculate allocation percentages
+      const calculatePercentage = (value) => {
+        return totalValue > 0 ? (value / totalValue * 100) : 0;
+      };
+
+      // Create comprehensive portfolio with all holdings
+      const newPortfolio = {
+        totalValue: totalValue,
+        cashReserve: cashSavings,
+        invested: bondsValue + stocksValue + etfsValue,
+        returns: {
+          value: 0,
+          percentage: 0
+        },
+        riskScore: 
+          profileData.riskTolerance === 'conservative' ? 3.5 :
+          profileData.riskTolerance === 'aggressive' ? 8.5 : 6.0,
+        allocation: [
+          { 
+            name: "Cash", 
+            value: cashSavings, 
+            percentage: calculatePercentage(cashSavings), 
+            color: "#F59E0B" 
+          },
+          { 
+            name: "Bonds", 
+            value: bondsValue, 
+            percentage: calculatePercentage(bondsValue), 
+            color: "#10B981" 
+          },
+          { 
+            name: "Stocks", 
+            value: stocksValue, 
+            percentage: calculatePercentage(stocksValue), 
+            color: "#4F46E5" 
+          },
+          { 
+            name: "ETFs", 
+            value: etfsValue, 
+            percentage: calculatePercentage(etfsValue), 
+            color: "#8B5CF6" 
+          }
+        ].filter(item => item.value > 0),
+        performance: [
+          { month: "Week 1", value: totalValue, change: 0 }
+        ],
+        holdings: [
+          // Add bonds to holdings
+          ...(profileData.bonds || [])
+            .filter(bond => bond.symbol && bond.quantity && bond.avgPrice)
+            .map(bond => ({
+              symbol: bond.symbol,
+              name: getBondName(bond.symbol),
+              type: 'bond',
+              shares: Number(bond.quantity),
+              avgPrice: Number(bond.avgPrice),
+              currentPrice: Number(bond.avgPrice),
+              value: Number(bond.quantity) * Number(bond.avgPrice)
+            })),
+          // Add stocks to holdings
+          ...(profileData.stocks || [])
+            .filter(stock => stock.symbol && stock.quantity && stock.avgPrice)
+            .map(stock => ({
+              symbol: stock.symbol,
+              name: getStockName(stock.symbol),
+              type: 'stock',
+              shares: Number(stock.quantity),
+              avgPrice: Number(stock.avgPrice),
+              currentPrice: Number(stock.avgPrice),
+              value: Number(stock.quantity) * Number(stock.avgPrice)
+            })),
+          // Add ETFs to holdings
+          ...(profileData.etfs || [])
+            .filter(etf => etf.symbol && etf.quantity && etf.avgPrice)
+            .map(etf => ({
+              symbol: etf.symbol,
+              name: getETFName(etf.symbol),
+              type: 'etf',
+              shares: Number(etf.quantity),
+              avgPrice: Number(etf.avgPrice),
+              currentPrice: Number(etf.avgPrice),
+              value: Number(etf.quantity) * Number(etf.avgPrice)
+            }))
+        ],
+        onboardingData: {
+          ...profileData,
+          completedAt: new Date().toISOString()
+        }
+      };
+
+      // Use email as userId
+      const updatedUser = {
+        ...currentUser,
+        userId: profileData.email,
+        name: profileData.name,
+        email: profileData.email,
+        password: profileData.password,
+        age: profileData.age,
+        riskTolerance: profileData.riskTolerance,
+        investmentGoal: profileData.investmentGoal,
+        investmentHorizon: profileData.investmentHorizon,
+        monthlyContribution: profileData.monthlyContribution,
+        hasPortfolio: true
+      };
+
+      // Prepare data for backend API
+      const apiPayload = {
+        userId: profileData.email, // EMAIL AS USER ID
+        userProfile: updatedUser,
+        portfolio: newPortfolio,
+        timestamp: new Date().toISOString(),
+        version: '1.0'
+      };
+
+      console.log('Sending to backend:', `${API_BASE_URL}/api/onboarding/complete`);
+      console.log('Payload:', JSON.stringify(apiPayload, null, 2));
+
+      // Save to backend API
+      const response = await fetch(`${API_BASE_URL}/api/onboarding/complete`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(apiPayload)
+      });
+
+      console.log('Response status:', response.status);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Backend error response:', errorText);
+        throw new Error(`Failed to save onboarding data: ${response.status} ${errorText}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ Successfully saved to backend:', result);
+
+      // Update local state after successful save
+      setCurrentUser(updatedUser);
+      setPortfolio(newPortfolio);
+      setIsAuthenticated(true);
+      localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+      localStorage.setItem('currentPortfolio', JSON.stringify(newPortfolio));
+
+      return { success: true, data: result };
+    } catch (error) {
+      console.error('❌ Error completing onboarding:', error);
+      
+      // Still update local state even if API fails (for development)
+      const updatedUser = {
+        ...currentUser,
+        userId: profileData.email,
+        name: profileData.name,
+        email: profileData.email,
+        password: profileData.password,
+        age: profileData.age,
+        riskTolerance: profileData.riskTolerance,
+        investmentGoal: profileData.investmentGoal,
+        investmentHorizon: profileData.investmentHorizon,
+        monthlyContribution: profileData.monthlyContribution,
+        hasPortfolio: true
+      };
+      
+      setCurrentUser(updatedUser);
+      setIsAuthenticated(true);
+      localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+      
+      return { success: false, error: error.message };
+    }
   };
 
   // Update user profile
@@ -130,7 +319,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('currentUser', JSON.stringify(updatedUser));
   };
 
-  // Update portfolio (for future use)
+  // Update portfolio
   const updatePortfolio = (updates) => {
     const updatedPortfolio = {
       ...portfolio,
@@ -146,12 +335,54 @@ export const AuthProvider = ({ children }) => {
     isLoading,
     login,
     logout,
+    signup,
     completeOnboarding,
     updateUserProfile,
     updatePortfolio
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+};
+
+// Helper functions
+const getBondName = (symbol) => {
+  const bondNames = {
+    'US_TREASURY_10Y': 'US Treasury 10Y',
+    'US_TREASURY_30Y': 'US Treasury 30Y',
+    'CORPORATE_AAA': 'Corporate AAA Bond',
+    'MUNICIPAL': 'Municipal Bond',
+    'HIGH_YIELD': 'High Yield Corporate'
+  };
+  return bondNames[symbol] || symbol;
+};
+
+const getStockName = (symbol) => {
+  const stockNames = {
+    'AAPL': 'Apple Inc.',
+    'MSFT': 'Microsoft Corporation',
+    'GOOGL': 'Alphabet Inc.',
+    'AMZN': 'Amazon.com Inc.',
+    'TSLA': 'Tesla Inc.',
+    'NVDA': 'NVIDIA Corporation',
+    'JPM': 'JPMorgan Chase & Co.',
+    'V': 'Visa Inc.',
+    'JNJ': 'Johnson & Johnson',
+    'WMT': 'Walmart Inc.'
+  };
+  return stockNames[symbol] || symbol;
+};
+
+const getETFName = (symbol) => {
+  const etfNames = {
+    'SPY': 'SPDR S&P 500 ETF',
+    'QQQ': 'Invesco QQQ Trust',
+    'VTI': 'Vanguard Total Stock Market ETF',
+    'IWM': 'iShares Russell 2000 ETF',
+    'EEM': 'iShares MSCI Emerging Markets ETF',
+    'VEA': 'Vanguard FTSE Developed Markets ETF',
+    'AGG': 'iShares Core US Aggregate Bond ETF'
+  };
+  return etfNames[symbol] || symbol;
 };
 
 export default AuthContext;

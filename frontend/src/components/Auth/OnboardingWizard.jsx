@@ -12,27 +12,91 @@ import {
   ArrowLeft,
   DollarSign,
   Clock,
-  Sparkles
+  Sparkles,
+  Wallet,
+  FileText,
+  BarChart3,
+  PieChart,
+  Plus,
+  Trash2,
+  Lock,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 
-const OnboardingWizard = () => {
+const ExtendedOnboardingWizard = () => {
   const navigate = useNavigate();
-  const { currentUser, completeOnboarding } = useAuth();
+  const { completeOnboarding } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
-  const totalSteps = 4;
+  const totalSteps = 8;
 
   const [profileData, setProfileData] = useState({
+    // Step 1: Personal Information & Credentials
     name: '',
     email: '',
     age: '',
+    password: '',
+    confirmPassword: '',
+    
+    // Step 2: Risk Tolerance
     riskTolerance: 'moderate',
+    
+    // Step 3: Investment Goals
     investmentGoal: 'growth',
     investmentHorizon: '5-10',
+    
+    // Step 4: Investment Amount
     initialInvestment: '',
-    monthlyContribution: ''
+    monthlyContribution: '',
+    
+    // Step 5: Cash Savings
+    cashSavings: '',
+    
+    // Step 6: Bonds Holdings
+    bonds: [],
+    
+    // Step 7: Stocks Holdings
+    stocks: [],
+    
+    // Step 8: ETFs Holdings
+    etfs: []
   });
 
   const [errors, setErrors] = useState({});
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // Mock data for dropdowns
+  const bondOptions = [
+    { value: 'US_TREASURY_10Y', label: 'US Treasury 10Y' },
+    { value: 'US_TREASURY_30Y', label: 'US Treasury 30Y' },
+    { value: 'CORPORATE_AAA', label: 'Corporate AAA Bond' },
+    { value: 'MUNICIPAL', label: 'Municipal Bond' },
+    { value: 'HIGH_YIELD', label: 'High Yield Corporate' }
+  ];
+
+  const stockOptions = [
+    { value: 'AAPL', label: 'Apple Inc. (AAPL)' },
+    { value: 'MSFT', label: 'Microsoft (MSFT)' },
+    { value: 'GOOGL', label: 'Alphabet (GOOGL)' },
+    { value: 'AMZN', label: 'Amazon (AMZN)' },
+    { value: 'TSLA', label: 'Tesla (TSLA)' },
+    { value: 'NVDA', label: 'NVIDIA (NVDA)' },
+    { value: 'JPM', label: 'JPMorgan Chase (JPM)' },
+    { value: 'V', label: 'Visa (V)' },
+    { value: 'JNJ', label: 'Johnson & Johnson (JNJ)' },
+    { value: 'WMT', label: 'Walmart (WMT)' }
+  ];
+
+  const etfOptions = [
+    { value: 'SPY', label: 'SPDR S&P 500 ETF (SPY)' },
+    { value: 'QQQ', label: 'Invesco QQQ Trust (QQQ)' },
+    { value: 'VTI', label: 'Vanguard Total Stock Market (VTI)' },
+    { value: 'IWM', label: 'iShares Russell 2000 (IWM)' },
+    { value: 'EEM', label: 'iShares MSCI Emerging Markets (EEM)' },
+    { value: 'VEA', label: 'Vanguard FTSE Developed Markets (VEA)' },
+    { value: 'AGG', label: 'iShares Core US Aggregate Bond (AGG)' }
+  ];
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -40,10 +104,75 @@ const OnboardingWizard = () => {
       ...prev,
       [name]: value
     }));
-    // Clear error for this field
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
+  };
+
+  // Holdings management functions
+  const addHolding = (type) => {
+    const newHolding = { symbol: '', quantity: '', avgPrice: '' };
+    setProfileData(prev => ({
+      ...prev,
+      [type]: [...prev[type], newHolding]
+    }));
+  };
+
+  const updateHolding = (type, index, field, value) => {
+    setProfileData(prev => ({
+      ...prev,
+      [type]: prev[type].map((item, i) => 
+        i === index ? { ...item, [field]: value } : item
+      )
+    }));
+  };
+
+  const removeHolding = (type, index) => {
+    setProfileData(prev => ({
+      ...prev,
+      [type]: prev[type].filter((_, i) => i !== index)
+    }));
+  };
+
+  const validatePassword = (password) => {
+    const minLength = 8;
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+    if (password.length < minLength) {
+      return 'Password must be at least 8 characters long';
+    }
+    if (!hasUpperCase) {
+      return 'Password must contain at least one uppercase letter';
+    }
+    if (!hasLowerCase) {
+      return 'Password must contain at least one lowercase letter';
+    }
+    if (!hasNumber) {
+      return 'Password must contain at least one number';
+    }
+    if (!hasSpecialChar) {
+      return 'Password must contain at least one special character';
+    }
+    return null;
+  };
+
+  const getPasswordStrength = (password) => {
+    if (!password) return { strength: 0, label: '', color: '' };
+    
+    let strength = 0;
+    if (password.length >= 8) strength++;
+    if (password.length >= 12) strength++;
+    if (/[a-z]/.test(password)) strength++;
+    if (/[A-Z]/.test(password)) strength++;
+    if (/[0-9]/.test(password)) strength++;
+    if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) strength++;
+
+    if (strength <= 2) return { strength: 1, label: 'Weak', color: 'bg-red-500' };
+    if (strength <= 4) return { strength: 2, label: 'Medium', color: 'bg-yellow-500' };
+    return { strength: 3, label: 'Strong', color: 'bg-green-500' };
   };
 
   const validateStep = (step) => {
@@ -51,15 +180,32 @@ const OnboardingWizard = () => {
 
     if (step === 1) {
       if (!profileData.name.trim()) newErrors.name = 'Name is required';
+      
       if (!profileData.email.trim()) {
         newErrors.email = 'Email is required';
       } else if (!/\S+@\S+\.\S+/.test(profileData.email)) {
         newErrors.email = 'Email is invalid';
       }
+      
       if (!profileData.age) {
         newErrors.age = 'Age is required';
       } else if (profileData.age < 18 || profileData.age > 100) {
         newErrors.age = 'Age must be between 18 and 100';
+      }
+
+      if (!profileData.password) {
+        newErrors.password = 'Password is required';
+      } else {
+        const passwordError = validatePassword(profileData.password);
+        if (passwordError) {
+          newErrors.password = passwordError;
+        }
+      }
+
+      if (!profileData.confirmPassword) {
+        newErrors.confirmPassword = 'Please confirm your password';
+      } else if (profileData.password !== profileData.confirmPassword) {
+        newErrors.confirmPassword = 'Passwords do not match';
       }
     }
 
@@ -73,6 +219,14 @@ const OnboardingWizard = () => {
         newErrors.monthlyContribution = 'Monthly contribution is required';
       } else if (profileData.monthlyContribution < 0) {
         newErrors.monthlyContribution = 'Amount cannot be negative';
+      }
+    }
+
+    if (step === 5) {
+      if (!profileData.cashSavings) {
+        newErrors.cashSavings = 'Cash savings amount is required';
+      } else if (profileData.cashSavings < 0) {
+        newErrors.cashSavings = 'Amount cannot be negative';
       }
     }
 
@@ -97,14 +251,14 @@ const OnboardingWizard = () => {
   };
 
   const handleComplete = () => {
-    // Save profile data
-    completeOnboarding(profileData);
+    const result = completeOnboarding(profileData);
+    console.log('Onboarding completed!', result);
     navigate('/dashboard');
   };
 
   const renderStepIndicator = () => (
-    <div className="flex items-center justify-center mb-8">
-      {[1, 2, 3, 4].map((step) => (
+    <div className="flex items-center justify-center mb-8 overflow-x-auto pb-4">
+      {[1, 2, 3, 4, 5, 6, 7, 8].map((step) => (
         <React.Fragment key={step}>
           <div className="flex items-center">
             <div
@@ -121,7 +275,7 @@ const OnboardingWizard = () => {
           </div>
           {step < totalSteps && (
             <div
-              className={`w-16 h-1 mx-2 transition-all ${
+              className={`w-12 h-1 mx-2 transition-all ${
                 step < currentStep ? 'bg-green-500' : 'bg-gray-200'
               }`}
             ></div>
@@ -131,70 +285,163 @@ const OnboardingWizard = () => {
     </div>
   );
 
-  const renderStep1 = () => (
-    <div className="space-y-6">
-      <div className="text-center mb-8">
-        <div className="inline-flex items-center justify-center w-16 h-16 bg-indigo-100 rounded-full mb-4">
-          <User className="w-8 h-8 text-indigo-600" />
+  const renderStep1 = () => {
+    const passwordStrength = getPasswordStrength(profileData.password);
+    
+    return (
+      <div className="space-y-6">
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-indigo-100 rounded-full mb-4">
+            <User className="w-8 h-8 text-indigo-600" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Create Your Account</h2>
+          <p className="text-gray-600">Let's get started with the basics</p>
         </div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Personal Information</h2>
-        <p className="text-gray-600">Let's start with the basics</p>
-      </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Full Name *
-        </label>
-        <input
-          type="text"
-          name="name"
-          value={profileData.name}
-          onChange={handleChange}
-          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none ${
-            errors.name ? 'border-red-500' : 'border-gray-300'
-          }`}
-          placeholder="John Smith"
-        />
-        {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
-      </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Full Name *
+          </label>
+          <input
+            type="text"
+            name="name"
+            value={profileData.name}
+            onChange={handleChange}
+            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none ${
+              errors.name ? 'border-red-500' : 'border-gray-300'
+            }`}
+            placeholder="John Smith"
+          />
+          {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
+        </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Email Address *
-        </label>
-        <input
-          type="email"
-          name="email"
-          value={profileData.email}
-          onChange={handleChange}
-          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none ${
-            errors.email ? 'border-red-500' : 'border-gray-300'
-          }`}
-          placeholder="john@example.com"
-        />
-        {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
-      </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Email Address (Your User ID) *
+          </label>
+          <div className="relative">
+            <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <input
+              type="email"
+              name="email"
+              value={profileData.email}
+              onChange={handleChange}
+              className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none ${
+                errors.email ? 'border-red-500' : 'border-gray-300'
+              }`}
+              placeholder="john@example.com"
+            />
+          </div>
+          {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
+          <p className="mt-1 text-xs text-gray-500">You'll use this email to log in</p>
+        </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Age *
-        </label>
-        <input
-          type="number"
-          name="age"
-          value={profileData.age}
-          onChange={handleChange}
-          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none ${
-            errors.age ? 'border-red-500' : 'border-gray-300'
-          }`}
-          placeholder="30"
-          min="18"
-          max="100"
-        />
-        {errors.age && <p className="mt-1 text-sm text-red-600">{errors.age}</p>}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Age *
+          </label>
+          <input
+            type="number"
+            name="age"
+            value={profileData.age}
+            onChange={handleChange}
+            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none ${
+              errors.age ? 'border-red-500' : 'border-gray-300'
+            }`}
+            placeholder="30"
+            min="18"
+            max="100"
+          />
+          {errors.age && <p className="mt-1 text-sm text-red-600">{errors.age}</p>}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Password *
+          </label>
+          <div className="relative">
+            <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <input
+              type={showPassword ? "text" : "password"}
+              name="password"
+              value={profileData.password}
+              onChange={handleChange}
+              className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none ${
+                errors.password ? 'border-red-500' : 'border-gray-300'
+              }`}
+              placeholder="Create a strong password"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            >
+              {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+            </button>
+          </div>
+          {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
+          
+          {profileData.password && (
+            <div className="mt-2">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs text-gray-600">Password strength:</span>
+                <span className={`text-xs font-medium ${
+                  passwordStrength.strength === 1 ? 'text-red-600' :
+                  passwordStrength.strength === 2 ? 'text-yellow-600' :
+                  'text-green-600'
+                }`}>
+                  {passwordStrength.label}
+                </span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div
+                  className={`h-2 rounded-full transition-all ${passwordStrength.color}`}
+                  style={{ width: `${(passwordStrength.strength / 3) * 100}%` }}
+                ></div>
+              </div>
+            </div>
+          )}
+          
+          <p className="mt-1 text-xs text-gray-500">
+            Must be 8+ characters with uppercase, lowercase, number, and special character
+          </p>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Confirm Password *
+          </label>
+          <div className="relative">
+            <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <input
+              type={showConfirmPassword ? "text" : "password"}
+              name="confirmPassword"
+              value={profileData.confirmPassword}
+              onChange={handleChange}
+              className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none ${
+                errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
+              }`}
+              placeholder="Re-enter your password"
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            >
+              {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+            </button>
+          </div>
+          {errors.confirmPassword && <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>}
+          {profileData.confirmPassword && profileData.password === profileData.confirmPassword && (
+            <p className="mt-1 text-sm text-green-600 flex items-center">
+              <Check className="w-4 h-4 mr-1" />
+              Passwords match
+            </p>
+          )}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   const renderStep2 = () => (
     <div className="space-y-6">
@@ -394,42 +641,183 @@ const OnboardingWizard = () => {
         )}
         <p className="mt-1 text-sm text-gray-500">Optional: Set to $0 if not applicable</p>
       </div>
-
-      {/* Projection Preview */}
-      {profileData.initialInvestment > 0 && (
-        <div className="mt-6 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border border-indigo-100">
-          <h3 className="font-semibold text-gray-900 mb-3">Estimated Portfolio Value</h3>
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-600">Initial Investment:</span>
-              <span className="font-medium">${Number(profileData.initialInvestment).toLocaleString()}</span>
-            </div>
-            {profileData.monthlyContribution > 0 && (
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Monthly Contribution:</span>
-                <span className="font-medium">${Number(profileData.monthlyContribution).toLocaleString()}</span>
-              </div>
-            )}
-            <div className="pt-2 border-t border-indigo-200">
-              <div className="flex justify-between">
-                <span className="text-gray-600">Projected Value (5 years)*:</span>
-                <span className="font-bold text-indigo-600">
-                  ${(Number(profileData.initialInvestment) * 1.5 + 
-                     Number(profileData.monthlyContribution || 0) * 60 * 1.2).toLocaleString(undefined, {maximumFractionDigits: 0})}
-                </span>
-              </div>
-              <p className="text-xs text-gray-500 mt-1">*Based on historical average returns</p>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
+  );
+
+  const renderStep5 = () => (
+    <div className="space-y-6">
+      <div className="text-center mb-8">
+        <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
+          <Wallet className="w-8 h-8 text-green-600" />
+        </div>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">Cash Savings</h2>
+        <p className="text-gray-600">How much cash do you have in savings?</p>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Cash Savings Amount *
+        </label>
+        <div className="relative">
+          <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+          <input
+            type="number"
+            name="cashSavings"
+            value={profileData.cashSavings}
+            onChange={handleChange}
+            className={`w-full pl-8 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none ${
+              errors.cashSavings ? 'border-red-500' : 'border-gray-300'
+            }`}
+            placeholder="5,000"
+            min="0"
+          />
+        </div>
+        {errors.cashSavings && (
+          <p className="mt-1 text-sm text-red-600">{errors.cashSavings}</p>
+        )}
+        <p className="mt-1 text-sm text-gray-500">Enter your total cash savings across all accounts</p>
+      </div>
+
+      <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+        <p className="text-sm text-blue-900">
+          <strong>Tip:</strong> Maintaining 3-6 months of expenses in cash savings is recommended for emergency situations.
+        </p>
+      </div>
+    </div>
+  );
+
+  const renderHoldingsStep = (type, title, icon, options, color = 'indigo') => {
+    const holdings = profileData[type];
+    
+    return (
+      <div className="space-y-6">
+        <div className="text-center mb-8">
+          <div className={`inline-flex items-center justify-center w-16 h-16 bg-${color}-100 rounded-full mb-4`}>
+            {icon}
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">{title}</h2>
+          <p className="text-gray-600">Add your existing {title.toLowerCase()}</p>
+        </div>
+
+        <div className="space-y-4">
+          {holdings.map((holding, index) => (
+            <div key={index} className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+              <div className="flex items-start justify-between mb-3">
+                <span className="text-sm font-medium text-gray-700">
+                  {title.slice(0, -1)} #{index + 1}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => removeHolding(type, index)}
+                  className="text-red-600 hover:text-red-700"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+              
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">
+                    Select {title.slice(0, -1)}
+                  </label>
+                  <select
+                    value={holding.symbol}
+                    onChange={(e) => updateHolding(type, index, 'symbol', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none text-sm"
+                  >
+                    <option value="">Select...</option>
+                    {options.map(opt => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">
+                      Quantity
+                    </label>
+                    <input
+                      type="number"
+                      value={holding.quantity}
+                      onChange={(e) => updateHolding(type, index, 'quantity', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none text-sm"
+                      placeholder="100"
+                      min="0"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">
+                      Avg Price ($)
+                    </label>
+                    <input
+                      type="number"
+                      value={holding.avgPrice}
+                      onChange={(e) => updateHolding(type, index, 'avgPrice', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none text-sm"
+                      placeholder="150.00"
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+
+          <button
+            type="button"
+            onClick={() => addHolding(type)}
+            className="w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-indigo-400 hover:text-indigo-600 transition-all flex items-center justify-center space-x-2"
+          >
+            <Plus className="w-5 h-5" />
+            <span>Add {title.slice(0, -1)}</span>
+          </button>
+
+          {holdings.length === 0 && (
+            <p className="text-center text-sm text-gray-500 py-4">
+              No {title.toLowerCase()} added yet. Click the button above to add your first {title.toLowerCase().slice(0, -1)}.
+            </p>
+          )}
+        </div>
+
+        <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+          <p className="text-xs text-gray-600">
+            <strong>Note:</strong> You can skip this step if you don't currently hold any {title.toLowerCase()}.
+          </p>
+        </div>
+      </div>
+    );
+  };
+
+  const renderStep6 = () => renderHoldingsStep(
+    'bonds',
+    'Bonds',
+    <FileText className="w-8 h-8 text-blue-600" />,
+    bondOptions,
+    'blue'
+  );
+
+  const renderStep7 = () => renderHoldingsStep(
+    'stocks',
+    'Stocks',
+    <BarChart3 className="w-8 h-8 text-green-600" />,
+    stockOptions,
+    'green'
+  );
+
+  const renderStep8 = () => renderHoldingsStep(
+    'etfs',
+    'ETFs',
+    <PieChart className="w-8 h-8 text-purple-600" />,
+    etfOptions,
+    'purple'
   );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center p-4">
       <div className="w-full max-w-2xl">
-        {/* Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl shadow-lg mb-4">
             <Sparkles className="w-8 h-8 text-white" />
@@ -438,20 +826,20 @@ const OnboardingWizard = () => {
           <p className="text-gray-600">Let's personalize your investment experience</p>
         </div>
 
-        {/* Progress Indicator */}
         {renderStepIndicator()}
 
-        {/* Main Card */}
         <div className="bg-white rounded-2xl shadow-xl p-8 mb-6">
-          {/* Step Content */}
           <div className="min-h-[400px]">
             {currentStep === 1 && renderStep1()}
             {currentStep === 2 && renderStep2()}
             {currentStep === 3 && renderStep3()}
             {currentStep === 4 && renderStep4()}
+            {currentStep === 5 && renderStep5()}
+            {currentStep === 6 && renderStep6()}
+            {currentStep === 7 && renderStep7()}
+            {currentStep === 8 && renderStep8()}
           </div>
 
-          {/* Navigation Buttons */}
           <div className="flex justify-between mt-8 pt-6 border-t border-gray-200">
             <button
               type="button"
@@ -482,7 +870,6 @@ const OnboardingWizard = () => {
           </div>
         </div>
 
-        {/* Footer */}
         <div className="text-center">
           <p className="text-sm text-gray-500">
             Step {currentStep} of {totalSteps} • Your data is secure and encrypted
@@ -493,4 +880,4 @@ const OnboardingWizard = () => {
   );
 };
 
-export default OnboardingWizard;
+export default ExtendedOnboardingWizard;
