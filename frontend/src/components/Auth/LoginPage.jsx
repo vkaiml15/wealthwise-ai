@@ -8,7 +8,7 @@ const LoginPage = () => {
   const { login } = useAuth();
   
   const [formData, setFormData] = useState({
-    userId: '',
+    email: '',
     password: ''
   });
   const [showPassword, setShowPassword] = useState(false);
@@ -28,9 +28,8 @@ const LoginPage = () => {
     setError('');
     setIsLoading(true);
 
-    // Simulate API call delay
-    setTimeout(() => {
-      const result = login(formData.userId, formData.password);
+    try {
+      const result = await login(formData.email, formData.password);
       
       if (result.success) {
         if (result.needsOnboarding) {
@@ -41,23 +40,29 @@ const LoginPage = () => {
       } else {
         setError('Invalid credentials. Please try again.');
       }
+    } catch (error) {
+      setError('An error occurred. Please try again.');
+    } finally {
       setIsLoading(false);
-    }, 800);
+    }
   };
 
   const fillDemoCredentials = (userType) => {
     if (userType === 'existing') {
       setFormData({
-        userId: 'john_investor',
+        email: 'john@example.com',
         password: 'Invest@2024'
       });
     } else {
-      setFormData({
-        userId: 'new_user1',
-        password: 'Welcome@123'
-      });
+      // For new user demo, just navigate to onboarding
+      navigate('/onboarding');
     }
     setError('');
+  };
+
+  // Handle new user signup - simply navigate to onboarding
+  const handleNewUserSignup = () => {
+    navigate('/onboarding');
   };
 
   return (
@@ -158,17 +163,17 @@ const LoginPage = () => {
             {/* Login Form */}
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label htmlFor="userId" className="block text-sm font-medium text-gray-700 mb-2">
-                  User ID
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                  Email Address
                 </label>
                 <input
-                  type="text"
-                  id="userId"
-                  name="userId"
-                  value={formData.userId}
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={formData.email}
                   onChange={handleChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none"
-                  placeholder="Enter your user ID"
+                  placeholder="Enter your email"
                   required
                 />
               </div>
@@ -231,7 +236,7 @@ const LoginPage = () => {
             </form>
 
             {/* Demo Credentials */}
-            <div className="mt-8 pt-6 border-t border-gray-200">
+            {/* <div className="mt-8 pt-6 border-t border-gray-200">
               <p className="text-sm text-gray-600 mb-3">Quick demo access:</p>
               <div className="flex space-x-3">
                 <button
@@ -249,13 +254,16 @@ const LoginPage = () => {
                   New User
                 </button>
               </div>
-            </div>
+            </div> */}
 
             {/* Sign Up Link */}
             <div className="mt-6 text-center">
               <p className="text-sm text-gray-600">
                 Don't have an account?{' '}
-                <button className="text-indigo-600 hover:text-indigo-700 font-semibold">
+                <button 
+                  onClick={handleNewUserSignup}
+                  className="text-indigo-600 hover:text-indigo-700 font-semibold"
+                >
                   Create account
                 </button>
               </p>
