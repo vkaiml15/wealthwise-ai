@@ -1,8 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const AuthContext = createContext();
-
-// API Base URL - Change this if your backend runs on different port
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
 export const useAuth = () => {
@@ -19,36 +17,189 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Check for existing session on mount
-  useEffect(() => {
-    const storedUser = localStorage.getItem('currentUser');
-    const storedPortfolio = localStorage.getItem('currentPortfolio');
-    
-    if (storedUser) {
-      try {
-        const user = JSON.parse(storedUser);
-        setCurrentUser(user);
-        
-        // Only set authenticated if user has completed onboarding
-        if (user.hasPortfolio) {
-          setIsAuthenticated(true);
-        }
-        
-        // Load portfolio if exists
-        if (storedPortfolio) {
-          const userPortfolio = JSON.parse(storedPortfolio);
-          setPortfolio(userPortfolio);
-        }
-      } catch (error) {
-        console.error('Error loading stored user:', error);
-        localStorage.removeItem('currentUser');
-        localStorage.removeItem('currentPortfolio');
-      }
+  // Helper function to normalize portfolio data from backend
+  const normalizePortfolioFromBackend = (backendPortfolio, marketData = null) => {
+    if (!backendPortfolio) return null;
+
+    // If we have market data from the market-report endpoint, use it
+    if (marketData && marketData.success) {
+      const { portfolioMetrics, holdings, cashSavings } = marketData;
+      
+      // Calculate allocation from holdings
+      const totalValue = portfolioMetrics.totalValue + (cashSavings || 0);
+      const calculatePercentage = (value) => totalValue > 0 ? (value / totalValue * 100) : 0;
+
+      // Group holdings by type for allocation
+      const stocksValue = holdings
+        .filter(h => h.type === 'stock')
+        .reduce((sum, h) => sum + h.currentValue, 0);
+      
+      const bondsValue = holdings
+        .filter(h => h.type === 'bond')
+        .reduce((sum, h) => sum + h.currentValue, 0);
+      
+      const etfsValue = holdings
+        .filter(h => h.type === 'etf')
+        .reduce((sum, h) => sum + h.currentValue, 0);
+
+      // Debug: Log what types we're seeing
+      console.log('Holdings breakdown:', {
+        total: holdings.length,
+        stocks: holdings.filter(h => h.type === 'stock').length,
+        bonds: holdings.filter(h => h.type === 'bond').length,
+        etfs: holdings.filter(h => h.type === 'etf').length,
+        stocksValue,
+        bondsValue,
+        etfsValue
+      });
+
+      // Calculate total invested amount from holdings
+      const totalInvested = holdings.reduce((sum, h) => {
+        return sum + (h.avgPrice * h.quantity);
+      }, 0);
+
+// Calculate returns
+      const currentValue = portfolioMetrics.totalValue;
+      const returnsValue = currentValue - totalInvested;
+      const returnsPercentage = totalInvested > 0 
+        ? ((currentValue - totalInvested) / totalInvested) * 100 
+        : 0;
+
+      const holdingsWithReturns = holdings.map(h => ({
+          symbol: h.symbol,
+          currentValue: h.currentValue,
+          returnPercent: h.avgPrice > 0 ? ((h.currentPrice - h.avgPrice) / h.avgPrice * 100) : 0,
+          returnValue: h.currentValue - (h.avgPrice * h.quantity),
+          type: h.type
+        }));
+
+        // Sort by return percentage
+        const sortedByReturn = [...holdingsWithReturns].sort((a, b) => b.returnPercent - a.returnPercent);
+
+        // Get top 5 gainers and top 5 losers
+        const topGainers = sortedByReturn.slice(0, 3);
+        const topLosers = sortedByReturn.slice(-3).reverse();
+
+      return {
+        totalValue: totalValue,
+        cashReserve: cashSavings || 0,
+        invested: totalInvested,        // ✅ FIXED
+        returns: {
+          value: returnsValue,           // ✅ FIXED
+          percentage: returnsPercentage  // ✅ FIXED
+        },
+        riskScore: 5,
+        allocation: [
+          { name: "Stocks", value: stocksValue, percentage: calculatePercentage(stocksValue), color: "#4F46E5" },
+          { name: "ETFs", value: etfsValue, percentage: calculatePercentage(etfsValue), color: "#8B5CF6" },
+          { name: "Bonds", value: bondsValue, percentage: calculatePercentage(bondsValue), color: "#10B981" },
+          { name: "Cash", value: cashSavings, percentage: calculatePercentage(cashSavings), color: "#F59E0B" }
+        ].filter(item => item.value > 0),
+        performance: {
+            topGainers,
+            topLosers,
+            summary: {
+              totalInvested: totalInvested,
+              currentValue: currentValue,
+              totalReturn: returnsValue,
+              returnPercent: returnsPercentage
+            }
+          },
+        holdings: holdings.map(h => ({
+          symbol: h.symbol,
+          name: h.symbol,
+          shares: h.quantity,
+          avgPrice: h.avgPrice,
+          currentPrice: h.currentPrice,
+          value: h.currentValue,
+          type: h.type,
+          sector: h.sector
+        })),
+        userId: backendPortfolio.userId,
+        createdAt: backendPortfolio.createdAt,
+        updatedAt: backendPortfolio.updatedAt
+      };
     }
-    setIsLoading(false);
+
+    // Fallback: Basic normalization from raw portfolio data
+    return {
+      totalValue: 0,
+      cashReserve: parseFloat(backendPortfolio.cashSavings || 0),
+      invested: 0,
+      returns: { value: 0, percentage: 0 },
+      riskScore: 5,
+      allocation: [],
+      performance: [],
+      holdings: [],
+      userId: backendPortfolio.userId,
+      createdAt: backendPortfolio.createdAt,
+      updatedAt: backendPortfolio.updatedAt
+    };
+  };
+
+  
+
+  // Load portfolio data from backend
+  const fetchPortfolioData = async (email) => {
+    try {
+      console.log('Fetching portfolio data for:', email);
+      
+      const marketResponse = await fetch(`${API_BASE_URL}/api/portfolio/${email}/market-report`);
+      
+      if (marketResponse.ok) {
+        const marketData = await marketResponse.json();
+        console.log('Market data received:', marketData);
+        
+        const portfolioResponse = await fetch(`${API_BASE_URL}/api/portfolio/${email}`);
+        const portfolioData = portfolioResponse.ok ? await portfolioResponse.json() : null;
+        
+        const normalizedPortfolio = normalizePortfolioFromBackend(
+          portfolioData?.portfolio,
+          marketData
+        );
+        
+        setPortfolio(normalizedPortfolio);
+        localStorage.setItem('currentPortfolio', JSON.stringify(normalizedPortfolio));
+        
+        return normalizedPortfolio;
+      } else {
+        console.error('Failed to fetch market report');
+        return null;
+      }
+    } catch (error) {
+      console.error('Error fetching portfolio data:', error);
+      return null;
+    }
+  };
+
+  // Initialize auth state from localStorage
+  useEffect(() => {
+    const initializeAuth = async () => {
+      const savedUser = localStorage.getItem('currentUser');
+      
+      if (savedUser) {
+        try {
+          const user = JSON.parse(savedUser);
+          setCurrentUser(user);
+          setIsAuthenticated(true);
+          
+          if (user.hasPortfolio && user.email) {
+            await fetchPortfolioData(user.email);
+          }
+        } catch (error) {
+          console.error('Error initializing auth:', error);
+          localStorage.removeItem('currentUser');
+          localStorage.removeItem('currentPortfolio');
+        }
+      }
+      
+      setIsLoading(false);
+    };
+
+    initializeAuth();
   }, []);
 
-  // Login function - connects to backend API
+  // Login function
   const login = async (email, password) => {
     try {
       console.log('Attempting login for:', email);
@@ -60,8 +211,6 @@ export const AuthProvider = ({ children }) => {
         },
         body: JSON.stringify({ email, password })
       });
-
-      console.log('Login response status:', response.status);
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -76,10 +225,8 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticated(true);
       localStorage.setItem('currentUser', JSON.stringify(data.user));
       
-      // Load portfolio if exists
-      if (data.portfolio) {
-        setPortfolio(data.portfolio);
-        localStorage.setItem('currentPortfolio', JSON.stringify(data.portfolio));
+      if (data.user.hasPortfolio) {
+        await fetchPortfolioData(data.user.email);
       }
       
       return { 
@@ -92,10 +239,19 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Signup/Register function - creates new user for onboarding
+  // Logout function
+  const logout = () => {
+    setCurrentUser(null);
+    setPortfolio(null);
+    setIsAuthenticated(false);
+    localStorage.removeItem('currentUser');
+    localStorage.removeItem('currentPortfolio');
+  };
+
+  // Signup function
   const signup = () => {
     const newUser = {
-      userId: null, // Will be set to email during onboarding
+      userId: null,
       isNewUser: true,
       hasPortfolio: false,
       createdAt: new Date().toISOString()
@@ -107,86 +263,73 @@ export const AuthProvider = ({ children }) => {
     return { success: true };
   };
 
-  // Logout function
-  const logout = () => {
-    setCurrentUser(null);
-    setPortfolio(null);
-    setIsAuthenticated(false);
-    localStorage.removeItem('currentUser');
-    localStorage.removeItem('currentPortfolio');
-  };
-
-  // Complete onboarding - Save only user input to DynamoDB
+  // Complete onboarding function
   const completeOnboarding = async (profileData) => {
     try {
       console.log('Starting onboarding completion...');
-      console.log('Profile data:', profileData);
 
-      // Prepare data for backend API - ONLY what user entered
-      const apiPayload = {
-        userId: profileData.email, // Email as user ID
+      const payload = {
+        userId: profileData.email,
         name: profileData.name,
         email: profileData.email,
         password: profileData.password,
-        age: profileData.age,
+        age: parseInt(profileData.age),
         riskTolerance: profileData.riskTolerance,
         investmentGoal: profileData.investmentGoal,
         investmentHorizon: profileData.investmentHorizon,
-        initialInvestment: profileData.initialInvestment,
-        monthlyContribution: profileData.monthlyContribution,
-        cashSavings: profileData.cashSavings,
-        bonds: profileData.bonds,
-        stocks: profileData.stocks,
-        etfs: profileData.etfs,
+        initialInvestment: parseFloat(profileData.initialInvestment || 0),
+        monthlyContribution: parseFloat(profileData.monthlyContribution || 0),
+        cashSavings: parseFloat(profileData.cashSavings || 0),
+        bonds: (profileData.bonds || []).map(b => ({
+          symbol: b.symbol,
+          quantity: parseFloat(b.quantity),
+          avgPrice: parseFloat(b.avgPrice)
+        })),
+        stocks: (profileData.stocks || []).map(s => ({
+          symbol: s.symbol,
+          quantity: parseFloat(s.quantity),
+          avgPrice: parseFloat(s.avgPrice)
+        })),
+        etfs: (profileData.etfs || []).map(e => ({
+          symbol: e.symbol,
+          quantity: parseFloat(e.quantity),
+          avgPrice: parseFloat(e.avgPrice)
+        })),
         timestamp: new Date().toISOString()
       };
 
-      console.log('Sending to backend:', `${API_BASE_URL}/api/onboarding/complete`);
-      console.log('Payload:', JSON.stringify(apiPayload, null, 2));
+      console.log('Sending onboarding request:', payload);
 
-      // Save to backend API
       const response = await fetch(`${API_BASE_URL}/api/onboarding/complete`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(apiPayload)
+        body: JSON.stringify(payload)
       });
-
-      console.log('Response status:', response.status);
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Backend error response:', errorText);
-        throw new Error(`Failed to save onboarding data: ${response.status} ${errorText}`);
+        console.error('Onboarding failed:', errorText);
+        throw new Error(`Failed to complete onboarding: ${response.status}`);
       }
 
       const result = await response.json();
-      console.log('✅ Successfully saved to backend:', result);
+      console.log('✅ Onboarding successful:', result);
 
-      // Update local state
-      const updatedUser = {
-        ...currentUser,
-        userId: profileData.email,
-        name: profileData.name,
-        email: profileData.email,
-        password: profileData.password,
-        age: profileData.age,
-        riskTolerance: profileData.riskTolerance,
-        investmentGoal: profileData.investmentGoal,
-        investmentHorizon: profileData.investmentHorizon,
-        monthlyContribution: profileData.monthlyContribution,
-        hasPortfolio: true
-      };
-      
-      setCurrentUser(updatedUser);
+      setCurrentUser(result.user);
       setIsAuthenticated(true);
-      localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+      localStorage.setItem('currentUser', JSON.stringify(result.user));
 
-      return { success: true, data: result };
+      await fetchPortfolioData(result.user.email);
+
+      return { success: true };
     } catch (error) {
-      console.error('❌ Error completing onboarding:', error);
-      return { success: false, error: error.message };
+      console.error('❌ Onboarding error:', error);
+      return { 
+        success: false, 
+        error: error.message || 'Failed to complete onboarding'
+      };
     }
   };
 
@@ -200,13 +343,12 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('currentUser', JSON.stringify(updatedUser));
   };
 
-  // Update portfolio
-  const updatePortfolio = (updates) => {
-    const updatedPortfolio = {
-      ...portfolio,
-      ...updates
-    };
-    setPortfolio(updatedPortfolio);
+  // Refresh portfolio data
+  const refreshPortfolio = async () => {
+    if (currentUser?.email && currentUser?.hasPortfolio) {
+      return await fetchPortfolioData(currentUser.email);
+    }
+    return null;
   };
 
   const value = {
@@ -219,51 +361,11 @@ export const AuthProvider = ({ children }) => {
     signup,
     completeOnboarding,
     updateUserProfile,
-    updatePortfolio
+    refreshPortfolio,
+    fetchPortfolioData
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-};
-
-// Helper functions
-const getBondName = (symbol) => {
-  const bondNames = {
-    'US_TREASURY_10Y': 'US Treasury 10Y',
-    'US_TREASURY_30Y': 'US Treasury 30Y',
-    'CORPORATE_AAA': 'Corporate AAA Bond',
-    'MUNICIPAL': 'Municipal Bond',
-    'HIGH_YIELD': 'High Yield Corporate'
-  };
-  return bondNames[symbol] || symbol;
-};
-
-const getStockName = (symbol) => {
-  const stockNames = {
-    'AAPL': 'Apple Inc.',
-    'MSFT': 'Microsoft Corporation',
-    'GOOGL': 'Alphabet Inc.',
-    'AMZN': 'Amazon.com Inc.',
-    'TSLA': 'Tesla Inc.',
-    'NVDA': 'NVIDIA Corporation',
-    'JPM': 'JPMorgan Chase & Co.',
-    'V': 'Visa Inc.',
-    'JNJ': 'Johnson & Johnson',
-    'WMT': 'Walmart Inc.'
-  };
-  return stockNames[symbol] || symbol;
-};
-
-const getETFName = (symbol) => {
-  const etfNames = {
-    'SPY': 'SPDR S&P 500 ETF',
-    'QQQ': 'Invesco QQQ Trust',
-    'VTI': 'Vanguard Total Stock Market ETF',
-    'IWM': 'iShares Russell 2000 ETF',
-    'EEM': 'iShares MSCI Emerging Markets ETF',
-    'VEA': 'Vanguard FTSE Developed Markets ETF',
-    'AGG': 'iShares Core US Aggregate Bond ETF'
-  };
-  return etfNames[symbol] || symbol;
 };
 
 export default AuthContext;

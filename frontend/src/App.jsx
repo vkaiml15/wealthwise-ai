@@ -11,6 +11,7 @@ import Layout from './components/Layout/Layout';
 import Dashboard from './components/Dashboard/Dashboard';
 import ChatInterface from './components/Chatbot/ChatInterface';
 import Settings from './components/Settings/Settings';
+import MarketTrends from './components/MarketTrends.jsx';
 
 // Loading Screen Component
 const LoadingScreen = () => {
@@ -63,6 +64,7 @@ const AppRoutes = () => {
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="chat" element={<ChatInterface />} />
+        <Route path="market" element={<MarketTrends />} />
         <Route path="settings" element={<Settings />} />
       </Route>
 

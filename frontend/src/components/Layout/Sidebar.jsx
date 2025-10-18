@@ -33,8 +33,8 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     },
     {
       icon: PieChart,
-      label: 'Portfolio',
-      path: '/portfolio',
+      label: 'Rebalance',
+      path: '/Rebalnce',
       color: 'blue'
     },
     {
