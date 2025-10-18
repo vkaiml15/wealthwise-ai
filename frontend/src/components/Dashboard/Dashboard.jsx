@@ -78,7 +78,7 @@ const Dashboard = () => {
 
 
   const isPositive = returns.value > 0;
-
+ 
   return (
     <div className="space-y-6">
       {/* Welcome Section */}
@@ -111,7 +111,7 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
-
+ 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
@@ -144,13 +144,13 @@ const Dashboard = () => {
           icon={Shield}
           iconColor="yellow"
           subtitle={
-            riskScore < 4 ? "Conservative" : 
-            riskScore < 7 ? "Moderate" : 
+            riskScore < 4 ? "Conservative" :
+            riskScore < 7 ? "Moderate" :
             "Aggressive"
           }
         />
       </div>
-
+ 
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Portfolio Allocation */}
@@ -181,7 +181,7 @@ const Dashboard = () => {
           <PerformanceChart data={performance} />
         </div>
       </div>
-
+ 
       {/* Holdings Table */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
         <div className="flex items-center justify-between mb-6">
@@ -276,7 +276,7 @@ const Dashboard = () => {
           </div>
         )}
       </div>
-
+ 
       {/* Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <button
@@ -293,7 +293,7 @@ const Dashboard = () => {
             </div>
           </div>
         </button>
-
+ 
         <button className="p-6 bg-white rounded-xl shadow-sm border border-gray-200 hover:border-purple-300 hover:shadow-md transition-all group">
           <div className="flex items-center space-x-4">
             <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center group-hover:bg-purple-200 transition-colors">
@@ -305,7 +305,7 @@ const Dashboard = () => {
             </div>
           </div>
         </button>
-
+ 
         <button className="p-6 bg-white rounded-xl shadow-sm border border-gray-200 hover:border-green-300 hover:shadow-md transition-all group">
           <div className="flex items-center space-x-4">
             <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200 transition-colors">
@@ -321,5 +321,5 @@ const Dashboard = () => {
     </div>
   );
 };
-
+ 
 export default Dashboard;
