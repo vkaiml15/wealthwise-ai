@@ -67,21 +67,26 @@ app.add_middleware(
 
 # Initialize DynamoDB
 print("🔌 Initializing DynamoDB connection...")
-dynamodb = boto3.resource(
-    'dynamodb',
-    region_name=os.getenv('AWS_REGION', 'us-east-1'),
-    aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
-    aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
-    aws_session_token=os.getenv('AWS_SESSION_TOKEN')
-)
+# dynamodb = boto3.resource(
+#     'dynamodb',
+#     region_name=os.getenv('AWS_REGION', 'us-east-1'),
+#     aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
+#     aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
+#     aws_session_token=os.getenv('AWS_SESSION_TOKEN')
+# )
+dynamodb = boto3.Session(profile_name='my-dev-profile').resource('dynamodb')
 
-client = boto3.client(
-    'dynamodb',
-    region_name=os.getenv('AWS_REGION', 'us-east-1'),
-    aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
-    aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
-    aws_session_token=os.getenv('AWS_SESSION_TOKEN')
-)
+# client = boto3.client(
+#     'dynamodb',
+#     region_name=os.getenv('AWS_REGION', 'us-east-1'),
+#     aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
+#     aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
+#     aws_session_token=os.getenv('AWS_SESSION_TOKEN')
+# )
+
+session = boto3.Session(profile_name='my-dev-profile')
+client = session.client('dynamodb')
+
 
 tables = client.list_tables()
 print(f"✅ DynamoDB connected! Found {len(tables['TableNames'])} tables")
