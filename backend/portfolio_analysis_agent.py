@@ -32,7 +32,7 @@ class PortfolioAnalysisAgent:
         #     aws_session_token=os.getenv('AWS_SESSION_TOKEN')
         # )
 
-        self.dynamodb = boto3.Session(profile_name='my-dev-profile').resource('dynamodb')
+        self.dynamodb = boto3.resource("dynamodb", region_name=os.getenv("AWS_REGION", "us-east-1"))
         self.users_table = self.dynamodb.Table('WealthWiseUsers')
         self.portfolios_table = self.dynamodb.Table('WealthWisePortfolios')
         

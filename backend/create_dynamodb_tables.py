@@ -22,7 +22,7 @@ load_dotenv()
 
 import boto3
 
-dynamodb = boto3.Session(profile_name='my-dev-profile').resource('dynamodb')
+dynamodb = boto3.resource("dynamodb", region_name=os.getenv("AWS_REGION", "us-east-1"))
 
 def create_users_table():
     """Create WealthWiseUsers table"""

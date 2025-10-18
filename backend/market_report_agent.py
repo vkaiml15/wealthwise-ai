@@ -28,7 +28,7 @@ class HybridMarketDataAgent:
         
         
 
-        self.dynamodb = boto3.Session(profile_name='my-dev-profile').resource('dynamodb')
+        self.dynamodb = boto3.resource("dynamodb", region_name=os.getenv("AWS_REGION", "us-east-1"))
 
         self.portfolios_table = self.dynamodb.Table('WealthWisePortfolios')
         
