@@ -15,6 +15,7 @@ import os
 import sys
 from dotenv import load_dotenv
 
+
 load_dotenv()
 
 print("=" * 60)
@@ -46,6 +47,7 @@ import bcrypt
 from strand_tools import create_strand_tools
 from strand_orchestrator import StrandOrchestrator
 from strand_portfolio_graph import create_portfolio_analysis_graph
+from strand_risk_agent import analyze_user_risk_profile
 
 # Import existing agents for backward compatibility
 from market_report_agent import HybridMarketDataAgent
@@ -64,6 +66,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 # Initialize DynamoDB
 print("🔌 Initializing DynamoDB connection...")
@@ -375,6 +378,7 @@ async def ask_about_portfolio(email: str, request: AskRequest):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=str(e)
         )
+    
 
 @app.get("/api/portfolio/{email}/analysis-v2")
 async def get_portfolio_analysis_v2(email: str):
@@ -684,6 +688,33 @@ async def get_strand_stats():
             'active_apis': len([c for c in market_agent.apis.values() if c['enabled']])
         }
     }
+
+@app.get("/api/portfolio/{email}/risk-analysis")
+async def get_risk_analysis(email: str):
+    """
+    🆕 Get comprehensive risk analysis using Strand SDK
+    """
+    print(f"🎯 Strand risk analysis requested for: {email}")
+    
+    try:
+        result = analyze_user_risk_profile(email, users_table, portfolios_table)
+        
+        if not result['success']:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=result.get('error', 'Risk analysis failed')
+            )
+        
+        return result
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Risk analysis error: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Internal server error: {str(e)}"
+        )
 
 # ==================== RUN SERVER ====================
 
