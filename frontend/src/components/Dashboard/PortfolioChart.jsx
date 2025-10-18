@@ -100,7 +100,7 @@ const PortfolioChart = ({ data }) => {
             </div>
             <div className="text-right">
               <p className="text-sm font-semibold text-gray-900">
-                ${(item.value / 1000).toFixed(0)}k
+                ₹{(item.value / 1000).toFixed(0)}k
               </p>
               <p className="text-xs text-gray-500">{item.percentage.toFixed(1)}%</p>
             </div>
@@ -113,7 +113,7 @@ const PortfolioChart = ({ data }) => {
         <div className="flex items-center justify-between">
           <span className="text-sm font-medium text-gray-700">Total Invested</span>
           <span className="text-lg font-bold text-gray-900">
-            ${data.reduce((sum, item) => sum + item.value, 0).toLocaleString()}
+            ₹{data.reduce((sum, item) => sum + item.value, 0).toLocaleString()}
           </span>
         </div>
       </div>

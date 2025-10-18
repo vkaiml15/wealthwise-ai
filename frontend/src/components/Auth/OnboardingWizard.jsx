@@ -68,35 +68,117 @@ const ExtendedOnboardingWizard = () => {
 
   // Mock data for dropdowns
   const bondOptions = [
-    { value: 'US_TREASURY_10Y', label: 'US Treasury 10Y' },
-    { value: 'US_TREASURY_30Y', label: 'US Treasury 30Y' },
-    { value: 'CORPORATE_AAA', label: 'Corporate AAA Bond' },
-    { value: 'MUNICIPAL', label: 'Municipal Bond' },
-    { value: 'HIGH_YIELD', label: 'High Yield Corporate' }
-  ];
+  // Gilt Funds (Government Securities - Safest)
+  { value: 'IDFC_GILT', label: 'IDFC Gilt Fund - Government Securities' },
+  { value: 'ICICI_GILT', label: 'ICICI Prudential Gilt Fund' },
+  { value: 'SBI_GILT', label: 'SBI Magnum Gilt Fund' },
+  
+  // Short Duration Debt Funds (Low Risk)
+  { value: 'HDFC_SHORT_DEBT', label: 'HDFC Short Term Debt Fund' },
+  { value: 'ICICI_SHORT_DEBT', label: 'ICICI Prudential Short Term Fund' },
+  { value: 'SBI_SHORT_DEBT', label: 'SBI Short Term Debt Fund' },
+  
+  // Corporate Bond Funds (Moderate Risk)
+  { value: 'HDFC_CORP_BOND', label: 'HDFC Corporate Bond Fund' },
+  { value: 'ICICI_CORP_BOND', label: 'ICICI Corporate Bond Fund' },
+  { value: 'AXIS_CORP_BOND', label: 'Axis Corporate Debt Fund' },
+  
+  // Liquid Funds (Ultra Short-term, Cash Equivalent)
+  { value: 'HDFC_LIQUID', label: 'HDFC Liquid Fund' },
+  { value: 'ICICI_LIQUID', label: 'ICICI Liquid Fund' },
+  { value: 'SBI_LIQUID', label: 'SBI Liquid Fund' },
+  
+  // Banking & PSU Debt Funds
+  { value: 'AXIS_BANKING_DEBT', label: 'Axis Banking & PSU Debt Fund' },
+  { value: 'ICICI_BANKING_DEBT', label: 'ICICI Banking & PSU Debt Fund' }
+];
 
-  const stockOptions = [
-    { value: 'AAPL', label: 'Apple Inc. (AAPL)' },
-    { value: 'MSFT', label: 'Microsoft (MSFT)' },
-    { value: 'GOOGL', label: 'Alphabet (GOOGL)' },
-    { value: 'AMZN', label: 'Amazon (AMZN)' },
-    { value: 'TSLA', label: 'Tesla (TSLA)' },
-    { value: 'NVDA', label: 'NVIDIA (NVDA)' },
-    { value: 'JPM', label: 'JPMorgan Chase (JPM)' },
-    { value: 'V', label: 'Visa (V)' },
-    { value: 'JNJ', label: 'Johnson & Johnson (JNJ)' },
-    { value: 'WMT', label: 'Walmart (WMT)' }
-  ];
+// ========================================
+// INDIAN STOCKS (NSE Listed)
+// ========================================
+const stockOptions = [
+  // Large Cap - Nifty 50 Leaders
+  { value: 'RELIANCE.NS', label: 'Reliance Industries' },
+  { value: 'TCS.NS', label: 'Tata Consultancy Services (TCS)' },
+  { value: 'HDFCBANK.NS', label: 'HDFC Bank' },
+  { value: 'INFY.NS', label: 'Infosys' },
+  { value: 'ICICIBANK.NS', label: 'ICICI Bank' },
+  { value: 'HINDUNILVR.NS', label: 'Hindustan Unilever' },
+  { value: 'SBIN.NS', label: 'State Bank of India (SBI)' },
+  { value: 'BHARTIARTL.NS', label: 'Bharti Airtel' },
+  { value: 'ITC.NS', label: 'ITC Limited' },
+  { value: 'KOTAKBANK.NS', label: 'Kotak Mahindra Bank' },
+  { value: 'LT.NS', label: 'Larsen & Toubro (L&T)' },
+  { value: 'AXISBANK.NS', label: 'Axis Bank' },
+  { value: 'BAJFINANCE.NS', label: 'Bajaj Finance' },
+  { value: 'ASIANPAINT.NS', label: 'Asian Paints' },
+  { value: 'MARUTI.NS', label: 'Maruti Suzuki' },
+  { value: 'TITAN.NS', label: 'Titan Company' },
+  { value: 'WIPRO.NS', label: 'Wipro' },
+  { value: 'ULTRACEMCO.NS', label: 'UltraTech Cement' },
+  { value: 'SUNPHARMA.NS', label: 'Sun Pharmaceutical' },
+  { value: 'NESTLEIND.NS', label: 'Nestle India' },
+  { value: 'HCLTECH.NS', label: 'HCL Technologies' },
+  { value: 'TECHM.NS', label: 'Tech Mahindra' },
+  { value: 'TATAMOTORS.NS', label: 'Tata Motors' },
+  { value: 'ADANIPORTS.NS', label: 'Adani Ports' },
+  { value: 'POWERGRID.NS', label: 'Power Grid Corporation' },
+  
+  // Additional Popular Stocks
+  { value: 'ONGC.NS', label: 'Oil and Natural Gas Corporation' },
+  { value: 'NTPC.NS', label: 'NTPC Limited' },
+  { value: 'COALINDIA.NS', label: 'Coal India' },
+  { value: 'DRREDDY.NS', label: 'Dr. Reddy\'s Laboratories' },
+  { value: 'CIPLA.NS', label: 'Cipla' },
+  { value: 'DIVISLAB.NS', label: 'Divi\'s Laboratories' },
+  { value: 'EICHERMOT.NS', label: 'Eicher Motors' },
+  { value: 'HEROMOTOCO.NS', label: 'Hero MotoCorp' },
+  { value: 'BAJAJFINSV.NS', label: 'Bajaj Finserv' },
+  { value: 'M&M.NS', label: 'Mahindra & Mahindra' }
+];
 
-  const etfOptions = [
-    { value: 'SPY', label: 'SPDR S&P 500 ETF (SPY)' },
-    { value: 'QQQ', label: 'Invesco QQQ Trust (QQQ)' },
-    { value: 'VTI', label: 'Vanguard Total Stock Market (VTI)' },
-    { value: 'IWM', label: 'iShares Russell 2000 (IWM)' },
-    { value: 'EEM', label: 'iShares MSCI Emerging Markets (EEM)' },
-    { value: 'VEA', label: 'Vanguard FTSE Developed Markets (VEA)' },
-    { value: 'AGG', label: 'iShares Core US Aggregate Bond (AGG)' }
-  ];
+// ========================================
+// INDIAN ETFs (Exchange Traded Funds)
+// ========================================
+const etfOptions = [
+  // Index ETFs (Most Popular)
+  { 
+    value: 'NIFTYBEES.NS', 
+    label: 'Nifty BeES - Nifty 50 Index' 
+  },
+  { 
+    value: 'JUNIORBEES.NS', 
+    label: 'Junior BeES - Nifty Next 50' 
+  },
+  
+  // Sectoral ETFs
+  { 
+    value: 'BANKBEES.NS', 
+    label: 'Bank BeES - Banking Sector' 
+  },
+  { 
+    value: 'ITBEES.NS', 
+    label: 'IT BeES - Technology Sector' 
+  },
+  
+  // Commodity ETFs
+  { 
+    value: 'GOLDBEES.NS', 
+    label: 'Gold BeES - Gold ETF' 
+  },
+  
+  // Liquid/Safe ETFs
+  { 
+    value: 'LIQUIDBEES.NS', 
+    label: 'Liquid BeES - Overnight Fund' 
+  },
+  
+  // PSU ETFs
+  { 
+    value: 'CPSEETF.NS', 
+    label: 'CPSE ETF - Public Sector Companies' 
+  }
+];
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -213,7 +295,7 @@ const ExtendedOnboardingWizard = () => {
       if (!profileData.initialInvestment) {
         newErrors.initialInvestment = 'Initial investment is required';
       } else if (profileData.initialInvestment < 1000) {
-        newErrors.initialInvestment = 'Minimum investment is $1,000';
+        newErrors.initialInvestment = 'Minimum investment is ₹1,000';
       }
       if (!profileData.monthlyContribution) {
         newErrors.monthlyContribution = 'Monthly contribution is required';
@@ -599,7 +681,7 @@ const ExtendedOnboardingWizard = () => {
           Initial Investment *
         </label>
         <div className="relative">
-          <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+          <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500">₹</span>
           <input
             type="number"
             name="initialInvestment"
@@ -615,7 +697,7 @@ const ExtendedOnboardingWizard = () => {
         {errors.initialInvestment && (
           <p className="mt-1 text-sm text-red-600">{errors.initialInvestment}</p>
         )}
-        <p className="mt-1 text-sm text-gray-500">Minimum: $1,000</p>
+        <p className="mt-1 text-sm text-gray-500">Minimum: ₹1,000</p>
       </div>
 
       <div>
@@ -623,7 +705,7 @@ const ExtendedOnboardingWizard = () => {
           Monthly Contribution *
         </label>
         <div className="relative">
-          <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+          <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500">₹</span>
           <input
             type="number"
             name="monthlyContribution"
@@ -639,7 +721,7 @@ const ExtendedOnboardingWizard = () => {
         {errors.monthlyContribution && (
           <p className="mt-1 text-sm text-red-600">{errors.monthlyContribution}</p>
         )}
-        <p className="mt-1 text-sm text-gray-500">Optional: Set to $0 if not applicable</p>
+        <p className="mt-1 text-sm text-gray-500">Optional: Set to ₹0 if not applicable</p>
       </div>
     </div>
   );
@@ -659,7 +741,7 @@ const ExtendedOnboardingWizard = () => {
           Cash Savings Amount *
         </label>
         <div className="relative">
-          <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+          <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500">₹</span>
           <input
             type="number"
             name="cashSavings"
@@ -749,7 +831,7 @@ const ExtendedOnboardingWizard = () => {
                   
                   <div>
                     <label className="block text-xs font-medium text-gray-600 mb-1">
-                      Avg Price ($)
+                      Avg Price (₹)
                     </label>
                     <input
                       type="number"
