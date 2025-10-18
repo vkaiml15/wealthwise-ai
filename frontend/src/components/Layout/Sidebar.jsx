@@ -92,7 +92,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       
       
       // Fetch user data (including risk analysis)
-      const userResponse = await fetch(`${process.env.REACT_APP_API_URL}/api/users/${userEmail}`);
+      const userResponse = await fetch(`${process.env.REACT_APP_API_URL}/api/user/${userEmail}`);
       const userData = await userResponse.json();
 
       // Fetch portfolio data

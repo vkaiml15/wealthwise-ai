@@ -4,8 +4,7 @@ import boto3
 import os
 
 def get_risk_agent():
-    session = boto3.Session(profile_name='my-dev-profile')
-    bedrock_client = session.client("bedrock-runtime", region_name="us-east-1")
+    bedrock_client = boto3.client("bedrock-runtime", region_name="us-east-1")
 
     os.environ["AWS_PROFILE"] = "my-dev-profile"
     os.environ["AWS_REGION"] = "us-east-1"

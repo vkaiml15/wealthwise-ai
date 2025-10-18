@@ -1,0 +1,20 @@
+npm ERR! code ENOENT
+npm ERR! syscall open
+npm ERR! path /home/darshan/wealthwise-ai/package.json
+npm ERR! errno -2
+npm ERR! enoent ENOENT: no such file or directory, open '/home/darshan/wealthwise-ai/package.json'
+npm ERR! enoent This is related to npm not being able to find a file.
+npm ERR! enoent 
+
+npm ERR! A complete log of this run can be found in:
+npm ERR!     /root/.npm/_logs/2025-10-18T12_09_53_811Z-debug-0.log
+npm ERR! code ENOENT
+npm ERR! syscall open
+npm ERR! path /home/darshan/wealthwise-ai/package.json
+npm ERR! errno -2
+npm ERR! enoent ENOENT: no such file or directory, open '/home/darshan/wealthwise-ai/package.json'
+npm ERR! enoent This is related to npm not being able to find a file.
+npm ERR! enoent 
+
+npm ERR! A complete log of this run can be found in:
+npm ERR!     /root/.npm/_logs/2025-10-18T12_10_35_722Z-debug-0.log

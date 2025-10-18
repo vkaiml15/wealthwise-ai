@@ -65,7 +65,7 @@
 # #     aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
 # #     aws_session_token=os.getenv('AWS_SESSION_TOKEN')
 # # )
-# dynamodb = boto3.Session(profile_name='my-dev-profile').resource('dynamodb')
+# dynamodb = boto3.resource("dynamodb", region_name=os.getenv("AWS_REGION", "us-east-1"))
 
 # # client = boto3.client(
 # #     'dynamodb',
@@ -75,8 +75,8 @@
 # #     aws_session_token=os.getenv('AWS_SESSION_TOKEN')
 # # )
 
-# session = boto3.Session(profile_name='my-dev-profile')
-# client = session.client('dynamodb')
+# # Using default credential chain (IAM role)
+# client = boto3.client("dynamodb", region_name=os.getenv("AWS_REGION", "us-east-1"))
 
 
 # tables = client.list_tables()
@@ -857,7 +857,7 @@ print("🔌 Initializing DynamoDB connection...")
 #     aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
 #     aws_session_token=os.getenv('AWS_SESSION_TOKEN')
 # )
-dynamodb = boto3.Session(profile_name='my-dev-profile').resource('dynamodb')
+dynamodb = boto3.resource("dynamodb", region_name=os.getenv("AWS_REGION", "us-east-1"))
 
 # client = boto3.client(
 #     'dynamodb',
@@ -867,8 +867,8 @@ dynamodb = boto3.Session(profile_name='my-dev-profile').resource('dynamodb')
 #     aws_session_token=os.getenv('AWS_SESSION_TOKEN')
 # )
 
-session = boto3.Session(profile_name='my-dev-profile')
-client = session.client('dynamodb')
+# Using default credential chain (IAM role)
+client = boto3.client("dynamodb", region_name=os.getenv("AWS_REGION", "us-east-1"))
 
 
 tables = client.list_tables()

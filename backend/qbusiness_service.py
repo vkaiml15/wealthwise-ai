@@ -12,12 +12,12 @@ class QBusinessService:
     """Service to interact with Amazon Q Business"""
 
     def __init__(self):
-        """Initialize Q Business client"""
+        """Initialize Q Business client using IAM role"""
         self.application_id = os.getenv('Q_BUSINESS_APPLICATION_ID', '5ec5ed78-be26-4395-afdf-75c9a6a09e3a')
         self.region = os.getenv('AWS_REGION', 'us-east-1')
 
-        # Initialize Q Business client using your existing AWS credentials
-        self.client = boto3.Session(profile_name='my-dev-profile').client(
+        # ✅ Use IAM role - boto3 automatically gets credentials from EC2 instance metadata
+        self.client = boto3.client(
             'qbusiness',
             region_name=self.region
         )
@@ -83,9 +83,6 @@ class QBusinessService:
             }
 
 
-
-
-
     def list_conversations(self, user_id: Optional[str] = None, max_results: int = 10) -> Dict[str, Any]:
         """List conversations (for anonymous mode)"""
         try:
@@ -134,4 +131,3 @@ def get_qbusiness_service() -> QBusinessService:
     if _qbusiness_service is None:
         _qbusiness_service = QBusinessService()
     return _qbusiness_service
- 
