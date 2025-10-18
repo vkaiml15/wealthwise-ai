@@ -1,28 +1,39 @@
-"""
-Strand SDK Risk Analysis Agent
-Uses official Strand SDK with @tool decorator
-"""
-
 import os
 import json
 import boto3
 from typing import Dict, Any
+from decimal import Decimal
 from dotenv import load_dotenv
 
 # ✅ CORRECT STRAND SDK IMPORTS
 from strands import Agent, tool
+from strands.models import BedrockModel
 from anthropic import Anthropic
 
 load_dotenv()
 
-# Initialize Bedrock Agent Runtime
-bedrock_agent_runtime = boto3.client(
+# Initialize Bedrock Agent Runtime with SSO
+session = boto3.Session(profile_name='my-dev-profile')
+
+bedrock_agent_runtime = session.client(
     service_name='bedrock-agent-runtime',
-    region_name=os.getenv('AWS_REGION', 'us-east-1'),
-    aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
-    aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
-    aws_session_token=os.getenv('AWS_SESSION_TOKEN')
+    region_name='us-east-1'
 )
+
+# ==================== HELPER FUNCTIONS ====================
+
+def convert_floats_to_decimal(obj):
+    """
+    Recursively convert all float values to Decimal for DynamoDB compatibility
+    """
+    if isinstance(obj, list):
+        return [convert_floats_to_decimal(item) for item in obj]
+    elif isinstance(obj, dict):
+        return {key: convert_floats_to_decimal(value) for key, value in obj.items()}
+    elif isinstance(obj, float):
+        return Decimal(str(obj))
+    else:
+        return obj
 
 
 # ==================== RISK CALCULATION LOGIC ====================
@@ -172,11 +183,30 @@ def get_risk_recommendation(risk_score: float, risk_label: str) -> str:
 
 # ==================== STRAND AGENT ====================
 
-# Initialize Strand Agent with tools
-risk_agent = Agent(
-    model="us.anthropic.claude-3-5-sonnet-20241022-v2:0",
-    tools=[get_risk_recommendation],
-    system_prompt="""You are the Risk Profile Agent for WealthWise AI, a robo-advisor platform.
+def get_risk_agent():
+    """
+    Initialize Strand Agent with AWS SSO credentials
+    This creates a new agent instance with fresh credentials
+    """
+    # Get credentials from SSO session
+    session = boto3.Session(profile_name='my-dev-profile')
+    bedrock_client = session.client("bedrock-runtime", region_name="us-east-1")
+    os.environ["AWS_PROFILE"] = "my-dev-profile"
+    os.environ["AWS_REGION"] = "us-east-1"
+    
+    
+    # Create Bedrock model with credentials
+    bedrock_model = BedrockModel(
+        model_id="us.anthropic.claude-3-5-sonnet-20241022-v2:0",
+        client=bedrock_client,  # ✅ explicitly give the client
+    )
+
+    
+    # Initialize Strand Agent with the configured model
+    agent = Agent(
+        model=bedrock_model,
+        tools=[get_risk_recommendation],
+        system_prompt="""You are the Risk Profile Agent for WealthWise AI, a robo-advisor platform.
 
 Your role:
 - Explain risk scores in simple, personalized language
@@ -185,7 +215,9 @@ Your role:
 - Focus on how specific factors combine to create their profile
 
 Always be supportive and explain complex concepts in everyday terms."""
-)
+    )
+    
+    return agent
 
 
 # ==================== MAIN ANALYSIS FUNCTION ====================
@@ -241,7 +273,10 @@ def analyze_user_risk_profile(user_email: str, users_table, portfolios_table) ->
         print(f"📈 Risk Score: {risk_result['riskScore']}/10 ({risk_result['riskLabel']})")
         
         # ✅ GET AGENT EXPLANATION
-        agent = risk_agent
+        print(f"🤖 Agent: Generating personalized explanation...")
+        
+        # Get agent with fresh credentials
+        agent = get_risk_agent()
         
         prompt = f"""Explain this risk analysis to the investor in 2-3 friendly sentences:
 
@@ -262,18 +297,14 @@ def analyze_user_risk_profile(user_email: str, users_table, portfolios_table) ->
 
 Explain what this score means for them personally and how their specific factors combined to create this assessment."""
         
-        print(f"🤖 Agent: Generating personalized explanation...")
         agent_response = agent(prompt)
         
         print(f"✅ Agent response received")
-        print(f"📊 Agent response type: {type(agent_response)}")
-        print(f"📊 Agent response dir: {[attr for attr in dir(agent_response) if not attr.startswith('_')]}")
         
-        # ✅ Extract text from AgentResult object - FIXED
+        # ✅ Extract text from AgentResult object
         rationale = "Risk analysis completed successfully."
         
         try:
-            # Try different attribute access patterns
             if hasattr(agent_response, 'text'):
                 rationale = agent_response.text
             elif hasattr(agent_response, 'content'):
@@ -306,6 +337,28 @@ Explain what this score means for them personally and how their specific factors
         
         print(f"📝 Rationale: {rationale[:100]}...")
         
+        # ✅ CONVERT TO DECIMAL FOR DYNAMODB
+        risk_analysis_result = {
+            **risk_result,
+            'rationale': rationale,
+            'agentType': 'Strand SDK',
+            'timestamp': __import__('datetime').datetime.utcnow().isoformat()
+        }
+        
+        # Convert all floats to Decimal
+        risk_analysis_decimal = convert_floats_to_decimal(risk_analysis_result)
+        
+        # ✅ STORE IN DYNAMODB
+        users_table.update_item(
+            Key={'userId': user_email},
+            UpdateExpression='SET riskAnalysis = :analysis',
+            ExpressionAttributeValues={
+                ':analysis': risk_analysis_decimal
+            }
+        )
+        
+        print("💾 Risk analysis saved to DynamoDB")
+        
         print("=" * 60)
         print("✅ Risk Analysis Complete")
         print("=" * 60)
@@ -314,12 +367,7 @@ Explain what this score means for them personally and how their specific factors
         return {
             'success': True,
             'userId': user_email,
-            'riskAnalysis': {
-                **risk_result,
-                'rationale': rationale,
-                'agentType': 'Strand SDK',
-                'timestamp': __import__('datetime').datetime.utcnow().isoformat()
-            }
+            'riskAnalysis': risk_analysis_result
         }
         
     except Exception as e:
@@ -370,6 +418,7 @@ if __name__ == "__main__":
 
 The score reflects their balanced approach with moderate growth potential."""
     
-    agent_response = risk_agent(agent_prompt)
+    agent = get_risk_agent()
+    agent_response = agent(agent_prompt)
     print(agent_response)
     print()

@@ -25,9 +25,7 @@ print(f"AWS_ACCESS_KEY_ID: {os.getenv('AWS_ACCESS_KEY_ID', 'NOT_SET')[:15]}...")
 print("=" * 60)
 print()
 
-if not os.getenv('AWS_ACCESS_KEY_ID'):
-    print("❌ ERROR: AWS credentials not found!")
-    sys.exit(1)
+
 
 # if not os.getenv('ANTHROPIC_API_KEY'):
 #     print("❌ ERROR: ANTHROPIC_API_KEY not found!")
