@@ -71,7 +71,7 @@ const Dashboard = () => {
   const cashReserve = portfolio.cashReserve ?? 0;
   const invested = portfolio.invested ?? 0;
   const returns = portfolio.returns ?? { value: 0, percentage: 0 };
-  const riskScore = portfolio.riskScore ?? 5;
+  const riskScore = currentUser?.riskAnalysis?.riskScore ?? 5;
   const allocation = portfolio.allocation ?? [];
   const performance = portfolio.performance ?? [];
   const holdings = portfolio.holdings ?? [];
