@@ -1,0 +1,102 @@
+============================================================
+🔧 DEBUG: Environment Variables
+============================================================
+AWS_ACCESS_KEY_ID: NOT_SET...
+AWS_SECRET_ACCESS_KEY: NOT_SET
+AWS_SESSION_TOKEN: NOT_SET
+AWS_REGION: us-east-1
+============================================================
+
+❌ ERROR: AWS credentials not found!
+❌ Make sure .env file exists in the backend directory
+============================================================
+🔧 DEBUG: Environment Variables
+============================================================
+AWS_ACCESS_KEY_ID: ASIAQ3EGQACRDIN...
+AWS_SECRET_ACCESS_KEY: SET
+AWS_SESSION_TOKEN: SET
+AWS_REGION: us-east-1
+============================================================
+
+Traceback (most recent call last):
+  File "/home/darshan/wealthwise-ai/backend/main.py", line 26, in <module>
+    from fastapi import FastAPI, HTTPException, status
+ModuleNotFoundError: No module named 'fastapi'
+============================================================
+🔧 DEBUG: Environment Variables
+============================================================
+AWS_ACCESS_KEY_ID: ASIAQ3EGQACRDIN...
+AWS_SECRET_ACCESS_KEY: SET
+AWS_SESSION_TOKEN: SET
+AWS_REGION: us-east-1
+============================================================
+
+Traceback (most recent call last):
+  File "/home/darshan/wealthwise-ai/backend/main.py", line 34, in <module>
+    import bcrypt
+ModuleNotFoundError: No module named 'bcrypt'
+============================================================
+🔧 DEBUG: Environment Variables
+============================================================
+AWS_ACCESS_KEY_ID: ASIAQ3EGQACRDIN...
+AWS_SECRET_ACCESS_KEY: SET
+AWS_SESSION_TOKEN: SET
+AWS_REGION: us-east-1
+============================================================
+
+🔌 Initializing DynamoDB connection...
+✅ DynamoDB connected! Found 72 tables
+✅ WealthWise tables found!
+============================================================
+
+Traceback (most recent call last):
+  File "/home/darshan/strands_env/lib/python3.12/site-packages/pydantic/networks.py", line 949, in import_email_validator
+    import email_validator
+ModuleNotFoundError: No module named 'email_validator'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/darshan/wealthwise-ai/backend/main.py", line 92, in <module>
+    class OnboardingData(BaseModel):
+  File "/home/darshan/strands_env/lib/python3.12/site-packages/pydantic/_internal/_model_construction.py", line 255, in __new__
+    complete_model_class(
+  File "/home/darshan/strands_env/lib/python3.12/site-packages/pydantic/_internal/_model_construction.py", line 648, in complete_model_class
+    schema = gen_schema.generate_schema(cls)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/darshan/strands_env/lib/python3.12/site-packages/pydantic/_internal/_generate_schema.py", line 729, in generate_schema
+    schema = self._generate_schema_inner(obj)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/darshan/strands_env/lib/python3.12/site-packages/pydantic/_internal/_generate_schema.py", line 1023, in _generate_schema_inner
+    return self._model_schema(obj)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/darshan/strands_env/lib/python3.12/site-packages/pydantic/_internal/_generate_schema.py", line 856, in _model_schema
+    {k: self._generate_md_field_schema(k, v, decorators) for k, v in fields.items()},
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/darshan/strands_env/lib/python3.12/site-packages/pydantic/_internal/_generate_schema.py", line 1228, in _generate_md_field_schema
+    schema, metadata = self._common_field_schema(name, field_info, decorators)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/darshan/strands_env/lib/python3.12/site-packages/pydantic/_internal/_generate_schema.py", line 1282, in _common_field_schema
+    schema = self._apply_annotations(
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/darshan/strands_env/lib/python3.12/site-packages/pydantic/_internal/_generate_schema.py", line 2227, in _apply_annotations
+    schema = get_inner_schema(source_type)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/darshan/strands_env/lib/python3.12/site-packages/pydantic/_internal/_schema_generation_shared.py", line 83, in __call__
+    schema = self._handler(source_type)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/darshan/strands_env/lib/python3.12/site-packages/pydantic/_internal/_generate_schema.py", line 2203, in inner_handler
+    schema = self._generate_schema_from_get_schema_method(obj, source_type)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/darshan/strands_env/lib/python3.12/site-packages/pydantic/_internal/_generate_schema.py", line 919, in _generate_schema_from_get_schema_method
+    schema = get_schema(
+             ^^^^^^^^^^^
+  File "/home/darshan/strands_env/lib/python3.12/site-packages/pydantic/networks.py", line 989, in __get_pydantic_core_schema__
+    import_email_validator()
+  File "/home/darshan/strands_env/lib/python3.12/site-packages/pydantic/networks.py", line 951, in import_email_validator
+    raise ImportError("email-validator is not installed, run `pip install 'pydantic[email]'`") from e
+ImportError: email-validator is not installed, run `pip install 'pydantic[email]'`
+INFO:     Started server process [64922]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)

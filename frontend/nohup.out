@@ -1,0 +1,1063 @@
+
+> wealthwise-ai@1.0.0 start
+> react-scripts start --host 0.0.0.0
+
+(node:65666) [DEP_WEBPACK_DEV_SERVER_ON_AFTER_SETUP_MIDDLEWARE] DeprecationWarning: 'onAfterSetupMiddleware' option is deprecated. Please use the 'setupMiddlewares' option.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:65666) [DEP_WEBPACK_DEV_SERVER_ON_BEFORE_SETUP_MIDDLEWARE] DeprecationWarning: 'onBeforeSetupMiddleware' option is deprecated. Please use the 'setupMiddlewares' option.
+Starting the development server...
+
+Compiled successfully!
+
+You can now view wealthwise-ai in the browser.
+
+  Local:            http://localhost:3000
+  On Your Network:  http://172.31.85.137:3000
+
+Note that the development build is not optimized.
+To create a production build, use npm run build.
+
+webpack compiled successfully
+The build failed because the process exited too early. This probably means the system ran out of memory or someone called `kill -9` on the process.
+
+> wealthwise-ai@1.0.0 start
+> react-scripts start 0.0.0.0
+
+Something is already running on port 3000.
+
+> wealthwise-ai@1.0.0 start
+> react-scripts start 0.0.0.0
+
+(node:71311) [DEP_WEBPACK_DEV_SERVER_ON_AFTER_SETUP_MIDDLEWARE] DeprecationWarning: 'onAfterSetupMiddleware' option is deprecated. Please use the 'setupMiddlewares' option.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:71311) [DEP_WEBPACK_DEV_SERVER_ON_BEFORE_SETUP_MIDDLEWARE] DeprecationWarning: 'onBeforeSetupMiddleware' option is deprecated. Please use the 'setupMiddlewares' option.
+Starting the development server...
+
+Failed to compile.
+
+Module not found: Error: Can't resolve '../data/mockChatResponses' in '/home/darshan/wealthwise-ai/frontend/src/context'
+WARNING in [eslint] 
+src/components/Auth/LoginPage.jsx
+  Line 50:9:  'fillDemoCredentials' is assigned a value but never used  no-unused-vars
+
+src/components/Chatbot/Message.jsx
+  Line 2:26:  'TrendingUp' is defined but never used     no-unused-vars
+  Line 2:38:  'TrendingDown' is defined but never used   no-unused-vars
+  Line 2:52:  'AlertTriangle' is defined but never used  no-unused-vars
+  Line 2:67:  'CheckCircle' is defined but never used    no-unused-vars
+
+src/components/Dashboard/Dashboard.jsx
+  Line 48:9:  'invested' is assigned a value but never used  no-unused-vars
+
+src/components/Dashboard/PerformanceChart.jsx
+  Line 3:3:  'LineChart' is defined but never used  no-unused-vars
+  Line 4:3:  'Line' is defined but never used       no-unused-vars
+
+src/components/Dashboard/PortfolioChart.jsx
+  Line 2:52:  'Legend' is defined but never used  no-unused-vars
+
+src/components/Settings/Settings.jsx
+  Line 5:3:   'Mail' is defined but never used      no-unused-vars
+  Line 12:3:  'Calendar' is defined but never used  no-unused-vars
+
+src/context/AuthContext.jsx
+  Line 229:7:  'getBondName' is assigned a value but never used   no-unused-vars
+  Line 240:7:  'getStockName' is assigned a value but never used  no-unused-vars
+  Line 256:7:  'getETFName' is assigned a value but never used    no-unused-vars
+
+src/context/ChatContext.jsx
+  Line 16:11:  'currentUser' is assigned a value but never used  no-unused-vars
+
+ERROR in ./src/context/ChatContext.jsx 8:0-76
+Module not found: Error: Can't resolve '../data/mockChatResponses' in '/home/darshan/wealthwise-ai/frontend/src/context'
+
+webpack compiled with 1 error and 1 warning
+Compiling...
+Failed to compile.
+
+Module not found: Error: Can't resolve '../data/mockChatResponses' in '/home/darshan/wealthwise-ai/frontend/src/context'
+WARNING in [eslint] 
+src/components/Auth/LoginPage.jsx
+  Line 50:9:  'fillDemoCredentials' is assigned a value but never used  no-unused-vars
+
+src/components/Chatbot/Message.jsx
+  Line 2:26:  'TrendingUp' is defined but never used     no-unused-vars
+  Line 2:38:  'TrendingDown' is defined but never used   no-unused-vars
+  Line 2:52:  'AlertTriangle' is defined but never used  no-unused-vars
+  Line 2:67:  'CheckCircle' is defined but never used    no-unused-vars
+
+src/components/Dashboard/Dashboard.jsx
+  Line 48:9:  'invested' is assigned a value but never used  no-unused-vars
+
+src/components/Dashboard/PerformanceChart.jsx
+  Line 3:3:  'LineChart' is defined but never used  no-unused-vars
+  Line 4:3:  'Line' is defined but never used       no-unused-vars
+
+src/components/Dashboard/PortfolioChart.jsx
+  Line 2:52:  'Legend' is defined but never used  no-unused-vars
+
+src/components/Settings/Settings.jsx
+  Line 5:3:   'Mail' is defined but never used      no-unused-vars
+  Line 12:3:  'Calendar' is defined but never used  no-unused-vars
+
+src/context/AuthContext.jsx
+  Line 229:7:  'getBondName' is assigned a value but never used   no-unused-vars
+  Line 240:7:  'getStockName' is assigned a value but never used  no-unused-vars
+  Line 256:7:  'getETFName' is assigned a value but never used    no-unused-vars
+
+src/context/ChatContext.jsx
+  Line 16:11:  'currentUser' is assigned a value but never used  no-unused-vars
+
+ERROR in ./src/context/ChatContext.jsx 8:0-76
+Module not found: Error: Can't resolve '../data/mockChatResponses' in '/home/darshan/wealthwise-ai/frontend/src/context'
+
+webpack compiled with 1 error and 1 warning
+Compiling...
+Failed to compile.
+
+Module not found: Error: Can't resolve '../data/mockChatResponses' in '/home/darshan/wealthwise-ai/frontend/src/context'
+WARNING in [eslint] 
+src/components/Auth/LoginPage.jsx
+  Line 50:9:  'fillDemoCredentials' is assigned a value but never used  no-unused-vars
+
+src/components/Chatbot/Message.jsx
+  Line 2:26:  'TrendingUp' is defined but never used     no-unused-vars
+  Line 2:38:  'TrendingDown' is defined but never used   no-unused-vars
+  Line 2:52:  'AlertTriangle' is defined but never used  no-unused-vars
+  Line 2:67:  'CheckCircle' is defined but never used    no-unused-vars
+
+src/components/Dashboard/Dashboard.jsx
+  Line 48:9:  'invested' is assigned a value but never used  no-unused-vars
+
+src/components/Dashboard/PerformanceChart.jsx
+  Line 3:3:  'LineChart' is defined but never used  no-unused-vars
+  Line 4:3:  'Line' is defined but never used       no-unused-vars
+
+src/components/Dashboard/PortfolioChart.jsx
+  Line 2:52:  'Legend' is defined but never used  no-unused-vars
+
+src/components/Settings/Settings.jsx
+  Line 5:3:   'Mail' is defined but never used      no-unused-vars
+  Line 12:3:  'Calendar' is defined but never used  no-unused-vars
+
+src/context/AuthContext.jsx
+  Line 229:7:  'getBondName' is assigned a value but never used   no-unused-vars
+  Line 240:7:  'getStockName' is assigned a value but never used  no-unused-vars
+  Line 256:7:  'getETFName' is assigned a value but never used    no-unused-vars
+
+src/context/ChatContext.jsx
+  Line 16:11:  'currentUser' is assigned a value but never used  no-unused-vars
+
+ERROR in ./src/context/ChatContext.jsx 8:0-76
+Module not found: Error: Can't resolve '../data/mockChatResponses' in '/home/darshan/wealthwise-ai/frontend/src/context'
+
+webpack compiled with 1 error and 1 warning
+Compiling...
+Failed to compile.
+
+Module not found: Error: Can't resolve '../data/mockChatResponses' in '/home/darshan/wealthwise-ai/frontend/src/context'
+WARNING in [eslint] 
+src/components/Auth/LoginPage.jsx
+  Line 50:9:  'fillDemoCredentials' is assigned a value but never used  no-unused-vars
+
+src/components/Chatbot/Message.jsx
+  Line 2:26:  'TrendingUp' is defined but never used     no-unused-vars
+  Line 2:38:  'TrendingDown' is defined but never used   no-unused-vars
+  Line 2:52:  'AlertTriangle' is defined but never used  no-unused-vars
+  Line 2:67:  'CheckCircle' is defined but never used    no-unused-vars
+
+src/components/Dashboard/Dashboard.jsx
+  Line 48:9:  'invested' is assigned a value but never used  no-unused-vars
+
+src/components/Dashboard/PerformanceChart.jsx
+  Line 3:3:  'LineChart' is defined but never used  no-unused-vars
+  Line 4:3:  'Line' is defined but never used       no-unused-vars
+
+src/components/Dashboard/PortfolioChart.jsx
+  Line 2:52:  'Legend' is defined but never used  no-unused-vars
+
+src/components/Settings/Settings.jsx
+  Line 5:3:   'Mail' is defined but never used      no-unused-vars
+  Line 12:3:  'Calendar' is defined but never used  no-unused-vars
+
+src/context/AuthContext.jsx
+  Line 229:7:  'getBondName' is assigned a value but never used   no-unused-vars
+  Line 240:7:  'getStockName' is assigned a value but never used  no-unused-vars
+  Line 256:7:  'getETFName' is assigned a value but never used    no-unused-vars
+
+src/context/ChatContext.jsx
+  Line 16:11:  'currentUser' is assigned a value but never used  no-unused-vars
+
+ERROR in ./src/context/ChatContext.jsx 8:0-76
+Module not found: Error: Can't resolve '../data/mockChatResponses' in '/home/darshan/wealthwise-ai/frontend/src/context'
+
+webpack compiled with 1 error and 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/components/Auth/LoginPage.jsx
+  Line 50:9:  'fillDemoCredentials' is assigned a value but never used  no-unused-vars
+
+src/components/Chatbot/Message.jsx
+  Line 2:26:  'TrendingUp' is defined but never used     no-unused-vars
+  Line 2:38:  'TrendingDown' is defined but never used   no-unused-vars
+  Line 2:52:  'AlertTriangle' is defined but never used  no-unused-vars
+  Line 2:67:  'CheckCircle' is defined but never used    no-unused-vars
+
+src/components/Dashboard/Dashboard.jsx
+  Line 48:9:  'invested' is assigned a value but never used  no-unused-vars
+
+src/components/Dashboard/PerformanceChart.jsx
+  Line 3:3:  'LineChart' is defined but never used  no-unused-vars
+  Line 4:3:  'Line' is defined but never used       no-unused-vars
+
+src/components/Dashboard/PortfolioChart.jsx
+  Line 2:52:  'Legend' is defined but never used  no-unused-vars
+
+src/components/Settings/Settings.jsx
+  Line 5:3:   'Mail' is defined but never used      no-unused-vars
+  Line 12:3:  'Calendar' is defined but never used  no-unused-vars
+
+src/context/AuthContext.jsx
+  Line 229:7:  'getBondName' is assigned a value but never used   no-unused-vars
+  Line 240:7:  'getStockName' is assigned a value but never used  no-unused-vars
+  Line 256:7:  'getETFName' is assigned a value but never used    no-unused-vars
+
+src/context/ChatContext.jsx
+  Line 16:11:  'currentUser' is assigned a value but never used  no-unused-vars
+
+src/data/mockChatResponses.js
+  Line 39:39:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 40:38:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/components/Auth/LoginPage.jsx
+  Line 50:9:  'fillDemoCredentials' is assigned a value but never used  no-unused-vars
+
+src/components/Chatbot/Message.jsx
+  Line 2:26:  'TrendingUp' is defined but never used     no-unused-vars
+  Line 2:38:  'TrendingDown' is defined but never used   no-unused-vars
+  Line 2:52:  'AlertTriangle' is defined but never used  no-unused-vars
+  Line 2:67:  'CheckCircle' is defined but never used    no-unused-vars
+
+src/components/Dashboard/Dashboard.jsx
+  Line 48:9:  'invested' is assigned a value but never used  no-unused-vars
+
+src/components/Dashboard/PerformanceChart.jsx
+  Line 3:3:  'LineChart' is defined but never used  no-unused-vars
+  Line 4:3:  'Line' is defined but never used       no-unused-vars
+
+src/components/Dashboard/PortfolioChart.jsx
+  Line 2:52:  'Legend' is defined but never used  no-unused-vars
+
+src/components/Settings/Settings.jsx
+  Line 5:3:   'Mail' is defined but never used      no-unused-vars
+  Line 12:3:  'Calendar' is defined but never used  no-unused-vars
+
+src/context/AuthContext.jsx
+  Line 229:7:  'getBondName' is assigned a value but never used   no-unused-vars
+  Line 240:7:  'getStockName' is assigned a value but never used  no-unused-vars
+  Line 256:7:  'getETFName' is assigned a value but never used    no-unused-vars
+
+src/context/ChatContext.jsx
+  Line 16:11:  'currentUser' is assigned a value but never used  no-unused-vars
+
+src/data/mockChatResponses.js
+  Line 39:39:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 40:38:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/components/Auth/LoginPage.jsx
+  Line 50:9:  'fillDemoCredentials' is assigned a value but never used  no-unused-vars
+
+src/components/Chatbot/Message.jsx
+  Line 2:26:  'TrendingUp' is defined but never used     no-unused-vars
+  Line 2:38:  'TrendingDown' is defined but never used   no-unused-vars
+  Line 2:52:  'AlertTriangle' is defined but never used  no-unused-vars
+  Line 2:67:  'CheckCircle' is defined but never used    no-unused-vars
+
+src/components/Dashboard/Dashboard.jsx
+  Line 48:9:  'invested' is assigned a value but never used  no-unused-vars
+
+src/components/Dashboard/PerformanceChart.jsx
+  Line 3:3:  'LineChart' is defined but never used  no-unused-vars
+  Line 4:3:  'Line' is defined but never used       no-unused-vars
+
+src/components/Dashboard/PortfolioChart.jsx
+  Line 2:52:  'Legend' is defined but never used  no-unused-vars
+
+src/components/Settings/Settings.jsx
+  Line 5:3:   'Mail' is defined but never used      no-unused-vars
+  Line 12:3:  'Calendar' is defined but never used  no-unused-vars
+
+src/context/AuthContext.jsx
+  Line 229:7:  'getBondName' is assigned a value but never used   no-unused-vars
+  Line 240:7:  'getStockName' is assigned a value but never used  no-unused-vars
+  Line 256:7:  'getETFName' is assigned a value but never used    no-unused-vars
+
+src/context/ChatContext.jsx
+  Line 16:11:  'currentUser' is assigned a value but never used  no-unused-vars
+
+src/data/mockChatResponses.js
+  Line 39:39:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 40:38:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/components/Auth/LoginPage.jsx
+  Line 50:9:  'fillDemoCredentials' is assigned a value but never used  no-unused-vars
+
+src/components/Chatbot/Message.jsx
+  Line 2:26:  'TrendingUp' is defined but never used     no-unused-vars
+  Line 2:38:  'TrendingDown' is defined but never used   no-unused-vars
+  Line 2:52:  'AlertTriangle' is defined but never used  no-unused-vars
+  Line 2:67:  'CheckCircle' is defined but never used    no-unused-vars
+
+src/components/Dashboard/Dashboard.jsx
+  Line 48:9:  'invested' is assigned a value but never used  no-unused-vars
+
+src/components/Dashboard/PerformanceChart.jsx
+  Line 3:3:  'LineChart' is defined but never used  no-unused-vars
+  Line 4:3:  'Line' is defined but never used       no-unused-vars
+
+src/components/Dashboard/PortfolioChart.jsx
+  Line 2:52:  'Legend' is defined but never used  no-unused-vars
+
+src/components/Settings/Settings.jsx
+  Line 5:3:   'Mail' is defined but never used      no-unused-vars
+  Line 12:3:  'Calendar' is defined but never used  no-unused-vars
+
+src/context/AuthContext.jsx
+  Line 229:7:  'getBondName' is assigned a value but never used   no-unused-vars
+  Line 240:7:  'getStockName' is assigned a value but never used  no-unused-vars
+  Line 256:7:  'getETFName' is assigned a value but never used    no-unused-vars
+
+src/context/ChatContext.jsx
+  Line 16:11:  'currentUser' is assigned a value but never used  no-unused-vars
+
+src/data/mockChatResponses.js
+  Line 39:39:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 40:38:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/components/Auth/LoginPage.jsx
+  Line 50:9:  'fillDemoCredentials' is assigned a value but never used  no-unused-vars
+
+src/components/Chatbot/Message.jsx
+  Line 2:26:  'TrendingUp' is defined but never used     no-unused-vars
+  Line 2:38:  'TrendingDown' is defined but never used   no-unused-vars
+  Line 2:52:  'AlertTriangle' is defined but never used  no-unused-vars
+  Line 2:67:  'CheckCircle' is defined but never used    no-unused-vars
+
+src/components/Dashboard/Dashboard.jsx
+  Line 48:9:  'invested' is assigned a value but never used  no-unused-vars
+
+src/components/Dashboard/PerformanceChart.jsx
+  Line 3:3:  'LineChart' is defined but never used  no-unused-vars
+  Line 4:3:  'Line' is defined but never used       no-unused-vars
+
+src/components/Dashboard/PortfolioChart.jsx
+  Line 2:52:  'Legend' is defined but never used  no-unused-vars
+
+src/components/Settings/Settings.jsx
+  Line 5:3:   'Mail' is defined but never used      no-unused-vars
+  Line 12:3:  'Calendar' is defined but never used  no-unused-vars
+
+src/context/AuthContext.jsx
+  Line 229:7:  'getBondName' is assigned a value but never used   no-unused-vars
+  Line 240:7:  'getStockName' is assigned a value but never used  no-unused-vars
+  Line 256:7:  'getETFName' is assigned a value but never used    no-unused-vars
+
+src/context/ChatContext.jsx
+  Line 16:11:  'currentUser' is assigned a value but never used  no-unused-vars
+
+src/data/mockChatResponses.js
+  Line 39:39:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 40:38:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/components/Auth/LoginPage.jsx
+  Line 50:9:  'fillDemoCredentials' is assigned a value but never used  no-unused-vars
+
+src/components/Chatbot/Message.jsx
+  Line 2:26:  'TrendingUp' is defined but never used     no-unused-vars
+  Line 2:38:  'TrendingDown' is defined but never used   no-unused-vars
+  Line 2:52:  'AlertTriangle' is defined but never used  no-unused-vars
+  Line 2:67:  'CheckCircle' is defined but never used    no-unused-vars
+
+src/components/Dashboard/Dashboard.jsx
+  Line 48:9:  'invested' is assigned a value but never used  no-unused-vars
+
+src/components/Dashboard/PerformanceChart.jsx
+  Line 3:3:  'LineChart' is defined but never used  no-unused-vars
+  Line 4:3:  'Line' is defined but never used       no-unused-vars
+
+src/components/Dashboard/PortfolioChart.jsx
+  Line 2:52:  'Legend' is defined but never used  no-unused-vars
+
+src/components/Settings/Settings.jsx
+  Line 5:3:   'Mail' is defined but never used      no-unused-vars
+  Line 12:3:  'Calendar' is defined but never used  no-unused-vars
+
+src/context/AuthContext.jsx
+  Line 229:7:  'getBondName' is assigned a value but never used   no-unused-vars
+  Line 240:7:  'getStockName' is assigned a value but never used  no-unused-vars
+  Line 256:7:  'getETFName' is assigned a value but never used    no-unused-vars
+
+src/context/ChatContext.jsx
+  Line 16:11:  'currentUser' is assigned a value but never used  no-unused-vars
+
+src/data/mockChatResponses.js
+  Line 39:39:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 40:38:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/components/Auth/LoginPage.jsx
+  Line 50:9:  'fillDemoCredentials' is assigned a value but never used  no-unused-vars
+
+src/components/Chatbot/Message.jsx
+  Line 2:26:  'TrendingUp' is defined but never used     no-unused-vars
+  Line 2:38:  'TrendingDown' is defined but never used   no-unused-vars
+  Line 2:52:  'AlertTriangle' is defined but never used  no-unused-vars
+  Line 2:67:  'CheckCircle' is defined but never used    no-unused-vars
+
+src/components/Dashboard/Dashboard.jsx
+  Line 48:9:  'invested' is assigned a value but never used  no-unused-vars
+
+src/components/Dashboard/PerformanceChart.jsx
+  Line 3:3:  'LineChart' is defined but never used  no-unused-vars
+  Line 4:3:  'Line' is defined but never used       no-unused-vars
+
+src/components/Dashboard/PortfolioChart.jsx
+  Line 2:52:  'Legend' is defined but never used  no-unused-vars
+
+src/components/Settings/Settings.jsx
+  Line 5:3:   'Mail' is defined but never used      no-unused-vars
+  Line 12:3:  'Calendar' is defined but never used  no-unused-vars
+
+src/context/AuthContext.jsx
+  Line 229:7:  'getBondName' is assigned a value but never used   no-unused-vars
+  Line 240:7:  'getStockName' is assigned a value but never used  no-unused-vars
+  Line 256:7:  'getETFName' is assigned a value but never used    no-unused-vars
+
+src/context/ChatContext.jsx
+  Line 16:11:  'currentUser' is assigned a value but never used  no-unused-vars
+
+src/data/mockChatResponses.js
+  Line 39:39:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 40:38:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/components/Auth/LoginPage.jsx
+  Line 50:9:  'fillDemoCredentials' is assigned a value but never used  no-unused-vars
+
+src/components/Chatbot/Message.jsx
+  Line 2:26:  'TrendingUp' is defined but never used     no-unused-vars
+  Line 2:38:  'TrendingDown' is defined but never used   no-unused-vars
+  Line 2:52:  'AlertTriangle' is defined but never used  no-unused-vars
+  Line 2:67:  'CheckCircle' is defined but never used    no-unused-vars
+
+src/components/Dashboard/Dashboard.jsx
+  Line 48:9:  'invested' is assigned a value but never used  no-unused-vars
+
+src/components/Dashboard/PerformanceChart.jsx
+  Line 3:3:  'LineChart' is defined but never used  no-unused-vars
+  Line 4:3:  'Line' is defined but never used       no-unused-vars
+
+src/components/Dashboard/PortfolioChart.jsx
+  Line 2:52:  'Legend' is defined but never used  no-unused-vars
+
+src/components/Settings/Settings.jsx
+  Line 5:3:   'Mail' is defined but never used      no-unused-vars
+  Line 12:3:  'Calendar' is defined but never used  no-unused-vars
+
+src/context/AuthContext.jsx
+  Line 229:7:  'getBondName' is assigned a value but never used   no-unused-vars
+  Line 240:7:  'getStockName' is assigned a value but never used  no-unused-vars
+  Line 256:7:  'getETFName' is assigned a value but never used    no-unused-vars
+
+src/context/ChatContext.jsx
+  Line 16:11:  'currentUser' is assigned a value but never used  no-unused-vars
+
+src/data/mockChatResponses.js
+  Line 39:39:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 40:38:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/components/Auth/LoginPage.jsx
+  Line 50:9:  'fillDemoCredentials' is assigned a value but never used  no-unused-vars
+
+src/components/Chatbot/Message.jsx
+  Line 2:26:  'TrendingUp' is defined but never used     no-unused-vars
+  Line 2:38:  'TrendingDown' is defined but never used   no-unused-vars
+  Line 2:52:  'AlertTriangle' is defined but never used  no-unused-vars
+  Line 2:67:  'CheckCircle' is defined but never used    no-unused-vars
+
+src/components/Dashboard/Dashboard.jsx
+  Line 48:9:  'invested' is assigned a value but never used  no-unused-vars
+
+src/components/Dashboard/PerformanceChart.jsx
+  Line 3:3:  'LineChart' is defined but never used  no-unused-vars
+  Line 4:3:  'Line' is defined but never used       no-unused-vars
+
+src/components/Dashboard/PortfolioChart.jsx
+  Line 2:52:  'Legend' is defined but never used  no-unused-vars
+
+src/components/Settings/Settings.jsx
+  Line 5:3:   'Mail' is defined but never used      no-unused-vars
+  Line 12:3:  'Calendar' is defined but never used  no-unused-vars
+
+src/context/AuthContext.jsx
+  Line 229:7:  'getBondName' is assigned a value but never used   no-unused-vars
+  Line 240:7:  'getStockName' is assigned a value but never used  no-unused-vars
+  Line 256:7:  'getETFName' is assigned a value but never used    no-unused-vars
+
+src/context/ChatContext.jsx
+  Line 16:11:  'currentUser' is assigned a value but never used  no-unused-vars
+
+src/data/mockChatResponses.js
+  Line 39:39:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 40:38:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/components/Auth/LoginPage.jsx
+  Line 50:9:  'fillDemoCredentials' is assigned a value but never used  no-unused-vars
+
+src/components/Chatbot/Message.jsx
+  Line 2:26:  'TrendingUp' is defined but never used     no-unused-vars
+  Line 2:38:  'TrendingDown' is defined but never used   no-unused-vars
+  Line 2:52:  'AlertTriangle' is defined but never used  no-unused-vars
+  Line 2:67:  'CheckCircle' is defined but never used    no-unused-vars
+
+src/components/Dashboard/Dashboard.jsx
+  Line 48:9:  'invested' is assigned a value but never used  no-unused-vars
+
+src/components/Dashboard/PerformanceChart.jsx
+  Line 3:3:  'LineChart' is defined but never used  no-unused-vars
+  Line 4:3:  'Line' is defined but never used       no-unused-vars
+
+src/components/Dashboard/PortfolioChart.jsx
+  Line 2:52:  'Legend' is defined but never used  no-unused-vars
+
+src/components/Settings/Settings.jsx
+  Line 5:3:   'Mail' is defined but never used      no-unused-vars
+  Line 12:3:  'Calendar' is defined but never used  no-unused-vars
+
+src/context/AuthContext.jsx
+  Line 229:7:  'getBondName' is assigned a value but never used   no-unused-vars
+  Line 240:7:  'getStockName' is assigned a value but never used  no-unused-vars
+  Line 256:7:  'getETFName' is assigned a value but never used    no-unused-vars
+
+src/context/ChatContext.jsx
+  Line 16:11:  'currentUser' is assigned a value but never used  no-unused-vars
+
+src/data/mockChatResponses.js
+  Line 39:39:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 40:38:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/components/Auth/LoginPage.jsx
+  Line 50:9:  'fillDemoCredentials' is assigned a value but never used  no-unused-vars
+
+src/components/Chatbot/Message.jsx
+  Line 2:26:  'TrendingUp' is defined but never used     no-unused-vars
+  Line 2:38:  'TrendingDown' is defined but never used   no-unused-vars
+  Line 2:52:  'AlertTriangle' is defined but never used  no-unused-vars
+  Line 2:67:  'CheckCircle' is defined but never used    no-unused-vars
+
+src/components/Dashboard/Dashboard.jsx
+  Line 48:9:  'invested' is assigned a value but never used  no-unused-vars
+
+src/components/Dashboard/PerformanceChart.jsx
+  Line 3:3:  'LineChart' is defined but never used  no-unused-vars
+  Line 4:3:  'Line' is defined but never used       no-unused-vars
+
+src/components/Dashboard/PortfolioChart.jsx
+  Line 2:52:  'Legend' is defined but never used  no-unused-vars
+
+src/components/Settings/Settings.jsx
+  Line 5:3:   'Mail' is defined but never used      no-unused-vars
+  Line 12:3:  'Calendar' is defined but never used  no-unused-vars
+
+src/context/AuthContext.jsx
+  Line 229:7:  'getBondName' is assigned a value but never used   no-unused-vars
+  Line 240:7:  'getStockName' is assigned a value but never used  no-unused-vars
+  Line 256:7:  'getETFName' is assigned a value but never used    no-unused-vars
+
+src/context/ChatContext.jsx
+  Line 16:11:  'currentUser' is assigned a value but never used  no-unused-vars
+
+src/data/mockChatResponses.js
+  Line 39:39:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 40:38:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/components/Auth/LoginPage.jsx
+  Line 50:9:  'fillDemoCredentials' is assigned a value but never used  no-unused-vars
+
+src/components/Chatbot/Message.jsx
+  Line 2:26:  'TrendingUp' is defined but never used     no-unused-vars
+  Line 2:38:  'TrendingDown' is defined but never used   no-unused-vars
+  Line 2:52:  'AlertTriangle' is defined but never used  no-unused-vars
+  Line 2:67:  'CheckCircle' is defined but never used    no-unused-vars
+
+src/components/Dashboard/Dashboard.jsx
+  Line 48:9:  'invested' is assigned a value but never used  no-unused-vars
+
+src/components/Dashboard/PerformanceChart.jsx
+  Line 3:3:  'LineChart' is defined but never used  no-unused-vars
+  Line 4:3:  'Line' is defined but never used       no-unused-vars
+
+src/components/Dashboard/PortfolioChart.jsx
+  Line 2:52:  'Legend' is defined but never used  no-unused-vars
+
+src/components/Settings/Settings.jsx
+  Line 5:3:   'Mail' is defined but never used      no-unused-vars
+  Line 12:3:  'Calendar' is defined but never used  no-unused-vars
+
+src/context/AuthContext.jsx
+  Line 229:7:  'getBondName' is assigned a value but never used   no-unused-vars
+  Line 240:7:  'getStockName' is assigned a value but never used  no-unused-vars
+  Line 256:7:  'getETFName' is assigned a value but never used    no-unused-vars
+
+src/context/ChatContext.jsx
+  Line 16:11:  'currentUser' is assigned a value but never used  no-unused-vars
+
+src/data/mockChatResponses.js
+  Line 39:39:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 40:38:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/components/Auth/LoginPage.jsx
+  Line 50:9:  'fillDemoCredentials' is assigned a value but never used  no-unused-vars
+
+src/components/Chatbot/Message.jsx
+  Line 2:26:  'TrendingUp' is defined but never used     no-unused-vars
+  Line 2:38:  'TrendingDown' is defined but never used   no-unused-vars
+  Line 2:52:  'AlertTriangle' is defined but never used  no-unused-vars
+  Line 2:67:  'CheckCircle' is defined but never used    no-unused-vars
+
+src/components/Dashboard/Dashboard.jsx
+  Line 48:9:  'invested' is assigned a value but never used  no-unused-vars
+
+src/components/Dashboard/PerformanceChart.jsx
+  Line 3:3:  'LineChart' is defined but never used  no-unused-vars
+  Line 4:3:  'Line' is defined but never used       no-unused-vars
+
+src/components/Dashboard/PortfolioChart.jsx
+  Line 2:52:  'Legend' is defined but never used  no-unused-vars
+
+src/components/Settings/Settings.jsx
+  Line 5:3:   'Mail' is defined but never used      no-unused-vars
+  Line 12:3:  'Calendar' is defined but never used  no-unused-vars
+
+src/context/AuthContext.jsx
+  Line 229:7:  'getBondName' is assigned a value but never used   no-unused-vars
+  Line 240:7:  'getStockName' is assigned a value but never used  no-unused-vars
+  Line 256:7:  'getETFName' is assigned a value but never used    no-unused-vars
+
+src/context/ChatContext.jsx
+  Line 16:11:  'currentUser' is assigned a value but never used  no-unused-vars
+
+src/data/mockChatResponses.js
+  Line 39:39:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 40:38:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/components/Auth/LoginPage.jsx
+  Line 50:9:  'fillDemoCredentials' is assigned a value but never used  no-unused-vars
+
+src/components/Chatbot/Message.jsx
+  Line 2:26:  'TrendingUp' is defined but never used     no-unused-vars
+  Line 2:38:  'TrendingDown' is defined but never used   no-unused-vars
+  Line 2:52:  'AlertTriangle' is defined but never used  no-unused-vars
+  Line 2:67:  'CheckCircle' is defined but never used    no-unused-vars
+
+src/components/Dashboard/Dashboard.jsx
+  Line 48:9:  'invested' is assigned a value but never used  no-unused-vars
+
+src/components/Dashboard/PerformanceChart.jsx
+  Line 3:3:  'LineChart' is defined but never used  no-unused-vars
+  Line 4:3:  'Line' is defined but never used       no-unused-vars
+
+src/components/Dashboard/PortfolioChart.jsx
+  Line 2:52:  'Legend' is defined but never used  no-unused-vars
+
+src/components/Settings/Settings.jsx
+  Line 5:3:   'Mail' is defined but never used      no-unused-vars
+  Line 12:3:  'Calendar' is defined but never used  no-unused-vars
+
+src/context/AuthContext.jsx
+  Line 229:7:  'getBondName' is assigned a value but never used   no-unused-vars
+  Line 240:7:  'getStockName' is assigned a value but never used  no-unused-vars
+  Line 256:7:  'getETFName' is assigned a value but never used    no-unused-vars
+
+src/context/ChatContext.jsx
+  Line 16:11:  'currentUser' is assigned a value but never used  no-unused-vars
+
+src/data/mockChatResponses.js
+  Line 39:39:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 40:38:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/components/Auth/LoginPage.jsx
+  Line 50:9:  'fillDemoCredentials' is assigned a value but never used  no-unused-vars
+
+src/components/Chatbot/Message.jsx
+  Line 2:26:  'TrendingUp' is defined but never used     no-unused-vars
+  Line 2:38:  'TrendingDown' is defined but never used   no-unused-vars
+  Line 2:52:  'AlertTriangle' is defined but never used  no-unused-vars
+  Line 2:67:  'CheckCircle' is defined but never used    no-unused-vars
+
+src/components/Dashboard/Dashboard.jsx
+  Line 48:9:  'invested' is assigned a value but never used  no-unused-vars
+
+src/components/Dashboard/PerformanceChart.jsx
+  Line 3:3:  'LineChart' is defined but never used  no-unused-vars
+  Line 4:3:  'Line' is defined but never used       no-unused-vars
+
+src/components/Dashboard/PortfolioChart.jsx
+  Line 2:52:  'Legend' is defined but never used  no-unused-vars
+
+src/components/Settings/Settings.jsx
+  Line 5:3:   'Mail' is defined but never used      no-unused-vars
+  Line 12:3:  'Calendar' is defined but never used  no-unused-vars
+
+src/context/AuthContext.jsx
+  Line 229:7:  'getBondName' is assigned a value but never used   no-unused-vars
+  Line 240:7:  'getStockName' is assigned a value but never used  no-unused-vars
+  Line 256:7:  'getETFName' is assigned a value but never used    no-unused-vars
+
+src/context/ChatContext.jsx
+  Line 16:11:  'currentUser' is assigned a value but never used  no-unused-vars
+
+src/data/mockChatResponses.js
+  Line 39:39:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 40:38:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/components/Auth/LoginPage.jsx
+  Line 50:9:  'fillDemoCredentials' is assigned a value but never used  no-unused-vars
+
+src/components/Chatbot/Message.jsx
+  Line 2:26:  'TrendingUp' is defined but never used     no-unused-vars
+  Line 2:38:  'TrendingDown' is defined but never used   no-unused-vars
+  Line 2:52:  'AlertTriangle' is defined but never used  no-unused-vars
+  Line 2:67:  'CheckCircle' is defined but never used    no-unused-vars
+
+src/components/Dashboard/Dashboard.jsx
+  Line 48:9:  'invested' is assigned a value but never used  no-unused-vars
+
+src/components/Dashboard/PerformanceChart.jsx
+  Line 3:3:  'LineChart' is defined but never used  no-unused-vars
+  Line 4:3:  'Line' is defined but never used       no-unused-vars
+
+src/components/Dashboard/PortfolioChart.jsx
+  Line 2:52:  'Legend' is defined but never used  no-unused-vars
+
+src/components/Settings/Settings.jsx
+  Line 5:3:   'Mail' is defined but never used      no-unused-vars
+  Line 12:3:  'Calendar' is defined but never used  no-unused-vars
+
+src/context/AuthContext.jsx
+  Line 229:7:  'getBondName' is assigned a value but never used   no-unused-vars
+  Line 240:7:  'getStockName' is assigned a value but never used  no-unused-vars
+  Line 256:7:  'getETFName' is assigned a value but never used    no-unused-vars
+
+src/context/ChatContext.jsx
+  Line 16:11:  'currentUser' is assigned a value but never used  no-unused-vars
+
+src/data/mockChatResponses.js
+  Line 39:39:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 40:38:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/components/Auth/LoginPage.jsx
+  Line 50:9:  'fillDemoCredentials' is assigned a value but never used  no-unused-vars
+
+src/components/Chatbot/Message.jsx
+  Line 2:26:  'TrendingUp' is defined but never used     no-unused-vars
+  Line 2:38:  'TrendingDown' is defined but never used   no-unused-vars
+  Line 2:52:  'AlertTriangle' is defined but never used  no-unused-vars
+  Line 2:67:  'CheckCircle' is defined but never used    no-unused-vars
+
+src/components/Dashboard/Dashboard.jsx
+  Line 48:9:  'invested' is assigned a value but never used  no-unused-vars
+
+src/components/Dashboard/PerformanceChart.jsx
+  Line 3:3:  'LineChart' is defined but never used  no-unused-vars
+  Line 4:3:  'Line' is defined but never used       no-unused-vars
+
+src/components/Dashboard/PortfolioChart.jsx
+  Line 2:52:  'Legend' is defined but never used  no-unused-vars
+
+src/components/Settings/Settings.jsx
+  Line 5:3:   'Mail' is defined but never used      no-unused-vars
+  Line 12:3:  'Calendar' is defined but never used  no-unused-vars
+
+src/context/AuthContext.jsx
+  Line 229:7:  'getBondName' is assigned a value but never used   no-unused-vars
+  Line 240:7:  'getStockName' is assigned a value but never used  no-unused-vars
+  Line 256:7:  'getETFName' is assigned a value but never used    no-unused-vars
+
+src/context/ChatContext.jsx
+  Line 16:11:  'currentUser' is assigned a value but never used  no-unused-vars
+
+src/data/mockChatResponses.js
+  Line 39:39:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 40:38:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/components/Auth/LoginPage.jsx
+  Line 50:9:  'fillDemoCredentials' is assigned a value but never used  no-unused-vars
+
+src/components/Chatbot/Message.jsx
+  Line 2:26:  'TrendingUp' is defined but never used     no-unused-vars
+  Line 2:38:  'TrendingDown' is defined but never used   no-unused-vars
+  Line 2:52:  'AlertTriangle' is defined but never used  no-unused-vars
+  Line 2:67:  'CheckCircle' is defined but never used    no-unused-vars
+
+src/components/Dashboard/Dashboard.jsx
+  Line 48:9:  'invested' is assigned a value but never used  no-unused-vars
+
+src/components/Dashboard/PerformanceChart.jsx
+  Line 3:3:  'LineChart' is defined but never used  no-unused-vars
+  Line 4:3:  'Line' is defined but never used       no-unused-vars
+
+src/components/Dashboard/PortfolioChart.jsx
+  Line 2:52:  'Legend' is defined but never used  no-unused-vars
+
+src/components/Settings/Settings.jsx
+  Line 5:3:   'Mail' is defined but never used      no-unused-vars
+  Line 12:3:  'Calendar' is defined but never used  no-unused-vars
+
+src/context/AuthContext.jsx
+  Line 229:7:  'getBondName' is assigned a value but never used   no-unused-vars
+  Line 240:7:  'getStockName' is assigned a value but never used  no-unused-vars
+  Line 256:7:  'getETFName' is assigned a value but never used    no-unused-vars
+
+src/context/ChatContext.jsx
+  Line 16:11:  'currentUser' is assigned a value but never used  no-unused-vars
+
+src/data/mockChatResponses.js
+  Line 39:39:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 40:38:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/components/Auth/LoginPage.jsx
+  Line 50:9:  'fillDemoCredentials' is assigned a value but never used  no-unused-vars
+
+src/components/Chatbot/Message.jsx
+  Line 2:26:  'TrendingUp' is defined but never used     no-unused-vars
+  Line 2:38:  'TrendingDown' is defined but never used   no-unused-vars
+  Line 2:52:  'AlertTriangle' is defined but never used  no-unused-vars
+  Line 2:67:  'CheckCircle' is defined but never used    no-unused-vars
+
+src/components/Dashboard/Dashboard.jsx
+  Line 48:9:  'invested' is assigned a value but never used  no-unused-vars
+
+src/components/Dashboard/PerformanceChart.jsx
+  Line 3:3:  'LineChart' is defined but never used  no-unused-vars
+  Line 4:3:  'Line' is defined but never used       no-unused-vars
+
+src/components/Dashboard/PortfolioChart.jsx
+  Line 2:52:  'Legend' is defined but never used  no-unused-vars
+
+src/components/Settings/Settings.jsx
+  Line 5:3:   'Mail' is defined but never used      no-unused-vars
+  Line 12:3:  'Calendar' is defined but never used  no-unused-vars
+
+src/context/AuthContext.jsx
+  Line 229:7:  'getBondName' is assigned a value but never used   no-unused-vars
+  Line 240:7:  'getStockName' is assigned a value but never used  no-unused-vars
+  Line 256:7:  'getETFName' is assigned a value but never used    no-unused-vars
+
+src/context/ChatContext.jsx
+  Line 16:11:  'currentUser' is assigned a value but never used  no-unused-vars
+
+src/data/mockChatResponses.js
+  Line 39:39:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 40:38:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/components/Auth/LoginPage.jsx
+  Line 50:9:  'fillDemoCredentials' is assigned a value but never used  no-unused-vars
+
+src/components/Chatbot/Message.jsx
+  Line 2:26:  'TrendingUp' is defined but never used     no-unused-vars
+  Line 2:38:  'TrendingDown' is defined but never used   no-unused-vars
+  Line 2:52:  'AlertTriangle' is defined but never used  no-unused-vars
+  Line 2:67:  'CheckCircle' is defined but never used    no-unused-vars
+
+src/components/Dashboard/Dashboard.jsx
+  Line 48:9:  'invested' is assigned a value but never used  no-unused-vars
+
+src/components/Dashboard/PerformanceChart.jsx
+  Line 3:3:  'LineChart' is defined but never used  no-unused-vars
+  Line 4:3:  'Line' is defined but never used       no-unused-vars
+
+src/components/Dashboard/PortfolioChart.jsx
+  Line 2:52:  'Legend' is defined but never used  no-unused-vars
+
+src/components/Settings/Settings.jsx
+  Line 5:3:   'Mail' is defined but never used      no-unused-vars
+  Line 12:3:  'Calendar' is defined but never used  no-unused-vars
+
+src/context/AuthContext.jsx
+  Line 229:7:  'getBondName' is assigned a value but never used   no-unused-vars
+  Line 240:7:  'getStockName' is assigned a value but never used  no-unused-vars
+  Line 256:7:  'getETFName' is assigned a value but never used    no-unused-vars
+
+src/context/ChatContext.jsx
+  Line 16:11:  'currentUser' is assigned a value but never used  no-unused-vars
+
+src/data/mockChatResponses.js
+  Line 39:39:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 40:38:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/components/Auth/LoginPage.jsx
+  Line 50:9:  'fillDemoCredentials' is assigned a value but never used  no-unused-vars
+
+src/components/Chatbot/Message.jsx
+  Line 2:26:  'TrendingUp' is defined but never used     no-unused-vars
+  Line 2:38:  'TrendingDown' is defined but never used   no-unused-vars
+  Line 2:52:  'AlertTriangle' is defined but never used  no-unused-vars
+  Line 2:67:  'CheckCircle' is defined but never used    no-unused-vars
+
+src/components/Dashboard/Dashboard.jsx
+  Line 48:9:  'invested' is assigned a value but never used  no-unused-vars
+
+src/components/Dashboard/PerformanceChart.jsx
+  Line 3:3:  'LineChart' is defined but never used  no-unused-vars
+  Line 4:3:  'Line' is defined but never used       no-unused-vars
+
+src/components/Dashboard/PortfolioChart.jsx
+  Line 2:52:  'Legend' is defined but never used  no-unused-vars
+
+src/components/Settings/Settings.jsx
+  Line 5:3:   'Mail' is defined but never used      no-unused-vars
+  Line 12:3:  'Calendar' is defined but never used  no-unused-vars
+
+src/context/AuthContext.jsx
+  Line 229:7:  'getBondName' is assigned a value but never used   no-unused-vars
+  Line 240:7:  'getStockName' is assigned a value but never used  no-unused-vars
+  Line 256:7:  'getETFName' is assigned a value but never used    no-unused-vars
+
+src/context/ChatContext.jsx
+  Line 16:11:  'currentUser' is assigned a value but never used  no-unused-vars
+
+src/data/mockChatResponses.js
+  Line 39:39:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 40:38:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/components/Auth/LoginPage.jsx
+  Line 50:9:  'fillDemoCredentials' is assigned a value but never used  no-unused-vars
+
+src/components/Chatbot/Message.jsx
+  Line 2:26:  'TrendingUp' is defined but never used     no-unused-vars
+  Line 2:38:  'TrendingDown' is defined but never used   no-unused-vars
+  Line 2:52:  'AlertTriangle' is defined but never used  no-unused-vars
+  Line 2:67:  'CheckCircle' is defined but never used    no-unused-vars
+
+src/components/Dashboard/Dashboard.jsx
+  Line 48:9:  'invested' is assigned a value but never used  no-unused-vars
+
+src/components/Dashboard/PerformanceChart.jsx
+  Line 3:3:  'LineChart' is defined but never used  no-unused-vars
+  Line 4:3:  'Line' is defined but never used       no-unused-vars
+
+src/components/Dashboard/PortfolioChart.jsx
+  Line 2:52:  'Legend' is defined but never used  no-unused-vars
+
+src/components/Settings/Settings.jsx
+  Line 5:3:   'Mail' is defined but never used      no-unused-vars
+  Line 12:3:  'Calendar' is defined but never used  no-unused-vars
+
+src/context/AuthContext.jsx
+  Line 229:7:  'getBondName' is assigned a value but never used   no-unused-vars
+  Line 240:7:  'getStockName' is assigned a value but never used  no-unused-vars
+  Line 256:7:  'getETFName' is assigned a value but never used    no-unused-vars
+
+src/context/ChatContext.jsx
+  Line 16:11:  'currentUser' is assigned a value but never used  no-unused-vars
+
+src/data/mockChatResponses.js
+  Line 39:39:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 40:38:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+webpack compiled with 1 warning
