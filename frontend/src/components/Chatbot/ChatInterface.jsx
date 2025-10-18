@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { useChat } from '../../context/ChatContext';
+import { getQBusinessService } from '../../services/qbusinessService';
 import { 
   Send, 
-  Sparkles, 
   TrendingUp, 
   BarChart3, 
   Shield, 
@@ -11,17 +10,20 @@ import {
   Loader2,
   AlertCircle,
   RefreshCw,
-  MessageSquare
+  Bot,
+  FileText
 } from 'lucide-react';
 import Message from './Message';
-import FollowUpChips from './FollowUpChips';
 
 const ChatInterface = () => {
   const { currentUser, portfolio } = useAuth();
-  const { messages, sendMessage, isTyping, clearChat } = useChat();
   const [inputValue, setInputValue] = useState('');
+  const [messages, setMessages] = useState([]);
+  const [isTyping, setIsTyping] = useState(false);
+  const [error, setError] = useState(null);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+  const qBusinessService = getQBusinessService();
 
   // Quick action queries
   const quickActions = [
@@ -60,29 +62,86 @@ const ChatInterface = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (inputValue.trim() && !isTyping) {
-      sendMessage(inputValue.trim());
+      await handleQBusinessMessage(inputValue.trim());
       setInputValue('');
+    }
+  };
+
+  const handleQBusinessMessage = async (query) => {
+    // Clear any previous errors
+    setError(null);
+
+    // Add user message
+    const userMessage = {
+      role: 'user',
+      content: query,
+      timestamp: Date.now()
+    };
+    setMessages(prev => [...prev, userMessage]);
+    setIsTyping(true);
+
+    try {
+      const response = await qBusinessService.sendMessage(
+        query,
+        currentUser?.email || 'user@wealthwise.com'
+      );
+
+      if (response.success) {
+        const assistantMessage = {
+          role: 'assistant',
+          content: response.message || 'No response received',
+          timestamp: Date.now(),
+          agent: 'Q Business',
+          sources: response.sources || []
+        };
+        setMessages(prev => [...prev, assistantMessage]);
+      } else {
+        // Handle API error
+        const errorMessage = {
+          role: 'assistant',
+          content: response.message || 'Sorry, I encountered an error. Please try again.',
+          timestamp: Date.now(),
+          agent: 'Q Business',
+          isError: true
+        };
+        setMessages(prev => [...prev, errorMessage]);
+        setError(response.error);
+      }
+    } catch (error) {
+      console.error('Q Business error:', error);
+      const errorMessage = {
+        role: 'assistant',
+        content: 'Sorry, I encountered an error connecting to Q Business. Please ensure the backend is running.',
+        timestamp: Date.now(),
+        agent: 'Q Business',
+        isError: true
+      };
+      setMessages(prev => [...prev, errorMessage]);
+      setError(error.message);
+    } finally {
+      setIsTyping(false);
     }
   };
 
   const handleQuickAction = (query) => {
     if (!isTyping) {
-      sendMessage(query);
-    }
-  };
-
-  const handleFollowUpClick = (query) => {
-    if (!isTyping) {
-      sendMessage(query);
+      setInputValue(query);
+      // Auto-submit after a brief delay
+      setTimeout(() => {
+        handleQBusinessMessage(query);
+        setInputValue('');
+      }, 100);
     }
   };
 
   const handleClearChat = () => {
     if (window.confirm('Are you sure you want to clear the chat history?')) {
-      clearChat();
+      setMessages([]);
+      setError(null);
+      qBusinessService.startNewConversation();
       setInputValue('');
     }
   };
@@ -90,25 +149,54 @@ const ChatInterface = () => {
   return (
     <div className="flex flex-col h-full bg-gray-50">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
-            <Sparkles className="w-6 h-6 text-white" />
+      <div className="bg-white border-b border-gray-200 px-6 py-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg flex items-center justify-center">
+              <Bot className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900">AI Investment Advisor</h2>
+              <p className="text-sm text-gray-500">Ask me anything about your investments</p>
+            </div>
           </div>
-          <div>
-            <h2 className="text-lg font-semibold text-gray-900">AI Investment Advisor</h2>
-            <p className="text-sm text-gray-500">Ask me anything about your investments</p>
+          
+          <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-2 px-3 py-1.5 bg-purple-50 text-purple-700 rounded-lg border border-purple-200">
+              <Bot className="w-4 h-4" />
+              <span className="text-sm font-medium">Q Business</span>
+              <span className="px-2 py-0.5 bg-purple-100 text-purple-700 text-xs rounded-full">
+                📄 Docs
+              </span>
+            </div>
+            
+            {messages.length > 0 && (
+              <button
+                onClick={handleClearChat}
+                className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <RefreshCw className="w-4 h-4" />
+                <span>Clear Chat</span>
+              </button>
+            )}
           </div>
         </div>
-        
-        {messages.length > 0 && (
-          <button
-            onClick={handleClearChat}
-            className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <RefreshCw className="w-4 h-4" />
-            <span>Clear Chat</span>
-          </button>
+
+        {/* Error Banner */}
+        {error && (
+          <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start space-x-2">
+            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="text-sm font-medium text-red-900">Connection Error</p>
+              <p className="text-xs text-red-700 mt-1">{error}</p>
+            </div>
+            <button
+              onClick={() => setError(null)}
+              className="text-red-400 hover:text-red-600"
+            >
+              ×
+            </button>
+          </div>
         )}
       </div>
 
@@ -117,15 +205,17 @@ const ChatInterface = () => {
         {messages.length === 0 ? (
           // Empty State
           <div className="h-full flex flex-col items-center justify-center text-center px-4">
-            <div className="w-20 h-20 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-full flex items-center justify-center mb-6">
-              <MessageSquare className="w-10 h-10 text-indigo-600" />
+            <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-indigo-100 rounded-full flex items-center justify-center mb-6">
+              <Bot className="w-10 h-10 text-purple-600" />
             </div>
             <h3 className="text-2xl font-bold text-gray-900 mb-3">
               Welcome back, {currentUser?.name || 'Investor'}!
             </h3>
-            <p className="text-gray-600 mb-8 max-w-md">
-              I'm your AI investment advisor. Ask me about portfolio analysis, market trends, 
-              recommendations, or any investment-related questions.
+            <p className="text-gray-600 mb-2 max-w-md">
+              I'm Amazon Q Business, trained on your company's documents and data. Ask me about your indexed portfolio documents, strategies, and specific holdings.
+            </p>
+            <p className="text-sm text-gray-500 mb-8">
+              💡 I can search through your uploaded documents and provide specific insights.
             </p>
 
             {/* Quick Actions */}
@@ -136,10 +226,10 @@ const ChatInterface = () => {
                   <button
                     key={index}
                     onClick={() => handleQuickAction(action.query)}
-                    className={`flex items-center space-x-3 p-4 bg-white border-2 border-gray-200 rounded-xl hover:border-${action.color}-500 hover:bg-${action.color}-50 transition-all group`}
+                    className="flex items-center space-x-3 p-4 bg-white border-2 border-gray-200 rounded-xl hover:border-purple-500 hover:bg-purple-50 transition-all group"
                   >
-                    <div className={`w-10 h-10 bg-${action.color}-100 rounded-lg flex items-center justify-center group-hover:bg-${action.color}-200 transition-colors`}>
-                      <action.icon className={`w-5 h-5 text-${action.color}-600`} />
+                    <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center group-hover:bg-purple-200 transition-colors">
+                      <action.icon className="w-5 h-5 text-purple-600" />
                     </div>
                     <div className="flex-1 text-left">
                       <p className="font-medium text-gray-900">{action.label}</p>
@@ -149,29 +239,6 @@ const ChatInterface = () => {
                 ))}
               </div>
             </div>
-
-            {/* Portfolio Context */}
-            {portfolio && (
-              <div className="mt-8 p-4 bg-indigo-50 rounded-lg border border-indigo-100 max-w-md">
-                <p className="text-sm text-indigo-900 font-medium mb-2">
-                  📊 Your Portfolio at a Glance
-                </p>
-                <div className="grid grid-cols-2 gap-3 text-sm">
-                  <div>
-                    <p className="text-indigo-600">Total Value</p>
-                    <p className="font-semibold text-indigo-900">
-                      ${portfolio.totalValue?.toLocaleString()}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-indigo-600">Risk Score</p>
-                    <p className="font-semibold text-indigo-900">
-                      {portfolio.riskScore}/10
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         ) : (
           // Messages
@@ -183,27 +250,16 @@ const ChatInterface = () => {
             {/* Typing Indicator */}
             {isTyping && (
               <div className="flex items-start space-x-3">
-                <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
-                  <Sparkles className="w-4 h-4 text-white" />
+                <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center flex-shrink-0">
+                  <Bot className="w-4 h-4 text-white" />
                 </div>
                 <div className="bg-white rounded-2xl rounded-tl-none px-4 py-3 shadow-sm border border-gray-200">
                   <div className="flex items-center space-x-2">
-                    <Loader2 className="w-4 h-4 text-indigo-600 animate-spin" />
-                    <span className="text-sm text-gray-600">Analyzing...</span>
+                    <Loader2 className="w-4 h-4 text-purple-600 animate-spin" />
+                    <span className="text-sm text-gray-600">Searching documents...</span>
                   </div>
                 </div>
               </div>
-            )}
-
-            {/* Follow-up Chips */}
-            {messages.length > 0 && 
-             messages[messages.length - 1]?.role === 'assistant' && 
-             messages[messages.length - 1]?.followUp && 
-             !isTyping && (
-              <FollowUpChips 
-                followUp={messages[messages.length - 1].followUp}
-                onChipClick={handleFollowUpClick}
-              />
             )}
 
             <div ref={messagesEndRef} />
@@ -214,10 +270,12 @@ const ChatInterface = () => {
       {/* Input Area */}
       <div className="bg-white border-t border-gray-200 px-6 py-4">
         {/* Context Indicator */}
-        {portfolio && messages.length > 0 && (
+        {messages.length > 0 && qBusinessService.getConversationId() && (
           <div className="mb-3 flex items-center space-x-2 text-xs text-gray-500">
-            <AlertCircle className="w-3 h-3" />
-            <span>I have context of your portfolio and previous conversation</span>
+            <FileText className="w-3 h-3" />
+            <span>
+              Conversation ID: {qBusinessService.getConversationId()?.substring(0, 8)}...
+            </span>
           </div>
         )}
 
@@ -233,8 +291,8 @@ const ChatInterface = () => {
                   handleSubmit(e);
                 }
               }}
-              placeholder="Ask about portfolio analysis, market trends, recommendations..."
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none resize-none"
+              placeholder="Ask about your documents, holdings, or strategies..."
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all outline-none resize-none"
               rows="1"
               style={{
                 minHeight: '48px',
@@ -246,7 +304,7 @@ const ChatInterface = () => {
           <button
             type="submit"
             disabled={!inputValue.trim() || isTyping}
-            className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-medium hover:from-indigo-700 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 shadow-lg hover:shadow-xl"
+            className="px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-medium hover:from-purple-700 hover:to-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 shadow-lg hover:shadow-xl"
           >
             {isTyping ? (
               <Loader2 className="w-5 h-5 animate-spin" />
@@ -261,11 +319,11 @@ const ChatInterface = () => {
         {messages.length === 0 && (
           <div className="mt-3 flex flex-wrap gap-2">
             <span className="text-xs text-gray-500">Try asking:</span>
-            {['Portfolio analysis', 'Market trends', 'Rebalancing'].map((tip, index) => (
+            {['What documents do I have?', 'Search for stock analysis', 'Find bond information'].map((tip, index) => (
               <button
                 key={index}
                 onClick={() => setInputValue(tip)}
-                className="text-xs px-3 py-1 bg-gray-100 text-gray-600 rounded-full hover:bg-gray-200 transition-colors"
+                className="text-xs px-3 py-1 bg-purple-50 text-purple-600 rounded-full hover:bg-purple-100 transition-colors"
               >
                 {tip}
               </button>
