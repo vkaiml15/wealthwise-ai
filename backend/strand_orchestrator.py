@@ -1,9 +1,3 @@
-"""
-Strand Orchestrator Agent - AWS Bedrock Version
-
-Modified to use AWS Bedrock instead of Anthropic API
-"""
-
 import os
 from typing import Dict, Any, Optional, List
 from anthropic import AnthropicBedrock

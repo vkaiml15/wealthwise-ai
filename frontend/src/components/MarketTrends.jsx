@@ -10,7 +10,7 @@ import {
   Info,
   AlertCircle,
   DollarSign,
-  Percent
+  Clock
 } from 'lucide-react';
 import {
   BarChart,
@@ -22,23 +22,23 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  Area,
-  AreaChart
+  ResponsiveContainer
 } from 'recharts';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL ;
+const API_BASE_URL = process.env.REACT_APP_API_URL;
+
+// Cache duration: 2 minutes (market data changes frequently)
+const CACHE_DURATION = 2 * 60 * 1000;
 
 const MarketTrends = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [marketData, setMarketData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [timeframe, setTimeframe] = useState('1M');
+  const [lastFetched, setLastFetched] = useState(null);
+  const [isCached, setIsCached] = useState(false);
   
-  // Get user email from localStorage (stored as currentUser object)
+  // Get user email from localStorage
   const getUserEmail = () => {
     try {
       const currentUser = localStorage.getItem('currentUser');
@@ -56,17 +56,51 @@ const MarketTrends = () => {
 
   useEffect(() => {
     if (userEmail) {
-      fetchMarketData();
+      loadFromCacheOrFetch();
     } else {
       setLoading(false);
       setError('User not logged in');
     }
   }, [userEmail]);
 
-  const fetchMarketData = async () => {
+  const loadFromCacheOrFetch = () => {
+    const cacheKey = `market_trends_${userEmail}`;
+    const cached = localStorage.getItem(cacheKey);
+    
+    if (cached) {
+      try {
+        const { data, timestamp } = JSON.parse(cached);
+        const age = Date.now() - timestamp;
+        
+        // If cache is less than 2 minutes old, use it
+        if (age < CACHE_DURATION) {
+          console.log('✅ Loading market trends from cache (age:', Math.round(age / 1000), 'seconds)');
+          setMarketData(data);
+          setLastFetched(new Date(timestamp));
+          setIsCached(true);
+          setLoading(false);
+          return;
+        } else {
+          console.log('⏰ Market trends cache expired, fetching fresh data');
+        }
+      } catch (e) {
+        console.error('Cache parse error:', e);
+      }
+    }
+    
+    // No valid cache, fetch fresh data
+    fetchMarketData();
+  };
+
+  const fetchMarketData = async (forceRefresh = false) => {
+    if (!forceRefresh && isCached && marketData) {
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
+      setIsCached(false);
       
       const response = await fetch(`${API_BASE_URL}/api/portfolio/${userEmail}/market-report`);
       
@@ -78,6 +112,16 @@ const MarketTrends = () => {
       
       if (data.success) {
         setMarketData(data);
+        setLastFetched(new Date());
+        
+        // Save to cache
+        const cacheKey = `market_trends_${userEmail}`;
+        localStorage.setItem(cacheKey, JSON.stringify({
+          data,
+          timestamp: Date.now()
+        }));
+        
+        console.log('💾 Market trends saved to cache');
       } else {
         throw new Error(data.error || 'Failed to load market data');
       }
@@ -90,9 +134,29 @@ const MarketTrends = () => {
   };
 
   const handleRefresh = async () => {
+    console.log('🔄 Manual refresh triggered');
     setIsRefreshing(true);
-    await fetchMarketData();
+    await fetchMarketData(true);
     setIsRefreshing(false);
+  };
+
+  // Format last fetched time
+  const getLastFetchedText = () => {
+    if (!lastFetched) return '';
+    
+    const now = Date.now();
+    const diff = now - lastFetched.getTime();
+    const seconds = Math.floor(diff / 1000);
+    const minutes = Math.floor(seconds / 60);
+    
+    if (seconds < 30) return 'Just now';
+    if (seconds < 60) return `${seconds} seconds ago`;
+    if (minutes === 1) return '1 minute ago';
+    if (minutes < 60) return `${minutes} minutes ago`;
+    
+    const hours = Math.floor(minutes / 60);
+    if (hours === 1) return '1 hour ago';
+    return `${hours} hours ago`;
   };
 
   if (loading) {
@@ -100,7 +164,12 @@ const MarketTrends = () => {
       <div className="flex items-center justify-center h-96">
         <div className="text-center">
           <RefreshCw className="w-12 h-12 text-indigo-600 animate-spin mx-auto mb-4" />
-          <p className="text-gray-600">Loading market analysis...</p>
+          <p className="text-gray-600 font-medium">
+            {isCached ? 'Loading from cache...' : 'Loading market analysis...'}
+          </p>
+          {!isCached && (
+            <p className="text-sm text-gray-500 mt-2">Fetching live market data</p>
+          )}
         </div>
       </div>
     );
@@ -238,7 +307,14 @@ const MarketTrends = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Market Trends</h1>
-          <p className="text-gray-600 mt-1">Portfolio performance and market analysis</p>
+          <p className="text-gray-600 mt-1">
+            Portfolio performance and market analysis
+            {lastFetched && (
+              <span className="ml-3 text-gray-500 text-sm">
+                • Updated {getLastFetchedText()}
+              </span>
+            )}
+          </p>
         </div>
         <div className="flex items-center space-x-3">
           <button

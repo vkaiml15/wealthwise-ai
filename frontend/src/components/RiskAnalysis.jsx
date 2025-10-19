@@ -12,7 +12,8 @@ import {
   Calendar,
   DollarSign,
   BarChart3,
-  Layers
+  Layers,
+  Clock
 } from 'lucide-react';
 import {
   RadarChart,
@@ -32,23 +33,62 @@ import {
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
+// Cache duration: 10 minutes (risk data changes less frequently than recommendations)
+const CACHE_DURATION = 10 * 60 * 1000;
+
 const RiskAnalysis = () => {
   const { currentUser } = useAuth();
   const [riskData, setRiskData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [lastFetched, setLastFetched] = useState(null);
+  const [isCached, setIsCached] = useState(false);
 
   useEffect(() => {
     if (currentUser?.email) {
-      fetchRiskAnalysis();
+      loadFromCacheOrFetch();
     }
   }, [currentUser?.email]);
 
-  const fetchRiskAnalysis = async () => {
+  const loadFromCacheOrFetch = () => {
+    const cacheKey = `risk_analysis_${currentUser.email}`;
+    const cached = localStorage.getItem(cacheKey);
+    
+    if (cached) {
+      try {
+        const { data, timestamp } = JSON.parse(cached);
+        const age = Date.now() - timestamp;
+        
+        // If cache is less than 10 minutes old, use it
+        if (age < CACHE_DURATION) {
+          console.log('✅ Loading risk analysis from cache (age:', Math.round(age / 1000), 'seconds)');
+          setRiskData(data.riskAnalysis);
+          setLastFetched(new Date(timestamp));
+          setIsCached(true);
+          setLoading(false);
+          return;
+        } else {
+          console.log('⏰ Risk analysis cache expired, fetching fresh data');
+        }
+      } catch (e) {
+        console.error('Cache parse error:', e);
+      }
+    }
+    
+    // No valid cache, fetch fresh data
+    fetchRiskAnalysis();
+  };
+
+  const fetchRiskAnalysis = async (forceRefresh = false) => {
+    if (!forceRefresh && isCached && riskData) {
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
+      setIsCached(false);
       
       const response = await fetch(`${API_BASE_URL}/api/portfolio/${currentUser.email}/risk-analysis`);
       
@@ -60,6 +100,16 @@ const RiskAnalysis = () => {
       
       if (data.success) {
         setRiskData(data.riskAnalysis);
+        setLastFetched(new Date());
+        
+        // Save to cache
+        const cacheKey = `risk_analysis_${currentUser.email}`;
+        localStorage.setItem(cacheKey, JSON.stringify({
+          data,
+          timestamp: Date.now()
+        }));
+        
+        console.log('💾 Risk analysis saved to cache');
       } else {
         throw new Error(data.error || 'Failed to load risk analysis');
       }
@@ -72,9 +122,27 @@ const RiskAnalysis = () => {
   };
 
   const handleRefresh = async () => {
+    console.log('🔄 Manual refresh triggered');
     setIsRefreshing(true);
-    await fetchRiskAnalysis();
+    await fetchRiskAnalysis(true);
     setIsRefreshing(false);
+  };
+
+  // Format last fetched time
+  const getLastFetchedText = () => {
+    if (!lastFetched) return '';
+    
+    const now = Date.now();
+    const diff = now - lastFetched.getTime();
+    const minutes = Math.floor(diff / 60000);
+    
+    if (minutes < 1) return 'Just now';
+    if (minutes === 1) return '1 minute ago';
+    if (minutes < 60) return `${minutes} minutes ago`;
+    
+    const hours = Math.floor(minutes / 60);
+    if (hours === 1) return '1 hour ago';
+    return `${hours} hours ago`;
   };
 
   if (loading) {
@@ -82,7 +150,12 @@ const RiskAnalysis = () => {
       <div className="flex items-center justify-center h-96">
         <div className="text-center">
           <RefreshCw className="w-12 h-12 text-indigo-600 animate-spin mx-auto mb-4" />
-          <p className="text-gray-600">Analyzing your risk profile...</p>
+          <p className="text-gray-600 font-medium">
+            {isCached ? 'Loading from cache...' : 'Analyzing your risk profile...'}
+          </p>
+          {!isCached && (
+            <p className="text-sm text-gray-500 mt-2">This may take a few seconds</p>
+          )}
         </div>
       </div>
     );
@@ -148,14 +221,6 @@ const RiskAnalysis = () => {
 
   const colors = getRiskColor();
 
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      maximumFractionDigits: 0
-    }).format(amount);
-  };
-
   const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       return (
@@ -178,7 +243,14 @@ const RiskAnalysis = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Risk Analysis</h1>
-          <p className="text-gray-600 mt-1">Understanding your investment risk profile</p>
+          <p className="text-gray-600 mt-1">
+            Understanding your investment risk profile
+            {lastFetched && (
+              <span className="ml-3 text-gray-500 text-sm">
+                • Updated {getLastFetchedText()}
+              </span>
+            )}
+          </p>
         </div>
         <button
           onClick={handleRefresh}

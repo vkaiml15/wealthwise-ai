@@ -294,19 +294,24 @@ const Dashboard = () => {
           </div>
         </button>
 
-        <button className="p-6 bg-white rounded-xl shadow-sm border border-gray-200 hover:border-purple-300 hover:shadow-md transition-all group">
+         <button
+          onClick={() => navigate('/risk')}
+          className="p-6 bg-white rounded-xl shadow-sm border border-gray-200 hover:border-indigo-300 hover:shadow-md transition-all group"
+        >
           <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center group-hover:bg-purple-200 transition-colors">
-              <BarChart3 className="w-6 h-6 text-purple-600" />
+            <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center group-hover:bg-indigo-200 transition-colors">
+              <MessageSquare className="w-6 h-6 text-indigo-600" />
             </div>
             <div className="flex-1 text-left">
-              <h3 className="font-semibold text-gray-900">Analyze Portfolio</h3>
-              <p className="text-sm text-gray-500">Deep dive into metrics</p>
+              <h3 className="font-semibold text-gray-900">Analyze Portfolio Risk</h3>
+              <p className="text-sm text-gray-500">Assess your exposure</p>
             </div>
           </div>
         </button>
 
-        <button className="p-6 bg-white rounded-xl shadow-sm border border-gray-200 hover:border-green-300 hover:shadow-md transition-all group">
+        <button  onClick={() => navigate('/recommendations')} 
+            className="p-6 bg-white rounded-xl shadow-sm border border-gray-200 hover:border-green-300 hover:shadow-md transition-all group">
+          
           <div className="flex items-center space-x-4">
             <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200 transition-colors">
               <TrendingUp className="w-6 h-6 text-green-600" />

@@ -13,6 +13,8 @@ import ChatInterface from './components/Chatbot/ChatInterface';
 import Settings from './components/Settings/Settings';
 import MarketTrends from './components/MarketTrends.jsx';
 import RiskAnalysis from './components/RiskAnalysis.jsx';
+import Recommendations from './components/Recommendations.jsx';
+import { NotificationProvider } from './context/NotificationContext';
 
 // Loading Screen Component
 const LoadingScreen = () => {
@@ -67,6 +69,7 @@ const AppRoutes = () => {
         <Route path="chat" element={<ChatInterface />} />
         <Route path="market" element={<MarketTrends />} />
         <Route path="risk" element={<RiskAnalysis />} />
+        <Route path="recommendations" element={<Recommendations />} />
         <Route path="settings" element={<Settings />} />
       </Route>
 
@@ -82,7 +85,9 @@ function App() {
     <Router>
       <AuthProvider>
         <ChatProvider>
-          <AppRoutes />
+          <NotificationProvider>
+            <AppRoutes />
+          </NotificationProvider>
         </ChatProvider>
       </AuthProvider>
     </Router>
