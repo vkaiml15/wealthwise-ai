@@ -20,7 +20,7 @@ const PortfolioChart = ({ data }) => {
         <div className="bg-white px-4 py-3 rounded-lg shadow-lg border border-gray-200">
           <p className="text-sm font-semibold text-gray-900 mb-2">{data.name}</p>
           <p className="text-lg font-bold text-indigo-600 mb-1">
-            ${data.value.toLocaleString()}
+            ₹{data.value.toLocaleString()}
           </p>
           <p className="text-xs text-gray-500">
             {data.percentage.toFixed(1)}% of portfolio
@@ -111,7 +111,7 @@ const PortfolioChart = ({ data }) => {
       {/* Total */}
       <div className="mt-4 pt-4 border-t border-gray-200">
         <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-gray-700">Total Invested</span>
+          <span className="text-sm font-medium text-gray-700">Current portfolio value</span>
           <span className="text-lg font-bold text-gray-900">
             ₹{data.reduce((sum, item) => sum + item.value, 0).toLocaleString()}
           </span>

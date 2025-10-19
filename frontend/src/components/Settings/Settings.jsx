@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { 
   User, 
@@ -12,13 +12,88 @@ import {
   Calendar,
   Target,
   DollarSign,
-  Clock
+  Clock,
+  Briefcase,
+  Plus,
+  Trash2,
+  Edit2,
+  TrendingUp,
+  PieChart,
+  Wallet,
+  AlertTriangle
 } from 'lucide-react';
 
 const Settings = () => {
   const { currentUser, updateUserProfile } = useAuth();
   const [activeTab, setActiveTab] = useState('profile');
-  const [saveStatus, setSaveStatus] = useState(null); // 'success', 'error', null
+  const [saveStatus, setSaveStatus] = useState(null);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [showUnsavedWarning, setShowUnsavedWarning] = useState(false);
+  const [pendingTab, setPendingTab] = useState(null);
+  
+  // Dropdown options for portfolio assets
+  const bondOptions = [
+    { value: 'IDFC_GILT', label: 'IDFC Gilt Fund - Government Securities' },
+    { value: 'ICICI_GILT', label: 'ICICI Prudential Gilt Fund' },
+    { value: 'SBI_GILT', label: 'SBI Magnum Gilt Fund' },
+    { value: 'HDFC_SHORT_DEBT', label: 'HDFC Short Term Debt Fund' },
+    { value: 'ICICI_SHORT_DEBT', label: 'ICICI Prudential Short Term Fund' },
+    { value: 'SBI_SHORT_DEBT', label: 'SBI Short Term Debt Fund' },
+    { value: 'HDFC_CORP_BOND', label: 'HDFC Corporate Bond Fund' },
+    { value: 'ICICI_CORP_BOND', label: 'ICICI Corporate Bond Fund' },
+    { value: 'AXIS_CORP_BOND', label: 'Axis Corporate Debt Fund' },
+    { value: 'HDFC_LIQUID', label: 'HDFC Liquid Fund' },
+    { value: 'ICICI_LIQUID', label: 'ICICI Liquid Fund' },
+    { value: 'SBI_LIQUID', label: 'SBI Liquid Fund' },
+    { value: 'AXIS_BANKING_DEBT', label: 'Axis Banking & PSU Debt Fund' },
+    { value: 'ICICI_BANKING_DEBT', label: 'ICICI Banking & PSU Debt Fund' }
+  ];
+
+  const stockOptions = [
+    { value: 'RELIANCE.NS', label: 'Reliance Industries' },
+    { value: 'TCS.NS', label: 'Tata Consultancy Services' },
+    { value: 'INFY.NS', label: 'Infosys' },
+    { value: 'HDFCBANK.NS', label: 'HDFC Bank' },
+    { value: 'ICICIBANK.NS', label: 'ICICI Bank' },
+    { value: 'KOTAKBANK.NS', label: 'Kotak Mahindra Bank' },
+    { value: 'BHARTIARTL.NS', label: 'Bharti Airtel' },
+    { value: 'ITC.NS', label: 'ITC Limited' },
+    { value: 'HINDUNILVR.NS', label: 'Hindustan Unilever' },
+    { value: 'SBIN.NS', label: 'State Bank of India' },
+    { value: 'LT.NS', label: 'Larsen & Toubro' },
+    { value: 'ASIANPAINT.NS', label: 'Asian Paints' },
+    { value: 'MARUTI.NS', label: 'Maruti Suzuki' },
+    { value: 'TITAN.NS', label: 'Titan Company' },
+    { value: 'SUNPHARMA.NS', label: 'Sun Pharmaceutical' },
+    { value: 'WIPRO.NS', label: 'Wipro' },
+    { value: 'AXISBANK.NS', label: 'Axis Bank' },
+    { value: 'ULTRACEMCO.NS', label: 'UltraTech Cement' },
+    { value: 'NESTLEIND.NS', label: 'Nestle India' },
+    { value: 'TATASTEEL.NS', label: 'Tata Steel' },
+    { value: 'POWERGRID.NS', label: 'Power Grid Corporation' },
+    { value: 'NTPC.NS', label: 'NTPC Limited' },
+    { value: 'ONGC.NS', label: 'Oil and Natural Gas Corporation' },
+    { value: 'TECHM.NS', label: 'Tech Mahindra' },
+    { value: 'HCLTECH.NS', label: 'HCL Technologies' },
+    { value: 'BAJFINANCE.NS', label: 'Bajaj Finance' },
+    { value: 'DRREDDY.NS', label: 'Dr. Reddy\'s Laboratories' },
+    { value: 'CIPLA.NS', label: 'Cipla' },
+    { value: 'DIVISLAB.NS', label: 'Divi\'s Laboratories' },
+    { value: 'EICHERMOT.NS', label: 'Eicher Motors' },
+    { value: 'HEROMOTOCO.NS', label: 'Hero MotoCorp' },
+    { value: 'BAJAJFINSV.NS', label: 'Bajaj Finserv' },
+    { value: 'M&M.NS', label: 'Mahindra & Mahindra' }
+  ];
+
+  const etfOptions = [
+    { value: 'NIFTYBEES.NS', label: 'Nifty BeES - Nifty 50 Index' },
+    { value: 'JUNIORBEES.NS', label: 'Junior BeES - Nifty Next 50' },
+    { value: 'BANKBEES.NS', label: 'Bank BeES - Banking Sector' },
+    { value: 'ITBEES.NS', label: 'IT BeES - Technology Sector' },
+    { value: 'GOLDBEES.NS', label: 'Gold BeES - Gold ETF' },
+    { value: 'LIQUIDBEES.NS', label: 'Liquid BeES - Overnight Fund' },
+    { value: 'CPSEETF.NS', label: 'CPSE ETF - Public Sector Companies' }
+  ];
   
   // Profile form state
   const [profileForm, setProfileForm] = useState({
@@ -35,6 +110,17 @@ const Settings = () => {
     investmentHorizon: currentUser?.investmentHorizon || '5-10',
     monthlyContribution: currentUser?.monthlyContribution || ''
   });
+
+  // Portfolio management state
+  const [portfolioForm, setPortfolioForm] = useState({
+    cashSavings: 0,
+    bonds: [],
+    stocks: [],
+    etfs: []
+  });
+  
+  const [originalPortfolio, setOriginalPortfolio] = useState(null);
+  const [portfolioLoading, setPortfolioLoading] = useState(false);
 
   // Notification preferences state
   const [notificationForm, setNotificationForm] = useState({
@@ -57,10 +143,93 @@ const Settings = () => {
 
   const tabs = [
     { id: 'profile', label: 'Profile', icon: User },
+    { id: 'portfolio', label: 'Portfolio', icon: Briefcase },
     { id: 'preferences', label: 'Investment Preferences', icon: Target },
     { id: 'notifications', label: 'Notifications', icon: Bell },
-    { id: 'security', label: 'Security', icon: Lock }
+    { id: 'security', label: 'Security', icon: Shield }
   ];
+
+  // Load existing portfolio data when component mounts
+  useEffect(() => {
+    const loadPortfolioData = async () => {
+      if (!currentUser?.email) return;
+      
+      setPortfolioLoading(true);
+      try {
+        const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+        const response = await fetch(`${API_BASE_URL}/api/portfolio/${currentUser.email}`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.portfolio) {
+            const portfolioData = {
+              cashSavings: data.portfolio.cashSavings || 0,
+              bonds: data.portfolio.bonds || [],
+              stocks: data.portfolio.stocks || [],
+              etfs: data.portfolio.etfs || []
+            };
+            setPortfolioForm(portfolioData);
+            setOriginalPortfolio(JSON.parse(JSON.stringify(portfolioData)));
+            console.log('Loaded existing portfolio:', data.portfolio);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading portfolio:', error);
+        // If load fails, user can still add new holdings from scratch
+      } finally {
+        setPortfolioLoading(false);
+      }
+    };
+
+    loadPortfolioData();
+  }, [currentUser]);
+
+  // Detect unsaved changes for portfolio tab
+  useEffect(() => {
+    if (activeTab === 'portfolio' && originalPortfolio) {
+      const hasChanges = JSON.stringify(portfolioForm) !== JSON.stringify(originalPortfolio);
+      setHasUnsavedChanges(hasChanges);
+    }
+  }, [portfolioForm, originalPortfolio, activeTab]);
+
+  // Warn before leaving page with unsaved changes
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasUnsavedChanges]);
+
+  const handleTabChange = (tabId) => {
+    if (hasUnsavedChanges && activeTab === 'portfolio') {
+      setShowUnsavedWarning(true);
+      setPendingTab(tabId);
+    } else {
+      setActiveTab(tabId);
+      setHasUnsavedChanges(false);
+    }
+  };
+
+  const confirmTabChange = () => {
+    setActiveTab(pendingTab);
+    setShowUnsavedWarning(false);
+    setHasUnsavedChanges(false);
+    setPendingTab(null);
+    // Reset portfolio to original
+    if (originalPortfolio) {
+      setPortfolioForm(JSON.parse(JSON.stringify(originalPortfolio)));
+    }
+  };
+
+  const cancelTabChange = () => {
+    setShowUnsavedWarning(false);
+    setPendingTab(null);
+  };
 
   const handleProfileChange = (e) => {
     const { name, value } = e.target;
@@ -75,9 +244,8 @@ const Settings = () => {
     setPreferencesForm(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleNotificationChange = (e) => {
-    const { name, checked } = e.target;
-    setNotificationForm(prev => ({ ...prev, [name]: checked }));
+  const handleNotificationChange = (name) => {
+    setNotificationForm(prev => ({ ...prev, [name]: !prev[name] }));
   };
 
   const handleSecurityChange = (e) => {
@@ -88,13 +256,56 @@ const Settings = () => {
     }
   };
 
+  // Validation: Check for duplicates
+  const hasDuplicates = (holdings) => {
+    const symbols = holdings.map(h => h.symbol).filter(Boolean);
+    return symbols.length !== new Set(symbols).size;
+  };
+
+  // Validation: Check for invalid values
+  const hasInvalidValues = (holdings) => {
+    const MAX_QUANTITY = 1000000;
+    const MAX_PRICE = 10000000;
+    
+    return holdings.some(h => {
+      const qty = parseFloat(h.quantity);
+      const price = parseFloat(h.avgPrice);
+      return qty > MAX_QUANTITY || price > MAX_PRICE || qty < 0 || price < 0;
+    });
+  };
+
+  // Holdings management functions
+  const addHolding = (type) => {
+    const newHolding = { symbol: '', quantity: '', avgPrice: '' };
+    setPortfolioForm(prev => ({
+      ...prev,
+      [type]: [...prev[type], newHolding]
+    }));
+  };
+
+  const updateHolding = (type, index, field, value) => {
+    setPortfolioForm(prev => ({
+      ...prev,
+      [type]: prev[type].map((item, i) => 
+        i === index ? { ...item, [field]: value } : item
+      )
+    }));
+  };
+
+  const removeHolding = (type, index) => {
+    setPortfolioForm(prev => ({
+      ...prev,
+      [type]: prev[type].filter((_, i) => i !== index)
+    }));
+  };
+
   const validateProfile = () => {
     const newErrors = {};
-    if (!profileForm.name.trim()) newErrors.name = 'Name is required';
-    if (!profileForm.email.trim()) {
-      newErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(profileForm.email)) {
-      newErrors.email = 'Email is invalid';
+    if (!profileForm.name.trim()) {
+      newErrors.name = 'Name is required';
+    }
+    if (!profileForm.email.trim() || !/\S+@\S+\.\S+/.test(profileForm.email)) {
+      newErrors.email = 'Valid email is required';
     }
     if (profileForm.age && (profileForm.age < 18 || profileForm.age > 100)) {
       newErrors.age = 'Age must be between 18 and 100';
@@ -108,9 +319,7 @@ const Settings = () => {
     if (!securityForm.currentPassword) {
       newErrors.currentPassword = 'Current password is required';
     }
-    if (!securityForm.newPassword) {
-      newErrors.newPassword = 'New password is required';
-    } else if (securityForm.newPassword.length < 8) {
+    if (!securityForm.newPassword || securityForm.newPassword.length < 8) {
       newErrors.newPassword = 'Password must be at least 8 characters';
     }
     if (securityForm.newPassword !== securityForm.confirmPassword) {
@@ -120,25 +329,137 @@ const Settings = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSave = () => {
-    if (activeTab === 'profile') {
-      if (!validateProfile()) return;
-      updateUserProfile(profileForm);
-    } else if (activeTab === 'preferences') {
-      updateUserProfile(preferencesForm);
-    } else if (activeTab === 'notifications') {
-      // Save notification preferences
-      console.log('Saving notifications:', notificationForm);
-    } else if (activeTab === 'security') {
-      if (!validateSecurity()) return;
-      // Update password
-      console.log('Updating password');
-      setSecurityForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+  const validatePortfolio = () => {
+    const newErrors = {};
+    
+    // Check for duplicates in each category
+    if (hasDuplicates(portfolioForm.bonds)) {
+      newErrors.bonds = 'Duplicate bond entries detected. Please remove duplicates.';
     }
+    if (hasDuplicates(portfolioForm.stocks)) {
+      newErrors.stocks = 'Duplicate stock entries detected. Please remove duplicates.';
+    }
+    if (hasDuplicates(portfolioForm.etfs)) {
+      newErrors.etfs = 'Duplicate ETF entries detected. Please remove duplicates.';
+    }
+    
+    // Check for invalid values
+    if (hasInvalidValues(portfolioForm.bonds)) {
+      newErrors.bondsValues = 'Invalid quantity or price values in bonds (max: 1M quantity, 10M price)';
+    }
+    if (hasInvalidValues(portfolioForm.stocks)) {
+      newErrors.stocksValues = 'Invalid quantity or price values in stocks (max: 1M quantity, 10M price)';
+    }
+    if (hasInvalidValues(portfolioForm.etfs)) {
+      newErrors.etfsValues = 'Invalid quantity or price values in ETFs (max: 1M quantity, 10M price)';
+    }
+    
+    // Check cash savings
+    if (portfolioForm.cashSavings < 0 || portfolioForm.cashSavings > 100000000) {
+      newErrors.cashSavings = 'Cash savings must be between 0 and 100M';
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
-    // Show success message
-    setSaveStatus('success');
-    setTimeout(() => setSaveStatus(null), 3000);
+  const handleSave = async () => {
+    try {
+      if (activeTab === 'profile') {
+        if (!validateProfile()) return;
+        updateUserProfile(profileForm);
+      } else if (activeTab === 'portfolio') {
+        // Validate portfolio before saving
+        if (!validatePortfolio()) {
+          setSaveStatus('error');
+          setTimeout(() => setSaveStatus(null), 5000);
+          return;
+        }
+
+        // Format portfolio data to match backend structure
+        const portfolioUpdate = {
+          cashSavings: parseFloat(portfolioForm.cashSavings) || 0,
+          bonds: portfolioForm.bonds
+            .filter(b => b.symbol && b.quantity && b.avgPrice) // Only include complete entries
+            .map(b => ({
+              symbol: b.symbol,
+              quantity: parseFloat(b.quantity) || 0,
+              avgPrice: parseFloat(b.avgPrice) || 0
+            })),
+          stocks: portfolioForm.stocks
+            .filter(s => s.symbol && s.quantity && s.avgPrice)
+            .map(s => ({
+              symbol: s.symbol,
+              quantity: parseFloat(s.quantity) || 0,
+              avgPrice: parseFloat(s.avgPrice) || 0
+            })),
+          etfs: portfolioForm.etfs
+            .filter(e => e.symbol && e.quantity && e.avgPrice)
+            .map(e => ({
+              symbol: e.symbol,
+              quantity: parseFloat(e.quantity) || 0,
+              avgPrice: parseFloat(e.avgPrice) || 0
+            }))
+        };
+        
+        // Call the backend API to update portfolio
+        const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+        
+        console.log('Updating portfolio for:', currentUser.email);
+        console.log('Portfolio data:', portfolioUpdate);
+        
+        const response = await fetch(`${API_BASE_URL}/api/portfolio/${currentUser.email}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(portfolioUpdate)
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: Failed to update portfolio`);
+        }
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          console.log('Portfolio updated successfully:', result);
+          
+          // Update original portfolio to new saved state
+          setOriginalPortfolio(JSON.parse(JSON.stringify(portfolioForm)));
+          setHasUnsavedChanges(false);
+          
+          // Optionally refresh the entire portfolio data
+          try {
+            const portfolioResponse = await fetch(`${API_BASE_URL}/api/portfolio/${currentUser.email}/market-report`);
+            if (portfolioResponse.ok) {
+              const marketData = await portfolioResponse.json();
+              console.log('Refreshed market data:', marketData);
+            }
+          } catch (refreshError) {
+            console.log('Market data refresh failed (non-critical):', refreshError);
+          }
+        } else {
+          throw new Error(result.message || 'Failed to update portfolio');
+        }
+        
+      } else if (activeTab === 'preferences') {
+        updateUserProfile(preferencesForm);
+      } else if (activeTab === 'notifications') {
+        console.log('Saving notifications:', notificationForm);
+      } else if (activeTab === 'security') {
+        if (!validateSecurity()) return;
+        console.log('Updating password');
+        setSecurityForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      }
+
+      // Show success message
+      setSaveStatus('success');
+      setTimeout(() => setSaveStatus(null), 3000);
+      
+    } catch (error) {
+      console.error('Error saving changes:', error);
+      setSaveStatus('error');
+      setTimeout(() => setSaveStatus(null), 5000);
+    }
   };
 
   const renderProfileTab = () => (
@@ -217,9 +538,214 @@ const Settings = () => {
     </div>
   );
 
+  const renderPortfolioTab = () => {
+    const renderHoldingSection = (type, title, bgColor, borderColor, icon, options) => {
+      const Icon = icon;
+      const holdings = portfolioForm[type] || [];
+
+      return (
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-4">
+            <Icon className="w-6 h-6 text-gray-700" />
+            <h3 className="text-xl font-semibold text-gray-900">{title}</h3>
+            <span className="ml-auto text-sm text-gray-500">
+              {holdings.length} holding{holdings.length !== 1 ? 's' : ''}
+            </span>
+          </div>
+
+          {/* Error messages for this section */}
+          {errors[type] && (
+            <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
+              <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" />
+              <p className="text-sm text-red-700">{errors[type]}</p>
+            </div>
+          )}
+          {errors[`${type}Values`] && (
+            <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
+              <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" />
+              <p className="text-sm text-red-700">{errors[`${type}Values`]}</p>
+            </div>
+          )}
+
+          {/* Existing Holdings */}
+          {holdings.length > 0 && (
+            <div className="space-y-3 mb-4">
+              {holdings.map((holding, index) => (
+                <div
+                  key={index}
+                  className={`p-4 bg-white border-2 ${borderColor} rounded-lg`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <label className="text-xs font-medium text-gray-500 mb-1 block">Symbol</label>
+                        <select
+                          value={holding.symbol}
+                          onChange={(e) => updateHolding(type, index, 'symbol', e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-semibold focus:ring-2 focus:ring-indigo-500 outline-none"
+                        >
+                          <option value="">Select {title.slice(0, -1)}</option>
+                          {/* If current symbol is not in the list, show it as the first option */}
+                          {holding.symbol && !options.find(opt => opt.value === holding.symbol) && (
+                            <option value={holding.symbol}>
+                              {holding.symbol} (Current)
+                            </option>
+                          )}
+                          {options.map((opt) => (
+                            <option key={opt.value} value={opt.value}>
+                              {opt.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="text-xs font-medium text-gray-500 mb-1 block">Quantity</label>
+                        <input
+                          type="number"
+                          value={holding.quantity}
+                          onChange={(e) => updateHolding(type, index, 'quantity', e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                          placeholder="10"
+                          min="0"
+                          max="1000000"
+                          step="0.01"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-medium text-gray-500 mb-1 block">Avg Price ($)</label>
+                        <input
+                          type="number"
+                          value={holding.avgPrice}
+                          onChange={(e) => updateHolding(type, index, 'avgPrice', e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                          placeholder="150.00"
+                          min="0"
+                          max="10000000"
+                          step="0.01"
+                        />
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => removeHolding(type, index)}
+                      className="ml-4 p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      title="Remove holding"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Add New Holding Button */}
+          <button
+            onClick={() => addHolding(type)}
+            className={`w-full p-4 border-2 border-dashed ${borderColor} ${bgColor} rounded-lg hover:bg-opacity-80 transition-all flex items-center justify-center gap-2 text-gray-700 font-medium`}
+          >
+            <Plus className="w-5 h-5" />
+            Add {title.slice(0, -1)}
+          </button>
+        </div>
+      );
+    };
+
+    return (
+      <div className="space-y-6">
+        {portfolioLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading your portfolio...</p>
+            </div>
+          </div>
+        ) : (
+          <div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-2">Manage Your Portfolio</h3>
+            <p className="text-sm text-gray-600 mb-8">
+              Update your portfolio holdings across different asset classes. Changes will be saved when you click "Save Changes" at the bottom.
+            </p>
+
+            {/* Unsaved changes indicator */}
+            {hasUnsavedChanges && (
+              <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg flex items-start gap-3">
+                <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5" />
+                <div>
+                  <p className="font-semibold text-yellow-900">You have unsaved changes</p>
+                  <p className="text-sm text-yellow-700">Don't forget to click "Save Changes" to keep your updates.</p>
+                </div>
+              </div>
+            )}
+
+            {/* Cash Savings */}
+            <div className="mb-8 p-6 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border-2 border-green-200">
+              <div className="flex items-center gap-3 mb-4">
+                <Wallet className="w-6 h-6 text-green-700" />
+                <h3 className="text-xl font-semibold text-gray-900">Cash Savings</h3>
+              </div>
+              {errors.cashSavings && (
+                <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
+                  <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" />
+                  <p className="text-sm text-red-700">{errors.cashSavings}</p>
+                </div>
+              )}
+              <div className="relative max-w-sm">
+                <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-600 font-semibold text-lg">
+                  $
+                </span>
+                <input
+                  type="number"
+                  value={portfolioForm.cashSavings}
+                  onChange={(e) => setPortfolioForm(prev => ({ ...prev, cashSavings: parseFloat(e.target.value) || 0 }))}
+                  className="w-full pl-10 pr-4 py-3 border-2 border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none text-lg font-semibold"
+                  placeholder="10000.00"
+                  min="0"
+                  max="100000000"
+                  step="0.01"
+                />
+              </div>
+              <p className="mt-2 text-sm text-gray-600">
+                Enter your total cash savings available for investment
+              </p>
+            </div>
+
+            {/* Bonds Section */}
+            {renderHoldingSection(
+              'bonds',
+              'Bonds',
+              'bg-blue-50',
+              'border-blue-200',
+              Shield,
+              bondOptions
+            )}
+
+            {/* Stocks Section */}
+            {renderHoldingSection(
+              'stocks',
+              'Stocks',
+              'bg-purple-50',
+              'border-purple-200',
+              TrendingUp,
+              stockOptions
+            )}
+
+            {/* ETFs Section */}
+            {renderHoldingSection(
+              'etfs',
+              'ETFs',
+              'bg-orange-50',
+              'border-orange-200',
+              PieChart,
+              etfOptions
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   const renderPreferencesTab = () => (
     <div className="space-y-6">
-      {/* Risk Tolerance */}
       <div>
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Risk Tolerance</h3>
         <div className="space-y-3">
@@ -258,43 +784,32 @@ const Settings = () => {
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <h4 className="font-semibold text-gray-900 mb-1">{option.title}</h4>
-                  <p className="text-sm text-gray-600">{option.description}</p>
+                  <div className="font-semibold text-gray-900">{option.title}</div>
+                  <div className="text-sm text-gray-600 mt-1">{option.description}</div>
                 </div>
-                <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                  option.color === 'green' ? 'bg-green-100 text-green-700' :
-                  option.color === 'yellow' ? 'bg-yellow-100 text-yellow-700' :
-                  'bg-red-100 text-red-700'
-                }`}>
+                <span className={`px-3 py-1 rounded-full text-xs font-medium bg-${option.color}-100 text-${option.color}-700`}>
                   {option.risk}
                 </span>
               </div>
-              {preferencesForm.riskTolerance === option.value && (
-                <div className="mt-2 flex items-center text-indigo-600 text-sm font-medium">
-                  <Check className="w-4 h-4 mr-1" />
-                  Selected
-                </div>
-              )}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Investment Goal */}
       <div>
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Investment Goal</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="space-y-2">
           {[
             { value: 'growth', label: 'Long-term Growth', icon: Target },
-            { value: 'income', label: 'Regular Income', icon: DollarSign },
-            { value: 'preservation', label: 'Wealth Preservation', icon: Shield },
-            { value: 'retirement', label: 'Retirement Planning', icon: Clock }
+            { value: 'income', label: 'Income Generation', icon: DollarSign },
+            { value: 'preservation', label: 'Capital Preservation', icon: Shield },
+            { value: 'balanced', label: 'Balanced Approach', icon: Briefcase }
           ].map((goal) => (
             <button
               key={goal.value}
               type="button"
               onClick={() => setPreferencesForm(prev => ({ ...prev, investmentGoal: goal.value }))}
-              className={`p-4 border-2 rounded-lg text-left transition-all flex items-center ${
+              className={`w-full p-3 border-2 rounded-lg flex items-center transition-all ${
                 preferencesForm.investmentGoal === goal.value
                   ? 'border-indigo-600 bg-indigo-50'
                   : 'border-gray-200 hover:border-gray-300'
@@ -312,7 +827,6 @@ const Settings = () => {
         </div>
       </div>
 
-      {/* Investment Horizon */}
       <div>
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Investment Horizon</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -338,7 +852,6 @@ const Settings = () => {
         </div>
       </div>
 
-      {/* Monthly Contribution */}
       <div>
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Monthly Contribution</h3>
         <div className="max-w-md">
@@ -369,52 +882,54 @@ const Settings = () => {
             {
               name: 'emailNotifications',
               label: 'Email Notifications',
-              description: 'Receive notifications via email'
+              description: 'Receive updates via email'
             },
             {
               name: 'pushNotifications',
               label: 'Push Notifications',
-              description: 'Receive push notifications in your browser'
+              description: 'Get real-time alerts in your browser'
             },
             {
               name: 'portfolioAlerts',
               label: 'Portfolio Alerts',
-              description: 'Get notified about significant portfolio changes'
+              description: 'Significant changes in your portfolio value'
             },
             {
               name: 'marketNews',
               label: 'Market News',
-              description: 'Stay updated with relevant market news'
+              description: 'Important market updates and trends'
             },
             {
               name: 'weeklyReports',
               label: 'Weekly Reports',
-              description: 'Receive weekly portfolio performance reports'
+              description: 'Weekly portfolio performance summary'
             },
             {
               name: 'recommendations',
-              label: 'Investment Recommendations',
-              description: 'Get personalized investment recommendations'
+              label: 'AI Recommendations',
+              description: 'Personalized investment suggestions'
             }
-          ].map((notification) => (
+          ].map((notif) => (
             <div
-              key={notification.name}
-              className="flex items-start justify-between p-4 bg-gray-50 rounded-lg"
+              key={notif.name}
+              className="flex items-center justify-between p-4 border border-gray-200 rounded-lg"
             >
-              <div className="flex-1">
-                <h4 className="font-medium text-gray-900 mb-1">{notification.label}</h4>
-                <p className="text-sm text-gray-600">{notification.description}</p>
+              <div>
+                <div className="font-medium text-gray-900">{notif.label}</div>
+                <div className="text-sm text-gray-500 mt-1">{notif.description}</div>
               </div>
-              <label className="relative inline-flex items-center cursor-pointer ml-4">
-                <input
-                  type="checkbox"
-                  name={notification.name}
-                  checked={notificationForm[notification.name]}
-                  onChange={handleNotificationChange}
-                  className="sr-only peer"
+              <button
+                onClick={() => handleNotificationChange(notif.name)}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                  notificationForm[notif.name] ? 'bg-indigo-600' : 'bg-gray-300'
+                }`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    notificationForm[notif.name] ? 'translate-x-6' : 'translate-x-1'
+                  }`}
                 />
-                <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
-              </label>
+              </button>
             </div>
           ))}
         </div>
@@ -439,7 +954,6 @@ const Settings = () => {
               className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none ${
                 errors.currentPassword ? 'border-red-500' : 'border-gray-300'
               }`}
-              placeholder="Enter current password"
             />
             {errors.currentPassword && (
               <p className="mt-1 text-sm text-red-600">{errors.currentPassword}</p>
@@ -458,7 +972,6 @@ const Settings = () => {
               className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none ${
                 errors.newPassword ? 'border-red-500' : 'border-gray-300'
               }`}
-              placeholder="Enter new password"
             />
             {errors.newPassword && (
               <p className="mt-1 text-sm text-red-600">{errors.newPassword}</p>
@@ -477,116 +990,116 @@ const Settings = () => {
               className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none ${
                 errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
               }`}
-              placeholder="Confirm new password"
             />
             {errors.confirmPassword && (
               <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
             )}
           </div>
-
-          <div className="pt-4">
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <div className="flex items-start space-x-3">
-                <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                <div className="text-sm text-blue-900">
-                  <p className="font-medium mb-1">Password Requirements:</p>
-                  <ul className="list-disc list-inside space-y-1 text-blue-800">
-                    <li>At least 8 characters long</li>
-                    <li>Include uppercase and lowercase letters</li>
-                    <li>Include at least one number</li>
-                    <li>Include at least one special character</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Two-Factor Authentication */}
-      <div className="pt-6 border-t border-gray-200">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Two-Factor Authentication</h3>
-        <div className="flex items-start justify-between p-4 bg-gray-50 rounded-lg">
-          <div className="flex-1">
-            <h4 className="font-medium text-gray-900 mb-1">Enable 2FA</h4>
-            <p className="text-sm text-gray-600">
-              Add an extra layer of security to your account
-            </p>
-          </div>
-          <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium">
-            Enable
-          </button>
         </div>
       </div>
     </div>
   );
 
   return (
-    <div className="max-w-5xl mx-auto">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Settings</h1>
-        <p className="text-gray-600">Manage your account settings and preferences</p>
-      </div>
-
-      {/* Success/Error Message */}
-      {saveStatus && (
-        <div className={`mb-6 p-4 rounded-lg flex items-center space-x-3 ${
-          saveStatus === 'success' ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'
-        }`}>
-          {saveStatus === 'success' ? (
-            <>
-              <Check className="w-5 h-5 text-green-600" />
-              <p className="text-green-800 font-medium">Settings saved successfully!</p>
-            </>
-          ) : (
-            <>
-              <AlertCircle className="w-5 h-5 text-red-600" />
-              <p className="text-red-800 font-medium">Error saving settings. Please try again.</p>
-            </>
-          )}
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-6xl mx-auto">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
+          <p className="text-gray-600 mt-2">Manage your account settings and preferences</p>
         </div>
-      )}
 
-      {/* Tabs */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-        {/* Tab Headers */}
-        <div className="border-b border-gray-200 bg-gray-50">
-          <div className="flex overflow-x-auto">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center space-x-2 px-6 py-4 text-sm font-medium whitespace-nowrap transition-all ${
-                  activeTab === tab.id
-                    ? 'text-indigo-600 border-b-2 border-indigo-600 bg-white'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                }`}
-              >
-                <tab.icon className="w-5 h-5" />
-                <span>{tab.label}</span>
-              </button>
-            ))}
+        {/* Unsaved Changes Warning Modal */}
+        {showUnsavedWarning && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-xl p-6 max-w-md mx-4 shadow-2xl">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <AlertTriangle className="w-6 h-6 text-yellow-600" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    Unsaved Changes
+                  </h3>
+                  <p className="text-gray-600 mb-4">
+                    You have unsaved changes in your portfolio. If you leave now, your changes will be lost.
+                  </p>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={cancelTabChange}
+                      className="flex-1 px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                    >
+                      Keep Editing
+                    </button>
+                    <button
+                      onClick={confirmTabChange}
+                      className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
+                    >
+                      Discard Changes
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
+        )}
 
-        {/* Tab Content */}
-        <div className="p-6 md:p-8">
-          {activeTab === 'profile' && renderProfileTab()}
-          {activeTab === 'preferences' && renderPreferencesTab()}
-          {activeTab === 'notifications' && renderNotificationsTab()}
-          {activeTab === 'security' && renderSecurityTab()}
-        </div>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          {/* Tabs */}
+          <div className="border-b border-gray-200">
+            <div className="flex overflow-x-auto">
+              {tabs.map((tab) => {
+                const Icon = tab.icon;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => handleTabChange(tab.id)}
+                    className={`flex items-center gap-2 px-6 py-4 font-medium transition-all whitespace-nowrap ${
+                      activeTab === tab.id
+                        ? 'text-indigo-600 border-b-2 border-indigo-600 bg-indigo-50'
+                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                    }`}
+                  >
+                    <Icon className="w-5 h-5" />
+                    {tab.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
 
-        {/* Save Button */}
-        <div className="border-t border-gray-200 bg-gray-50 px-6 md:px-8 py-4 flex justify-end">
-          <button
-            onClick={handleSave}
-            className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg font-medium hover:from-indigo-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl"
-          >
-            <Save className="w-5 h-5" />
-            <span>Save Changes</span>
-          </button>
+          {/* Tab Content */}
+          <div className="p-8">
+            {activeTab === 'profile' && renderProfileTab()}
+            {activeTab === 'portfolio' && renderPortfolioTab()}
+            {activeTab === 'preferences' && renderPreferencesTab()}
+            {activeTab === 'notifications' && renderNotificationsTab()}
+            {activeTab === 'security' && renderSecurityTab()}
+          </div>
+
+          {/* Save Button */}
+          <div className="px-8 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
+            <div>
+              {saveStatus === 'success' && (
+                <div className="flex items-center gap-2 text-green-600">
+                  <Check className="w-5 h-5" />
+                  <span className="font-medium">Changes saved successfully!</span>
+                </div>
+              )}
+              {saveStatus === 'error' && (
+                <div className="flex items-center gap-2 text-red-600">
+                  <AlertCircle className="w-5 h-5" />
+                  <span className="font-medium">Error saving changes. Please try again.</span>
+                </div>
+              )}
+            </div>
+            <button
+              onClick={handleSave}
+              className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2 font-medium"
+            >
+              <Save className="w-5 h-5" />
+              Save Changes
+            </button>
+          </div>
         </div>
       </div>
     </div>

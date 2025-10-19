@@ -13,7 +13,8 @@ import {
   DollarSign,
   BarChart3,
   Layers,
-  Clock
+  Clock,
+  IndianRupeeIcon
 } from 'lucide-react';
 import {
   RadarChart,
@@ -289,9 +290,7 @@ const RiskAnalysis = () => {
           <div>
             <h3 className="text-lg font-semibold mb-2">🤖 AI Analysis</h3>
             <p className="text-indigo-100 leading-relaxed">{rationale}</p>
-            <p className="text-xs text-indigo-200 mt-3 italic">
-              Powered by {riskData.agentType || 'Anthropic Agent'}
-            </p>
+            
           </div>
         </div>
       </div>
@@ -426,7 +425,7 @@ const RiskAnalysis = () => {
 
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
           <div className="flex items-center space-x-3 mb-3">
-            <DollarSign className="w-5 h-5 text-indigo-600" />
+            <IndianRupeeIcon className="w-5 h-5 text-indigo-600" />
             <h4 className="font-semibold text-gray-900">Contribution Capacity</h4>
           </div>
           <p className="text-2xl font-bold text-gray-900">Active</p>
@@ -468,9 +467,9 @@ const RiskAnalysis = () => {
           <div>
             <h4 className="font-semibold text-gray-900 mb-2">Understanding Your Risk Score</h4>
             <p className="text-sm text-gray-600 leading-relaxed">
-              Your risk score is calculated based on five key factors: <strong>age (15%)</strong>, 
-              <strong> investment horizon (25%)</strong>, <strong> risk tolerance (35%)</strong>, 
-              <strong> portfolio allocation (15%)</strong>, and <strong> monthly contribution capacity (10%)</strong>. 
+              Your risk score is calculated based on five key factors: <strong>age</strong>, 
+              <strong> investment horizon</strong>, <strong> risk tolerance</strong>, 
+              <strong> portfolio allocation</strong>, and <strong> monthly contribution capacity</strong>. 
               A higher score indicates greater capacity and willingness to take investment risks for potentially higher returns.
             </p>
           </div>

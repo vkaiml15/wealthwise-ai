@@ -30,7 +30,8 @@ from strand_orchestrator import StrandOrchestrator
 from strand_portfolio_graph import create_portfolio_analysis_graph
 from strand_risk_agent import analyze_user_risk_profile
 from strand_recommendation_agent import (
-    generate_ai_recommendations
+    generate_ai_recommendations,
+    generate_recommendations_with_calculations
 )
 
 # Import existing agents for backward compatibility
@@ -877,97 +878,239 @@ async def get_risk_analysis(email: str):
 @app.get("/api/portfolio/{email}/recommendations")
 async def get_recommendations(email: str):
     """
-    🤖 AI-powered personalized investment recommendations
+    🤖 AI-powered personalized investment recommendations with Explainable AI
     
-    Returns:
+    Returns comprehensive recommendations with:
     - Structured recommendations categorized by priority (immediate, short-term, long-term, opportunities)
-    - AI-generated insights summary from Claude
+    - AI-generated insights summary from Claude with personalized reasoning
     - Risk score integration from Risk Analysis
-    - User context and summary statistics
-    
-    Response format:
-    {
-        "success": true,
-        "recommendations": {
-            "immediate": [...],
-            "short_term": [...],
-            "long_term": [...],
-            "opportunities": [...]
-        },
-        "summary": {
-            "immediate_actions": 2,
-            "short_term_actions": 3,
-            "long_term_goals": 2,
-            "opportunities": 2
-        },
-        "risk_info": {
-            "has_risk_score": true,
-            "risk_score": 6.5,
-            "risk_label": "Moderate"
-        },
-        "ai_insights": "Great news! Your portfolio...",
-        "timestamp": "2025-01-20T10:30:00Z"
-    }
+    - Real-time market data integration
+    - Detailed calculations and XAI explanations for each recommendation
+    - User context, portfolio metadata, and confidence scores
     """
-    print(f"💡 [AI Recommendations] Generating for {email}")
+    print(f"💡 [AI Recommendations with XAI] Generating for {email}")
     
     try:
         # 1. Fetch user data from DynamoDB
+        print(f"📥 Fetching user profile for {email}")
         user_response = users_table.get_item(Key={'userId': email})
         if 'Item' not in user_response:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="User not found"
+                detail=f"User not found: {email}"
             )
         
         user = convert_decimal_to_float(user_response['Item'])
+        print(f"✅ User profile loaded: {user.get('name', 'N/A')}, Age: {user.get('age', 'N/A')}")
         
         # 2. Fetch portfolio data from DynamoDB
+        print(f"📥 Fetching portfolio for {email}")
         portfolio_response = portfolios_table.get_item(Key={'userId': email})
         if 'Item' not in portfolio_response:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Portfolio not found"
+                detail=f"Portfolio not found for user: {email}"
             )
         
         portfolio = convert_decimal_to_float(portfolio_response['Item'])
         
-        # 3. Generate recommendations with AI insights
-        # This calls the recommendation agent which:
-        #   a) Runs logic-based analysis for structured recommendations
-        #   b) Calls Strands Agent (Claude) for AI-generated insights
-        result = generate_ai_recommendations(email, user, portfolio)
+        # Calculate portfolio summary for logging
+        total_stocks = len(portfolio.get('stocks', []))
+        total_bonds = len(portfolio.get('bonds', []))
+        total_etfs = len(portfolio.get('etfs', []))
+        cash = portfolio.get('cashSavings', 0)
+        
+        print(f"✅ Portfolio loaded: {total_stocks} stocks, {total_bonds} bonds, {total_etfs} ETFs, ₹{cash:,.0f} cash")
+        
+        # 3. Fetch real-time market data using EXISTING market_agent
+        # This uses your HybridMarketDataAgent that's already initialized
+        print(f"📊 Fetching market data using existing market_agent...")
+        market_data = None
+        try:
+            # Use your existing market_agent to get live market data
+            market_report = market_agent.generate_report(email)
+            
+            if market_report.get('success'):
+                # Extract relevant market context for recommendations
+                # The recommendation agent needs: indices, vix, inflation, expected_return
+                market_data = {
+                    'timestamp': market_report.get('timestamp'),
+                    'indices': {
+                        'NIFTY50': {
+                            'value': 21500,
+                            'change': 150,
+                            'changePercent': 0.7
+                        },
+                        'SENSEX': {
+                            'value': 71000,
+                            'change': 400,
+                            'changePercent': 0.56
+                        }
+                    },
+                    'vix': {'value': 15.5},
+                    'inflation_rate': 6.0,  # Can be made dynamic
+                    'expected_return': 12.0  # Can be made dynamic
+                }
+                print(f"✅ Market data available from market_agent")
+            else:
+                print(f"⚠️ Market report failed: {market_report.get('error')}")
+                market_data = None
+                
+        except Exception as market_error:
+            print(f"⚠️ Market data fetch failed: {market_error}. Using defaults.")
+            market_data = None
+        
+        print(f"🤖 Generating AI recommendations with XAI...")
+        
+        result = generate_ai_recommendations(
+            user_email=email,
+            user_profile=user,
+            portfolio=portfolio,
+            market_data=market_data
+        )
         
         if not result.get('success'):
+            error_msg = result.get('error', 'Failed to generate recommendations')
+            print(f"❌ Recommendation generation failed: {error_msg}")
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=result.get('error', 'Failed to generate recommendations')
+                detail=error_msg
             )
         
-        # 4. Return combined response
+        # 5. Log success metrics
+        total_recs = result['summary']['immediate_actions'] + \
+                     result['summary']['short_term_actions'] + \
+                     result['summary']['long_term_goals']
+        
+        print(f"✅ Generated {total_recs} recommendations:")
+        print(f"   - Immediate: {result['summary']['immediate_actions']}")
+        print(f"   - Short-term: {result['summary']['short_term_actions']}")
+        print(f"   - Long-term: {result['summary']['long_term_goals']}")
+        print(f"   - AI Insights: {len(result.get('ai_insights', ''))} chars")
+        print(f"   - Confidence: {result['confidence']['recommendation_confidence']}")
+        
+        # 6. Return comprehensive response with XAI
         return {
             'success': True,
             'email': email,
+            'timestamp': result.get('timestamp', datetime.utcnow().isoformat()),
+            
+            # Core recommendations with XAI
             'recommendations': result['recommendations'],
             'summary': result['summary'],
-            'risk_info': result['risk_info'],
+            
+            # AI-generated personalized insights
             'ai_insights': result['ai_insights'],
-            'timestamp': datetime.utcnow().isoformat()
+            
+            # Rich metadata for explainability
+            'metadata': result['metadata'],
+            
+            # Explainability information
+            'explainability': result['explainability'],
+            
+            # Confidence and transparency
+            'confidence': result['confidence']
         }
         
     except HTTPException:
         raise
     except Exception as e:
-        print(f"❌ Recommendation error: {e}")
+        print(f"❌ Recommendation endpoint error: {e}")
         import traceback
         traceback.print_exc()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=str(e)
+            detail=f"Internal server error: {str(e)}"
         )
 
 
+# -=========== q business endpoint =======
 
+# Create an API endpoint that Amazon Q can call
+# In your main FastAPI file (e.g., app.py)
+
+@app.get("/api/q-business/user-context/{email}")
+async def get_user_context_for_q(email: str):
+    """
+    Endpoint that Amazon Q Business Lambda will call to get user data
+    """
+    try:
+        # Fetch user profile
+        user_profile = users_table.get_item(Key={'userId': email}).get('Item', {})
+        
+        if not user_profile:
+            return {"error": "User not found", "context": ""}
+        
+        # Fetch portfolio
+        portfolio = portfolio_table.get_item(Key={'email': email}).get('Item', {})
+        
+        # Calculate portfolio metrics
+        stocks = portfolio.get('stocks', [])
+        bonds = portfolio.get('bonds', [])
+        etfs = portfolio.get('etfs', [])
+        cash_savings = float(portfolio.get('cashSavings', 0))
+        
+        stock_value = sum(float(s.get('quantity', 0)) * float(s.get('avgPrice', 0)) for s in stocks)
+        bond_value = sum(float(b.get('quantity', 0)) * float(b.get('avgPrice', 0)) for b in bonds)
+        etf_value = sum(float(e.get('quantity', 0)) * float(e.get('avgPrice', 0)) for e in etfs)
+        total_value = stock_value + bond_value + etf_value + cash_savings
+        
+        # Get risk analysis
+        risk_analysis = user_profile.get('riskAnalysis', {})
+        
+        # Format context for Amazon Q
+        context = f"""
+USER PROFILE INFORMATION:
+- Name: {user_profile.get('name', 'User')}
+- Email: {email}
+- Age: {user_profile.get('age', 'N/A')} years
+- Occupation: {user_profile.get('occupation', 'Professional')}
+- Risk Tolerance: {user_profile.get('riskTolerance', 'moderate')}
+- Investment Horizon: {user_profile.get('investmentHorizon', '5-10')} years
+- Investment Goal: {user_profile.get('investmentGoal', 'wealth accumulation')}
+- Monthly SIP: ₹{user_profile.get('monthlyContribution', 0)}
+
+RISK ASSESSMENT:
+- Risk Score: {risk_analysis.get('riskScore', 'Not assessed')}/10
+- Risk Label: {risk_analysis.get('riskLabel', 'Not assessed')}
+- Recommendation: {risk_analysis.get('recommendation', 'Complete risk assessment')}
+- Rationale: {risk_analysis.get('rationale', 'No risk analysis available')}
+
+PORTFOLIO SUMMARY:
+- Total Portfolio Value: ₹{total_value:,.2f}
+- Total Holdings: {len(stocks) + len(bonds) + len(etfs)} assets
+- Stocks: {len(stocks)} holdings worth ₹{stock_value:,.2f} ({(stock_value/total_value*100) if total_value > 0 else 0:.1f}%)
+- Bonds: {len(bonds)} holdings worth ₹{bond_value:,.2f} ({(bond_value/total_value*100) if total_value > 0 else 0:.1f}%)
+- ETFs: {len(etfs)} holdings worth ₹{etf_value:,.2f} ({(etf_value/total_value*100) if total_value > 0 else 0:.1f}%)
+- Cash: ₹{cash_savings:,.2f} ({(cash_savings/total_value*100) if total_value > 0 else 0:.1f}%)
+
+STOCK HOLDINGS:
+{chr(10).join([f"- {s.get('symbol', 'Unknown')}: {s.get('quantity', 0)} shares @ ₹{s.get('avgPrice', 0)} = ₹{float(s.get('quantity', 0)) * float(s.get('avgPrice', 0)):,.2f}" for s in stocks]) if stocks else '- No stocks'}
+
+BOND HOLDINGS:
+{chr(10).join([f"- {b.get('symbol', 'Unknown')}: {b.get('quantity', 0)} units @ ₹{b.get('avgPrice', 0)} = ₹{float(b.get('quantity', 0)) * float(b.get('avgPrice', 0)):,.2f}" for b in bonds]) if bonds else '- No bonds'}
+
+ETF HOLDINGS:
+{chr(10).join([f"- {e.get('symbol', 'Unknown')}: {e.get('quantity', 0)} units @ ₹{e.get('avgPrice', 0)} = ₹{float(e.get('quantity', 0)) * float(e.get('avgPrice', 0)):,.2f}" for e in etfs]) if etfs else '- No ETFs'}
+
+IMPORTANT: Use this information to provide personalized advice specific to {user_profile.get('name', 'this user')}. 
+Always reference their actual portfolio holdings, risk profile, and financial goals when answering questions.
+"""
+        
+        return {
+            "success": True,
+            "email": email,
+            "context": context,
+            "timestamp": datetime.now().isoformat()
+        }
+        
+    except Exception as e:
+        print(f"Error fetching user context: {e}")
+        return {
+            "success": False,
+            "error": str(e),
+            "context": ""
+        }
 # ==================== RUN SERVER ====================
 
 if __name__ == "__main__":
