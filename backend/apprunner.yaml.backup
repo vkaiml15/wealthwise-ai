@@ -1,0 +1,16 @@
+version: 1.0
+
+# Specify Python 3.11 managed runtime
+runtime: python311
+
+# Build commands
+build:
+  commands:
+    build:
+      - python3 -m pip install --no-cache-dir -r requirements.txt
+
+# Runtime / Run configuration
+run:
+  command: python3 strand_main.py
+  network:
+    port: 8000

@@ -1,16 +1,13 @@
 version: 1.0
-
-# Specify Python 3.11 managed runtime
 runtime: python311
-
-# Build commands
 build:
   commands:
     build:
-      - python3 -m pip install --no-cache-dir -r requirements.txt
-
-# Runtime / Run configuration
+      - echo "Build phase - minimal operations only"
 run:
+  runtime-version: 3.11
+  pre-run:
+    - pip3 install --no-cache-dir -r requirements.txt
   command: python3 strand_main.py
   network:
     port: 8000
