@@ -171,6 +171,10 @@ class APIService {
   async getStrandStats() {
     return this.request('/api/strand/stats');
   }
+  
+  async getRecommendations(email) {
+  return this.request(`/api/portfolio/${email}/recommendations`);
+}
 
   // ==================== HEALTH CHECK ====================
 
@@ -188,6 +192,7 @@ class APIService {
     return this.request('/');
   }
 }
+
 
 // Create singleton instance
 const apiService = new APIService();

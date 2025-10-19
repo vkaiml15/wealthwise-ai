@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  MessageSquare, 
-  PieChart, 
+import {
+  LayoutDashboard,
+  MessageSquare,
+  PieChart,
   TrendingUp,
   Settings,
   BarChart3,
@@ -24,6 +24,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     diversity: '...',
     loading: true
   });
+  const [userEmail, setUserEmail] = useState(null);
 
   const menuItems = [
     {
@@ -68,36 +69,112 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     }
   ];
 
-  // Fetch quick stats from backend
+  // Get user email from localStorage - check multiple possible keys
   useEffect(() => {
-    fetchQuickStats();
-  }, []);
-  const getUserEmail = () => {
-    try {
-      const currentUser = localStorage.getItem('currentUser');
-      if (currentUser) {
-        const user = JSON.parse(currentUser);
-        return user.email;
+    const getUserEmail = () => {
+      // Try multiple possible localStorage keys
+      let email = localStorage.getItem("userEmail");
+      
+      if (!email) {
+        // Try getting from currentUser object
+        const currentUser = localStorage.getItem('currentUser');
+        if (currentUser) {
+          try {
+            const user = JSON.parse(currentUser);
+            email = user.email;
+          } catch (e) {
+            console.error('Error parsing currentUser:', e);
+          }
+        }
       }
-    } catch (e) {
-      console.error('Error reading user from localStorage:', e);
+      
+      if (!email) {
+        // Try other common keys
+        email = localStorage.getItem("email") || localStorage.getItem("user_email");
+      }
+      
+      return email;
+    };
+
+    const email = getUserEmail();
+    console.log('Found email in localStorage:', email);
+    
+    if (email) {
+      setUserEmail(email);
+    } else {
+      console.warn('No email found in localStorage. Checking all keys:', Object.keys(localStorage));
     }
-    return null;
-  };
-  
-  // const userEmail = getUserEmail();
-  const userEmail = localStorage.getItem("userEmail");
+
+    // Listen for storage changes (in case email is set after mount)
+    const handleStorageChange = () => {
+      const newEmail = getUserEmail();
+      if (newEmail && newEmail !== userEmail) {
+        console.log('Email updated via storage event:', newEmail);
+        setUserEmail(newEmail);
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Also check periodically in case storage event doesn't fire
+    const interval = setInterval(() => {
+      const newEmail = getUserEmail();
+      if (newEmail && newEmail !== userEmail) {
+        console.log('Email found via interval check:', newEmail);
+        setUserEmail(newEmail);
+        clearInterval(interval);
+      }
+    }, 500);
+
+    // Clean up after 5 seconds
+    const timeout = setTimeout(() => {
+      clearInterval(interval);
+    }, 5000);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      clearInterval(interval);
+      clearTimeout(timeout);
+    };
+  }, [userEmail]);
+
+  // Fetch quick stats when userEmail is available
+  useEffect(() => {
+    if (userEmail) {
+      fetchQuickStats();
+    }
+  }, [userEmail]);
+
   const fetchQuickStats = async () => {
+    if (!userEmail) {
+      console.log('No user email available');
+      return;
+    }
+
+    setQuickStats(prev => ({ ...prev, loading: true }));
+
     try {
-      
-      
+      console.log('Fetching stats for:', userEmail);
+
       // Fetch user data (including risk analysis)
       const userResponse = await fetch(`${process.env.REACT_APP_API_URL}/api/user/${userEmail}`);
+      
+      if (!userResponse.ok) {
+        throw new Error(`User API returned ${userResponse.status}`);
+      }
+      
       const userData = await userResponse.json();
+      console.log('User data:', userData);
 
       // Fetch portfolio data
       const portfolioResponse = await fetch(`${process.env.REACT_APP_API_URL}/api/portfolio/${userEmail}`);
+      
+      if (!portfolioResponse.ok) {
+        throw new Error(`Portfolio API returned ${portfolioResponse.status}`);
+      }
+      
       const portfolioData = await portfolioResponse.json();
+      console.log('Portfolio data:', portfolioData);
 
       // Calculate total holdings
       const stocksCount = portfolioData.portfolio?.stocks?.length || 0;
@@ -108,7 +185,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       // Calculate diversity (based on asset type distribution)
       let diversity = 'Low';
       const assetTypes = [stocksCount > 0, bondsCount > 0, etfsCount > 0].filter(Boolean).length;
-      
+
       if (assetTypes >= 3) {
         diversity = 'High';
       } else if (assetTypes === 2) {
@@ -251,12 +328,34 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
                   onClick={fetchQuickStats}
                   className="p-1 hover:bg-white/20 rounded-lg transition-colors"
                   title="Refresh stats"
+                  disabled={!userEmail || quickStats.loading}
                 >
                   <RefreshCw className={`w-4 h-4 ${quickStats.loading ? 'animate-spin' : ''}`} />
                 </button>
               </div>
-              
-              {quickStats.loading ? (
+
+              {!userEmail ? (
+                <div className="text-center py-4">
+                  <p className="text-sm text-indigo-100 mb-3">Unable to load user data</p>
+                  <button
+                    onClick={() => {
+                      // Try to get email again
+                      const email = localStorage.getItem("userEmail") || 
+                                   localStorage.getItem("email") ||
+                                   (localStorage.getItem('currentUser') && JSON.parse(localStorage.getItem('currentUser')).email);
+                      if (email) {
+                        setUserEmail(email);
+                      } else {
+                        console.error('Still no email found. localStorage keys:', Object.keys(localStorage));
+                        alert('Please refresh the page or log in again.');
+                      }
+                    }}
+                    className="px-3 py-1.5 bg-white/20 hover:bg-white/30 rounded-lg text-xs font-medium transition-colors"
+                  >
+                    Retry
+                  </button>
+                </div>
+              ) : quickStats.loading ? (
                 <div className="space-y-2">
                   <div className="h-4 bg-white/20 rounded animate-pulse"></div>
                   <div className="h-4 bg-white/20 rounded animate-pulse"></div>
@@ -284,7 +383,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
                     <span className="text-xs text-indigo-100">Diversity</span>
                     <span className="text-sm font-bold">{quickStats.diversity}</span>
                   </div>
-                  
+
                   {/* Asset breakdown tooltip */}
                   {quickStats.totalHoldings > 0 && (
                     <div className="pt-2 mt-2 border-t border-white/20">
