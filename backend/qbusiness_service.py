@@ -13,7 +13,7 @@ class QBusinessService:
 
     def __init__(self):
         """Initialize Q Business client using IAM role"""
-        self.application_id = os.getenv('Q_BUSINESS_APPLICATION_ID')
+        self.application_id = os.getenv('Q_BUSINESS_APPLICATION_ID')or '5ec5ed78-be26-4395-afdf-75c9a6a09e3a'
         self.region = os.getenv('AWS_REGION', 'us-east-1')
 
         # ✅ Use IAM role - boto3 automatically gets credentials from EC2 instance metadata
