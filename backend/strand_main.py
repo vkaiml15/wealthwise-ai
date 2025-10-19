@@ -1029,41 +1029,54 @@ async def get_recommendations(email: str):
 # Create an API endpoint that Amazon Q can call
 # In your main FastAPI file (e.g., app.py)
 
+def to_float(value):
+    """Safely convert DynamoDB Decimal or string to float"""
+    if isinstance(value, Decimal):
+        return float(value)
+    try:
+        return float(value)
+    except:
+        return 0.0
+
+
 @app.get("/api/q-business/user-context/{email}")
 async def get_user_context_for_q(email: str):
     """
     Endpoint that Amazon Q Business Lambda will call to get user data
     """
     try:
-        # Fetch user profile
-        user_profile = users_table.get_item(Key={'userId': email}).get('Item', {})
-        
+        # 1️⃣ Fetch user profile
+        user_resp = users_table.get_item(Key={"userId": email})
+        user_profile = user_resp.get("Item")
+
         if not user_profile:
             return {"error": "User not found", "context": ""}
-        
-        # Fetch portfolio
-        portfolio = portfolio_table.get_item(Key={'email': email}).get('Item', {})
-        
-        # Calculate portfolio metrics
-        stocks = portfolio.get('stocks', [])
-        bonds = portfolio.get('bonds', [])
-        etfs = portfolio.get('etfs', [])
-        cash_savings = float(portfolio.get('cashSavings', 0))
-        
-        stock_value = sum(float(s.get('quantity', 0)) * float(s.get('avgPrice', 0)) for s in stocks)
-        bond_value = sum(float(b.get('quantity', 0)) * float(b.get('avgPrice', 0)) for b in bonds)
-        etf_value = sum(float(e.get('quantity', 0)) * float(e.get('avgPrice', 0)) for e in etfs)
+
+        # 2️⃣ Fetch portfolio
+        portfolio_resp = portfolios_table.get_item(Key={"userId": email})
+        portfolio = portfolio_resp.get("Item", {})
+
+        # Extract holdings
+        stocks = portfolio.get("stocks", [])
+        bonds = portfolio.get("bonds", [])
+        etfs = portfolio.get("etfs", [])
+        cash_savings = to_float(portfolio.get("cashSavings", 0))
+
+        # 3️⃣ Compute totals
+        stock_value = sum(to_float(s.get("quantity")) * to_float(s.get("avgPrice")) for s in stocks)
+        bond_value = sum(to_float(b.get("quantity")) * to_float(b.get("avgPrice")) for b in bonds)
+        etf_value = sum(to_float(e.get("quantity")) * to_float(e.get("avgPrice")) for e in etfs)
         total_value = stock_value + bond_value + etf_value + cash_savings
-        
-        # Get risk analysis
-        risk_analysis = user_profile.get('riskAnalysis', {})
-        
-        # Format context for Amazon Q
+
+        # 4️⃣ Risk Analysis
+        risk_analysis = user_profile.get("riskAnalysis", {})
+
+        # 5️⃣ Build Context
         context = f"""
 USER PROFILE INFORMATION:
 - Name: {user_profile.get('name', 'User')}
 - Email: {email}
-- Age: {user_profile.get('age', 'N/A')} years
+- Age: {user_profile.get('age', 'N/A')}
 - Occupation: {user_profile.get('occupation', 'Professional')}
 - Risk Tolerance: {user_profile.get('riskTolerance', 'moderate')}
 - Investment Horizon: {user_profile.get('investmentHorizon', '5-10')} years
@@ -1071,7 +1084,7 @@ USER PROFILE INFORMATION:
 - Monthly SIP: ₹{user_profile.get('monthlyContribution', 0)}
 
 RISK ASSESSMENT:
-- Risk Score: {risk_analysis.get('riskScore', 'Not assessed')}/10
+- Risk Score: {risk_analysis.get('riskScore', 'Not assessed')}
 - Risk Label: {risk_analysis.get('riskLabel', 'Not assessed')}
 - Recommendation: {risk_analysis.get('recommendation', 'Complete risk assessment')}
 - Rationale: {risk_analysis.get('rationale', 'No risk analysis available')}
@@ -1079,39 +1092,35 @@ RISK ASSESSMENT:
 PORTFOLIO SUMMARY:
 - Total Portfolio Value: ₹{total_value:,.2f}
 - Total Holdings: {len(stocks) + len(bonds) + len(etfs)} assets
-- Stocks: {len(stocks)} holdings worth ₹{stock_value:,.2f} ({(stock_value/total_value*100) if total_value > 0 else 0:.1f}%)
-- Bonds: {len(bonds)} holdings worth ₹{bond_value:,.2f} ({(bond_value/total_value*100) if total_value > 0 else 0:.1f}%)
-- ETFs: {len(etfs)} holdings worth ₹{etf_value:,.2f} ({(etf_value/total_value*100) if total_value > 0 else 0:.1f}%)
+- Stocks: {len(stocks)} worth ₹{stock_value:,.2f} ({(stock_value/total_value*100) if total_value > 0 else 0:.1f}%)
+- Bonds: {len(bonds)} worth ₹{bond_value:,.2f} ({(bond_value/total_value*100) if total_value > 0 else 0:.1f}%)
+- ETFs: {len(etfs)} worth ₹{etf_value:,.2f} ({(etf_value/total_value*100) if total_value > 0 else 0:.1f}%)
 - Cash: ₹{cash_savings:,.2f} ({(cash_savings/total_value*100) if total_value > 0 else 0:.1f}%)
 
 STOCK HOLDINGS:
-{chr(10).join([f"- {s.get('symbol', 'Unknown')}: {s.get('quantity', 0)} shares @ ₹{s.get('avgPrice', 0)} = ₹{float(s.get('quantity', 0)) * float(s.get('avgPrice', 0)):,.2f}" for s in stocks]) if stocks else '- No stocks'}
+{chr(10).join([f"- {s.get('symbol', 'Unknown')}: {s.get('quantity', 0)} units @ ₹{s.get('avgPrice', 0)}" for s in stocks]) if stocks else '- No stocks'}
 
 BOND HOLDINGS:
-{chr(10).join([f"- {b.get('symbol', 'Unknown')}: {b.get('quantity', 0)} units @ ₹{b.get('avgPrice', 0)} = ₹{float(b.get('quantity', 0)) * float(b.get('avgPrice', 0)):,.2f}" for b in bonds]) if bonds else '- No bonds'}
+{chr(10).join([f"- {b.get('symbol', 'Unknown')}: {b.get('quantity', 0)} units @ ₹{b.get('avgPrice', 0)}" for b in bonds]) if bonds else '- No bonds'}
 
 ETF HOLDINGS:
-{chr(10).join([f"- {e.get('symbol', 'Unknown')}: {e.get('quantity', 0)} units @ ₹{e.get('avgPrice', 0)} = ₹{float(e.get('quantity', 0)) * float(e.get('avgPrice', 0)):,.2f}" for e in etfs]) if etfs else '- No ETFs'}
+{chr(10).join([f"- {e.get('symbol', 'Unknown')}: {e.get('quantity', 0)} units @ ₹{e.get('avgPrice', 0)}" for e in etfs]) if etfs else '- No ETFs'}
 
-IMPORTANT: Use this information to provide personalized advice specific to {user_profile.get('name', 'this user')}. 
-Always reference their actual portfolio holdings, risk profile, and financial goals when answering questions.
+IMPORTANT: Use this info to give personalized insights specific to {user_profile.get('name', 'the user')}.
 """
-        
+
         return {
             "success": True,
             "email": email,
-            "context": context,
-            "timestamp": datetime.now().isoformat()
+            "context": context.strip(),
+            "timestamp": datetime.now().isoformat(),
         }
-        
+
     except Exception as e:
         print(f"Error fetching user context: {e}")
-        return {
-            "success": False,
-            "error": str(e),
-            "context": ""
-        }
-# ==================== RUN SERVER ====================
+        return {"success": False, "error": str(e), "context": ""}
+    
+    
 
 if __name__ == "__main__":
     import uvicorn
