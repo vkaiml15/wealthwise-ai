@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+*.egg-info/
+
+# Environment
+.env
+.env.local
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+*.md
+WORKFLOW_README.md
+*.png
+*.drawio
+
+# Test files
+test_*.py
+test_*.html
+set_user_data.js
+
+# Logs
+backend.log
+nohup.out
