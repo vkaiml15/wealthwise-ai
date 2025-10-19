@@ -1,0 +1,71 @@
+import React, { Suspense, useRef } from 'react';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { OrbitControls, useGLTF, Environment } from '@react-three/drei';
+
+// Avatar model component
+function AvatarModel({
+  isTyping,
+  baseX = 0,
+  baseY = -4,
+  baseZ = -2
+}) {
+  const { scene } = useGLTF('/brunette.glb');
+  const modelRef = useRef();
+
+  // Idle animation
+  useFrame((state) => {
+    if (modelRef.current) {
+      const time = state.clock.getElapsedTime();
+      modelRef.current.position.y = baseY + Math.sin(time * 1.5) * 0.02; // breathing
+      modelRef.current.position.x = baseX;
+      modelRef.current.position.z = baseZ;
+
+      if (!isTyping) {
+        modelRef.current.rotation.y = Math.sin(time * 0.3) * 0.1; // idle rotation
+      }
+    }
+  });
+
+  return <primitive ref={modelRef} object={scene} scale={1.8} />;
+}
+
+// Main Avatar3D component
+export default function Avatar3D({
+  isTyping = false,
+  showControls = false,
+  baseX = 0,
+  baseY = -2.5,
+  baseZ = -2,
+  cameraPosition = [0, 0.2, 2],
+  zoom = 30
+}) {
+  return (
+    <div className="w-full h-full bg-gradient-to-br from-purple-50 to-indigo-50">
+      <Canvas camera={{ position: cameraPosition, fov: zoom }} shadows>
+        {/* Lights */}
+        <ambientLight intensity={0.6} />
+        <directionalLight position={[5, 5, 5]} intensity={0.8} castShadow />
+        <spotLight
+          position={[-5, 5, 2]}
+          intensity={0.3}
+          angle={0.3}
+          penumbra={1}
+          color="#8b5cf6"
+        />
+
+        <Suspense fallback={null}>
+          <AvatarModel
+            isTyping={isTyping}
+            baseX={baseX}
+            baseY={baseY}
+            baseZ={baseZ}
+          />
+          <Environment preset="city" />
+        </Suspense>
+
+        {/* Optional camera controls */}
+        {showControls && <OrbitControls enableZoom={true} />}
+      </Canvas>
+    </div>
+  );
+}

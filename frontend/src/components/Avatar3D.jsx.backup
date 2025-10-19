@@ -1,0 +1,62 @@
+import React, { Suspense, useRef, useEffect } from 'react';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { OrbitControls, useGLTF, Environment } from '@react-three/drei';
+
+function AvatarModel({ isTyping }) {
+  const { scene, animations } = useGLTF('/brunette.glb');
+  const modelRef = useRef();
+  
+  // Idle animation - gentle breathing and swaying
+  useFrame((state) => {
+    if (modelRef.current) {
+      const time = state.clock.getElapsedTime();
+      // Breathing effect
+      modelRef.current.position.y = Math.sin(time * 1.5) * 0.02 - 1;
+      // Gentle rotation
+      if (!isTyping) {
+        modelRef.current.rotation.y = Math.sin(time * 0.3) * 0.1;
+      }
+    }
+  });
+  
+  return (
+    <primitive 
+      ref={modelRef}
+      object={scene} 
+      scale={1.8} 
+      position={[0, -5, -2]} 
+    />
+  );
+}
+
+export default function Avatar3D({ isTyping = false, showControls = false }) {
+  return (
+    <div className="w-full h-full bg-gradient-to-br from-purple-50 to-indigo-50">
+      <Canvas 
+        camera={{ position: [0, 0.2, 2], fov: 50 }}
+        shadows
+      >
+        <ambientLight intensity={0.6} />
+        <directionalLight 
+          position={[5, 5, 5]} 
+          intensity={0.8}
+          castShadow
+        />
+        <spotLight
+          position={[-5, 5, 2]}
+          intensity={0.3}
+          angle={0.3}
+          penumbra={1}
+          color="#8b5cf6"
+        />
+        
+        <Suspense fallback={null}>
+          <AvatarModel isTyping={isTyping} />
+          <Environment preset="city" />
+        </Suspense>
+        
+        {showControls && <OrbitControls enableZoom={false} />}
+      </Canvas>
+    </div>
+  );
+}

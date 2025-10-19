@@ -2,9 +2,13 @@
 import os
 import sys
 from dotenv import load_dotenv
-
+import base64
 
 load_dotenv()
+
+
+
+
 
 print("=" * 60)
 print("🔧 STRAND SDK - WealthWise AI Robo-Advisor")
@@ -52,7 +56,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Polly Pydantic models
+class SynthesizeSpeechRequest(BaseModel):
+    text: str
+    voiceId: str = "Joanna"
 
+class SynthesizeSpeechResponse(BaseModel):
+    success: bool
+    audio: str = None
+    error: str = None
+
+# Initialize AWS Polly client
+polly_client = boto3.client('polly', region_name=os.getenv('AWS_REGION', 'us-east-1'))
 # Initialize DynamoDB
 print("🔌 Initializing DynamoDB connection...")
 # dynamodb = boto3.resource(
@@ -967,6 +982,47 @@ async def get_recommendations(email: str):
         )
 
 
+# ==================== POLLY TEXT-TO-SPEECH ====================
+
+@app.post("/api/polly/synthesize", response_model=SynthesizeSpeechResponse)
+async def synthesize_speech(request: SynthesizeSpeechRequest):
+    """
+    🔊 Synthesize speech using AWS Polly
+    
+    Converts text to speech audio using AWS Polly's neural engine
+    Returns base64 encoded MP3 audio
+    """
+    print(f"🔊 [Polly] Synthesizing speech: {request.text[:50]}...")
+    
+    try:
+        if not request.text:
+            raise HTTPException(status_code=400, detail="Text is required")
+        
+        # Call AWS Polly
+        response = polly_client.synthesize_speech(
+            Text=request.text,
+            OutputFormat='mp3',
+            VoiceId=request.voiceId,
+            Engine='neural'
+        )
+        
+        # Read the audio stream and encode it as base64
+        audio_data = response['AudioStream'].read()
+        audio_base64 = base64.b64encode(audio_data).decode('utf-8')
+        
+        print(f"✅ [Polly] Speech synthesized successfully ({len(audio_base64)} bytes)")
+        
+        return SynthesizeSpeechResponse(
+            success=True,
+            audio=audio_base64
+        )
+        
+    except Exception as e:
+        print(f"❌ [Polly] Error: {str(e)}")
+        return SynthesizeSpeechResponse(
+            success=False,
+            error=str(e)
+        )
 
 # ==================== RUN SERVER ====================
 

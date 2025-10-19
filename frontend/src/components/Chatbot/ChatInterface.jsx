@@ -1,28 +1,35 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { getQBusinessService } from '../../services/qbusinessService';
-import { 
-  Send, 
-  TrendingUp, 
-  BarChart3, 
-  Shield, 
+import {
+  Send,
+  TrendingUp,
+  BarChart3,
+  Shield,
   Target,
   Loader2,
   AlertCircle,
   RefreshCw,
   Bot,
-  FileText
+  FileText,
+  Volume2,
+  VolumeX
 } from 'lucide-react';
 import Message from './Message';
+import Avatar3D from '../Avatar3D';
+import { pollyService } from '../../services/pollyService';
 
 const ChatInterface = () => {
   const { currentUser, portfolio } = useAuth();
   const [inputValue, setInputValue] = useState('');
   const [messages, setMessages] = useState([]);
   const [isTyping, setIsTyping] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [autoSpeak, setAutoSpeak] = useState(true);
   const [error, setError] = useState(null);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+  const audioRef = useRef(null);
   const qBusinessService = getQBusinessService();
 
   // Quick action queries
@@ -58,8 +65,80 @@ const ChatInterface = () => {
     scrollToBottom();
   }, [messages, isTyping]);
 
+  // Cleanup audio on unmount
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+      pollyService.stop();
+    };
+  }, []);
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  // Enhanced speech function with lip sync
+  const speakWithLipSync = async (text) => {
+    try {
+      console.log('🔊 Starting speech with lip sync...');
+      
+      // Stop any existing audio
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+      pollyService.stop();
+
+      // Set speaking state BEFORE audio starts
+      setIsSpeaking(true);
+
+      // Get audio from Polly service
+      const audioData = await pollyService.synthesize(text);
+      
+      if (!audioData) {
+        console.error('❌ No audio data received');
+        setIsSpeaking(false);
+        return;
+      }
+
+      // Create audio element
+      const audio = new Audio(audioData);
+      audioRef.current = audio;
+
+      // Audio event listeners
+      audio.onplay = () => {
+        console.log('✅ Audio playing - lip sync active');
+        setIsSpeaking(true);
+      };
+
+      audio.onended = () => {
+        console.log('🔇 Audio ended - lip sync stopped');
+        setIsSpeaking(false);
+        audioRef.current = null;
+      };
+
+      audio.onerror = (e) => {
+        console.error('❌ Audio error:', e);
+        setIsSpeaking(false);
+        audioRef.current = null;
+      };
+
+      audio.onpause = () => {
+        console.log('⏸️ Audio paused');
+        setIsSpeaking(false);
+      };
+
+      // Start playback
+      await audio.play();
+
+    } catch (error) {
+      console.error('❌ Speech synthesis error:', error);
+      setIsSpeaking(false);
+      audioRef.current = null;
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -73,6 +152,14 @@ const ChatInterface = () => {
   const handleQBusinessMessage = async (query) => {
     // Clear any previous errors
     setError(null);
+
+    // Stop any ongoing speech
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
+    pollyService.stop();
+    setIsSpeaking(false);
 
     // Add user message
     const userMessage = {
@@ -98,6 +185,14 @@ const ChatInterface = () => {
           sources: response.sources || []
         };
         setMessages(prev => [...prev, assistantMessage]);
+
+        // Wait a brief moment for the message to render, then speak
+        setTimeout(() => {
+          if (autoSpeak && response.message) {
+            speakWithLipSync(response.message);
+          }
+        }, 300);
+
       } else {
         // Handle API error
         const errorMessage = {
@@ -141,8 +236,33 @@ const ChatInterface = () => {
     if (window.confirm('Are you sure you want to clear the chat history?')) {
       setMessages([]);
       setError(null);
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+      pollyService.stop();
+      setIsSpeaking(false);
       qBusinessService.startNewConversation();
       setInputValue('');
+    }
+  };
+
+  const handleVoiceToggle = () => {
+    if (isSpeaking) {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+      pollyService.stop();
+      setIsSpeaking(false);
+    }
+    setAutoSpeak(!autoSpeak);
+  };
+
+  // Manual speak function for re-speaking messages
+  const handleRespeakMessage = (text) => {
+    if (!isSpeaking) {
+      speakWithLipSync(text);
     }
   };
 
@@ -160,7 +280,7 @@ const ChatInterface = () => {
               <p className="text-sm text-gray-500">Ask me anything about your investments</p>
             </div>
           </div>
-          
+
           <div className="flex items-center space-x-3">
             <div className="flex items-center space-x-2 px-3 py-1.5 bg-purple-50 text-purple-700 rounded-lg border border-purple-200">
               <Bot className="w-4 h-4" />
@@ -169,7 +289,7 @@ const ChatInterface = () => {
                 📄 Docs
               </span>
             </div>
-            
+
             {messages.length > 0 && (
               <button
                 onClick={handleClearChat}
@@ -200,71 +320,155 @@ const ChatInterface = () => {
         )}
       </div>
 
-      {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
-        {messages.length === 0 ? (
-          // Empty State
-          <div className="h-full flex flex-col items-center justify-center text-center px-4">
-            <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-indigo-100 rounded-full flex items-center justify-center mb-6">
-              <Bot className="w-10 h-10 text-purple-600" />
-            </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-3">
-              Welcome back, {currentUser?.name || 'Investor'}!
-            </h3>
-            <p className="text-gray-600 mb-2 max-w-md">
-              I'm Amazon Q Business, trained on your company's documents and data. Ask me about your indexed portfolio documents, strategies, and specific holdings.
-            </p>
-            <p className="text-sm text-gray-500 mb-8">
-              💡 I can search through your uploaded documents and provide specific insights.
-            </p>
+      {/* Messages Area - Split Screen Layout */}
+      <div className="flex-1 flex gap-4 overflow-hidden">
+        {/* Avatar Panel - Always Visible */}
+        <div className="w-80 flex-shrink-0 bg-gradient-to-br from-purple-50 via-indigo-50 to-purple-100 border-r border-purple-200 flex flex-col">
+          {/* Avatar Container */}
+          <div className="flex-1 relative">
+            <Avatar3D
+              isTyping={isTyping}
+              isSpeaking={isSpeaking}
+              showControls={false}
+              baseY={-1.3}
+              cameraPosition={[0, 0.3, 2.2]}
+              zoom={45}
+            />
 
-            {/* Quick Actions */}
-            <div className="w-full max-w-2xl">
-              <p className="text-sm font-medium text-gray-700 mb-4">Quick Actions:</p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {quickActions.map((action, index) => (
-                  <button
-                    key={index}
-                    onClick={() => handleQuickAction(action.query)}
-                    className="flex items-center space-x-3 p-4 bg-white border-2 border-gray-200 rounded-xl hover:border-purple-500 hover:bg-purple-50 transition-all group"
-                  >
-                    <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center group-hover:bg-purple-200 transition-colors">
-                      <action.icon className="w-5 h-5 text-purple-600" />
-                    </div>
-                    <div className="flex-1 text-left">
-                      <p className="font-medium text-gray-900">{action.label}</p>
-                      <p className="text-xs text-gray-500 mt-0.5">{action.query}</p>
-                    </div>
-                  </button>
-                ))}
+            {/* Avatar Status Badge - Enhanced */}
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 px-4 py-2 bg-white/90 backdrop-blur-sm rounded-full shadow-lg border border-purple-200">
+              <div className="flex items-center space-x-3">
+                {/* Status Indicator */}
+                <div className={`relative w-3 h-3 rounded-full ${
+                  isSpeaking ? 'bg-blue-500' : 
+                  isTyping ? 'bg-purple-500' : 
+                  'bg-green-500'
+                }`}>
+                  {(isSpeaking || isTyping) && (
+                    <span className="absolute inset-0 rounded-full bg-current animate-ping opacity-75"></span>
+                  )}
+                </div>
+                
+                {/* Status Text */}
+                <span className="text-sm font-medium text-gray-700">
+                  {isSpeaking ? '🗣️ Speaking' : isTyping ? '💭 Thinking' : '✨ Ready'}
+                </span>
+
+                {/* Voice Toggle Button */}
+                <button
+                  onClick={handleVoiceToggle}
+                  className={`p-1.5 rounded-full transition-all ${
+                    autoSpeak 
+                      ? 'bg-purple-500 text-white shadow-md hover:bg-purple-600' 
+                      : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                  }`}
+                  title={autoSpeak ? 'Voice: ON' : 'Voice: OFF'}
+                >
+                  {autoSpeak ? <Volume2 className="w-3 h-3" /> : <VolumeX className="w-3 h-3" />}
+                </button>
               </div>
             </div>
-          </div>
-        ) : (
-          // Messages
-          <>
-            {messages.map((message, index) => (
-              <Message key={index} message={message} />
-            ))}
 
-            {/* Typing Indicator */}
-            {isTyping && (
-              <div className="flex items-start space-x-3">
-                <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center flex-shrink-0">
-                  <Bot className="w-4 h-4 text-white" />
+            {/* Debug Info (optional - remove in production) */}
+            {process.env.NODE_ENV === 'development' && (
+              <div className="absolute top-4 left-4 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                <div>Speaking: {isSpeaking ? '✅' : '❌'}</div>
+                <div>Typing: {isTyping ? '✅' : '❌'}</div>
+                <div>Auto: {autoSpeak ? '✅' : '❌'}</div>
+              </div>
+            )}
+          </div>
+
+          {/* Avatar Info Card */}
+          <div className="p-4 bg-white/80 backdrop-blur-sm border-t border-purple-200">
+            <div className="flex items-center space-x-3 mb-2">
+              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg flex items-center justify-center">
+                <Bot className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900">AI Advisor</h3>
+                <p className="text-xs text-gray-500">Amazon Q Business + Polly</p>
+              </div>
+            </div>
+            <p className="text-xs text-gray-600 leading-relaxed">
+              Your personal investment advisor powered by AI with realistic voice responses and lip-sync animation
+            </p>
+          </div>
+        </div>
+
+        {/* Chat Panel */}
+        <div className="flex-1 flex flex-col overflow-hidden bg-gray-50">
+          <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
+            {messages.length === 0 ? (
+              // Empty State
+              <div className="h-full flex flex-col items-center justify-center text-center px-4">
+                <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-indigo-100 rounded-full flex items-center justify-center mb-6">
+                  <Bot className="w-10 h-10 text-purple-600" />
                 </div>
-                <div className="bg-white rounded-2xl rounded-tl-none px-4 py-3 shadow-sm border border-gray-200">
-                  <div className="flex items-center space-x-2">
-                    <Loader2 className="w-4 h-4 text-purple-600 animate-spin" />
-                    <span className="text-sm text-gray-600">Searching documents...</span>
+                <h3 className="text-2xl font-bold text-gray-900 mb-3">
+                  Welcome back, {currentUser?.name || 'Investor'}!
+                </h3>
+                <p className="text-gray-600 mb-2 max-w-md">
+                  I'm Amazon Q Business with voice powered by AWS Polly. Ask me about your indexed portfolio documents, strategies, and specific holdings.
+                </p>
+                <p className="text-sm text-gray-500 mb-8">
+                  💡 I can search through your uploaded documents and speak the responses with realistic lip-sync!
+                </p>
+
+                {/* Quick Actions */}
+                <div className="w-full max-w-2xl">
+                  <p className="text-sm font-medium text-gray-700 mb-4">Quick Actions:</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {quickActions.map((action, index) => (
+                      <button
+                        key={index}
+                        onClick={() => handleQuickAction(action.query)}
+                        className="flex items-center space-x-3 p-4 bg-white border-2 border-gray-200 rounded-xl hover:border-purple-500 hover:bg-purple-50 transition-all group"
+                      >
+                        <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center group-hover:bg-purple-200 transition-colors">
+                          <action.icon className="w-5 h-5 text-purple-600" />
+                        </div>
+                        <div className="flex-1 text-left">
+                          <p className="font-medium text-gray-900">{action.label}</p>
+                          <p className="text-xs text-gray-500 mt-0.5">{action.query}</p>
+                        </div>
+                      </button>
+                    ))}
                   </div>
                 </div>
               </div>
-            )}
+            ) : (
+              // Messages
+              <>
+                {messages.map((message, index) => (
+                  <Message 
+                    key={index} 
+                    message={message}
+                    onRespeak={message.role === 'assistant' ? () => handleRespeakMessage(message.content) : null}
+                    isSpeaking={isSpeaking}
+                  />
+                ))}
 
-            <div ref={messagesEndRef} />
-          </>
-        )}
+                {/* Typing Indicator */}
+                {isTyping && (
+                  <div className="flex items-start space-x-3">
+                    <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center flex-shrink-0">
+                      <Bot className="w-4 h-4 text-white" />
+                    </div>
+                    <div className="bg-white rounded-2xl rounded-tl-none px-4 py-3 shadow-sm border border-gray-200">
+                      <div className="flex items-center space-x-2">
+                        <Loader2 className="w-4 h-4 text-purple-600 animate-spin" />
+                        <span className="text-sm text-gray-600">Searching documents...</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div ref={messagesEndRef} />
+              </>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Input Area */}

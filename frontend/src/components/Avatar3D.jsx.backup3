@@ -1,0 +1,108 @@
+import React, { Suspense, useRef } from 'react';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { OrbitControls, useGLTF, Environment } from '@react-three/drei';
+
+// Avatar model component with lip sync
+function AvatarModel({
+  isTyping,
+  isSpeaking,
+  baseX = 0,
+  baseY = -4,
+  baseZ = -2
+}) {
+  const { scene } = useGLTF('/brunette.glb');
+  const modelRef = useRef();
+  const mouthRef = useRef({ openAmount: 0, speed: 8 });
+
+  // Animation loop
+  useFrame((state) => {
+    if (modelRef.current) {
+      const time = state.clock.getElapsedTime();
+      
+      // Breathing animation
+      modelRef.current.position.y = baseY + Math.sin(time * 1.5) * 0.02;
+      modelRef.current.position.x = baseX;
+      modelRef.current.position.z = baseZ;
+
+      // Speaking animation - head bob and subtle movement
+      if (isSpeaking) {
+        // More active head movement when speaking
+        modelRef.current.rotation.y = Math.sin(time * 3) * 0.05;
+        modelRef.current.rotation.x = Math.sin(time * 2.5) * 0.02;
+        
+        // Subtle body movement
+        modelRef.current.position.x = baseX + Math.sin(time * 4) * 0.01;
+        
+        // Lip sync simulation - rapid movement
+        mouthRef.current.openAmount = Math.abs(Math.sin(time * mouthRef.current.speed)) * 0.3;
+        
+      } else if (isTyping) {
+        // Thinking animation - slower head tilt
+        modelRef.current.rotation.y = Math.sin(time * 1) * 0.08;
+        modelRef.current.rotation.x = Math.sin(time * 0.8) * 0.03;
+      } else {
+        // Idle animation - gentle rotation
+        modelRef.current.rotation.y = Math.sin(time * 0.3) * 0.1;
+        modelRef.current.rotation.x = 0;
+      }
+
+      // Apply mouth animation to mesh if available
+      scene.traverse((child) => {
+        if (child.isMesh && child.morphTargetInfluences) {
+          // Assuming there's a mouth morph target (index 0 often controls mouth)
+          // Adjust based on your model's morph targets
+          if (isSpeaking && child.morphTargetInfluences.length > 0) {
+            child.morphTargetInfluences[0] = mouthRef.current.openAmount;
+          } else {
+            child.morphTargetInfluences[0] = 0;
+          }
+        }
+      });
+    }
+  });
+
+  return <primitive ref={modelRef} object={scene} scale={1.8} />;
+}
+
+// Main Avatar3D component
+export default function Avatar3D({
+  isTyping = false,
+  isSpeaking = false,
+  showControls = false,
+  baseX = 0,
+  baseY = -1.5,
+  baseZ = -2,
+  cameraPosition = [0, 0.2, 2],
+  zoom = 30
+}) {
+  return (
+    <div className="w-full h-full bg-gradient-to-br from-purple-50 to-indigo-50">
+      <Canvas camera={{ position: cameraPosition, fov: zoom }} shadows>
+        {/* Lights */}
+        <ambientLight intensity={0.6} />
+        <directionalLight position={[5, 5, 5]} intensity={0.8} castShadow />
+        <spotLight
+          position={[-5, 5, 2]}
+          intensity={0.3}
+          angle={0.3}
+          penumbra={1}
+          color="#8b5cf6"
+        />
+
+        <Suspense fallback={null}>
+          <AvatarModel
+            isTyping={isTyping}
+            isSpeaking={isSpeaking}
+            baseX={baseX}
+            baseY={baseY}
+            baseZ={baseZ}
+          />
+          <Environment preset="city" />
+        </Suspense>
+
+        {/* Optional camera controls */}
+        {showControls && <OrbitControls enableZoom={true} />}
+      </Canvas>
+    </div>
+  );
+}
