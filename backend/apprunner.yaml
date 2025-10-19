@@ -1,0 +1,14 @@
+version: 1.0
+runtime: python3.11
+port: 8000
+build:
+  commands:
+    - python3 -m pip install --no-cache-dir -r requirements.txt
+startCommand: python3 strand_main.py
+healthCheck:
+  protocol: HTTP
+  path: /health
+  interval: 10
+  timeout: 5
+  healthyThreshold: 1
+  unhealthyThreshold: 5
