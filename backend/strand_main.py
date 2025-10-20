@@ -9,8 +9,6 @@ load_dotenv()
 print("=" * 60)
 print("🔧 STRAND SDK - WealthWise AI Robo-Advisor")
 print("=" * 60)
-print(f"AWS_ACCESS_KEY_ID: {os.getenv('AWS_ACCESS_KEY_ID', 'NOT_SET')[:15]}...")
-print("=" * 60)
 print()
 
 
@@ -37,7 +35,7 @@ from strand_recommendation_agent import (
 # Import existing agents for backward compatibility
 from market_report_agent import HybridMarketDataAgent
 from portfolio_analysis_agent import PortfolioAnalysisAgent
-from qbusiness_service import get_qbusiness_service
+from qbusiness_service import SmartQBusinessService
 
 app = FastAPI(
     title="WealthWise AI Robo-Advisor API (Strand-Powered)",
@@ -88,6 +86,36 @@ print()
 print("🔄 Initializing Legacy Agents...")
 market_agent = HybridMarketDataAgent(delay_between_calls=0.3, max_retries=3)
 analysis_agent = PortfolioAnalysisAgent()
+
+# ==================== Q BUSINESS INITIALIZATION ====================
+print()
+print("🔌 Initializing Q Business Service...")
+from qbusiness_service import SmartQBusinessService
+
+# Global singleton for Q Business
+_qbusiness_service_singleton = None
+
+def initialize_qbusiness_service():
+    """Initialize Q Business service with DynamoDB tables"""
+    global _qbusiness_service_singleton
+    if _qbusiness_service_singleton is None:
+        _qbusiness_service_singleton = SmartQBusinessService(
+            users_table=users_table,
+            portfolios_table=portfolios_table
+        )
+    return _qbusiness_service_singleton
+
+def get_qbusiness_service():
+    """Get the initialized Q Business service singleton"""
+    global _qbusiness_service_singleton
+    if _qbusiness_service_singleton is None:
+        _qbusiness_service_singleton = initialize_qbusiness_service()
+    return _qbusiness_service_singleton
+
+# Initialize immediately at startup
+_qbusiness_service_singleton = initialize_qbusiness_service()
+print("✅ Q Business Service initialized with DynamoDB tables")
+# ==================== END Q BUSINESS INITIALIZATION ====================
 
 # Initialize Strand Components ✨
 print()
@@ -331,47 +359,38 @@ class ChatResponse(BaseModel):
     error: Optional[str] = None
 
 # Then replace the chat endpoint with this:
+# In strand_main.py
+
 @app.post("/api/qbusiness/chat", response_model=ChatResponse)
 async def chat(
     request: ChatRequest,
     user_email: Optional[str] = Query(None, description="User email (optional)")
 ):
-    """
-    Send a message to Q Business and get a response
-    
-    Args:
-        request: Chat request with message and optional conversation context
-        user_email: Optional user email (not used in anonymous mode)
-    
-    Returns:
-        ChatResponse with Q Business response
-    """
     try:
-        # Get Q Business service
         qb_service = get_qbusiness_service()
         
-        # Validate IDs if provided (additional safety check)
         conversation_id = request.conversation_id
         parent_message_id = request.parent_message_id
         
-        # Only pass valid UUIDs to the service
         if conversation_id and len(conversation_id) < 36:
-            print(f"⚠️ Received invalid conversation_id from client: {conversation_id}")
-            conversation_id = None  # Start new conversation
-        
+            conversation_id = None
         if parent_message_id and len(parent_message_id) < 36:
-            print(f"⚠️ Received invalid parent_message_id from client: {parent_message_id}")
             parent_message_id = None
         
-        # Call Q Business
+        # ✅ Call with user_email parameter
         result = qb_service.chat_sync(
             user_message=request.message,
-            user_id=user_email,  # Not used in anonymous mode
+            user_email=user_email or 'anonymous@wealthwise.com',  # ← Changed parameter name
             conversation_id=conversation_id,
             parent_message_id=parent_message_id
         )
         
-        # Return response
+        # Log classification
+        if result['success']:
+            query_type = result.get('queryType', 'unknown')
+            context_injected = result.get('contextInjected', False)
+            print(f"📊 Query Type: {query_type.upper()}, Context Injected: {context_injected}")
+        
         return ChatResponse(
             success=result['success'],
             system_message=result.get('systemMessage', ''),
@@ -384,8 +403,10 @@ async def chat(
         
     except Exception as e:
         print(f"❌ API Error: {e}")
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
-
+    
 
 @app.get("/api/qbusiness/conversations")
 async def list_conversations(
@@ -1024,114 +1045,12 @@ async def get_recommendations(email: str):
         )
 
 
-# -=========== q business endpoint =======
-
-# Create an API endpoint that Amazon Q can call
-# In your main FastAPI file (e.g., app.py)
-
-def to_float(value):
-    """Safely convert DynamoDB Decimal or string to float"""
-    if isinstance(value, Decimal):
-        return float(value)
-    try:
-        return float(value)
-    except:
-        return 0.0
-
-
-@app.get("/api/q-business/user-context/{email}")
-async def get_user_context_for_q(email: str):
-    """
-    Endpoint that Amazon Q Business Lambda will call to get user data
-    """
-    try:
-        # 1️⃣ Fetch user profile
-        user_resp = users_table.get_item(Key={"userId": email})
-        user_profile = user_resp.get("Item")
-
-        if not user_profile:
-            return {"error": "User not found", "context": ""}
-
-        # 2️⃣ Fetch portfolio
-        portfolio_resp = portfolios_table.get_item(Key={"userId": email})
-        portfolio = portfolio_resp.get("Item", {})
-
-        # Extract holdings
-        stocks = portfolio.get("stocks", [])
-        bonds = portfolio.get("bonds", [])
-        etfs = portfolio.get("etfs", [])
-        cash_savings = to_float(portfolio.get("cashSavings", 0))
-
-        # 3️⃣ Compute totals
-        stock_value = sum(to_float(s.get("quantity")) * to_float(s.get("avgPrice")) for s in stocks)
-        bond_value = sum(to_float(b.get("quantity")) * to_float(b.get("avgPrice")) for b in bonds)
-        etf_value = sum(to_float(e.get("quantity")) * to_float(e.get("avgPrice")) for e in etfs)
-        total_value = stock_value + bond_value + etf_value + cash_savings
-
-        # 4️⃣ Risk Analysis
-        risk_analysis = user_profile.get("riskAnalysis", {})
-
-        # 5️⃣ Build Context
-        context = f"""
-USER PROFILE INFORMATION:
-- Name: {user_profile.get('name', 'User')}
-- Email: {email}
-- Age: {user_profile.get('age', 'N/A')}
-- Occupation: {user_profile.get('occupation', 'Professional')}
-- Risk Tolerance: {user_profile.get('riskTolerance', 'moderate')}
-- Investment Horizon: {user_profile.get('investmentHorizon', '5-10')} years
-- Investment Goal: {user_profile.get('investmentGoal', 'wealth accumulation')}
-- Monthly SIP: ₹{user_profile.get('monthlyContribution', 0)}
-
-RISK ASSESSMENT:
-- Risk Score: {risk_analysis.get('riskScore', 'Not assessed')}
-- Risk Label: {risk_analysis.get('riskLabel', 'Not assessed')}
-- Recommendation: {risk_analysis.get('recommendation', 'Complete risk assessment')}
-- Rationale: {risk_analysis.get('rationale', 'No risk analysis available')}
-
-PORTFOLIO SUMMARY:
-- Total Portfolio Value: ₹{total_value:,.2f}
-- Total Holdings: {len(stocks) + len(bonds) + len(etfs)} assets
-- Stocks: {len(stocks)} worth ₹{stock_value:,.2f} ({(stock_value/total_value*100) if total_value > 0 else 0:.1f}%)
-- Bonds: {len(bonds)} worth ₹{bond_value:,.2f} ({(bond_value/total_value*100) if total_value > 0 else 0:.1f}%)
-- ETFs: {len(etfs)} worth ₹{etf_value:,.2f} ({(etf_value/total_value*100) if total_value > 0 else 0:.1f}%)
-- Cash: ₹{cash_savings:,.2f} ({(cash_savings/total_value*100) if total_value > 0 else 0:.1f}%)
-
-STOCK HOLDINGS:
-{chr(10).join([f"- {s.get('symbol', 'Unknown')}: {s.get('quantity', 0)} units @ ₹{s.get('avgPrice', 0)}" for s in stocks]) if stocks else '- No stocks'}
-
-BOND HOLDINGS:
-{chr(10).join([f"- {b.get('symbol', 'Unknown')}: {b.get('quantity', 0)} units @ ₹{b.get('avgPrice', 0)}" for b in bonds]) if bonds else '- No bonds'}
-
-ETF HOLDINGS:
-{chr(10).join([f"- {e.get('symbol', 'Unknown')}: {e.get('quantity', 0)} units @ ₹{e.get('avgPrice', 0)}" for e in etfs]) if etfs else '- No ETFs'}
-
-IMPORTANT: Use this info to give personalized insights specific to {user_profile.get('name', 'the user')}.
-"""
-
-        return {
-            "success": True,
-            "email": email,
-            "context": context.strip(),
-            "timestamp": datetime.now().isoformat(),
-        }
-
-    except Exception as e:
-        print(f"Error fetching user context: {e}")
-        return {"success": False, "error": str(e), "context": ""}
-    
-    
-
 if __name__ == "__main__":
     import uvicorn
     print("=" * 60)
     print("🚀 WealthWise AI Robo-Advisor Backend Server")
     print("   Powered by Strand SDK + Claude Sonnet 4")
     print("=" * 60)
-    print("📡 Server running on port 8000")
-    print("🌍 Environment: development")
-    print("🔗 API Base URL: http://localhost:8000")
-    print(f"📊 DynamoDB Region: {os.getenv('AWS_REGION', 'us-east-1')}")
     print()
     print("🆕 NEW STRAND ENDPOINTS:")
     print("   POST /api/chat?user_email={email}")

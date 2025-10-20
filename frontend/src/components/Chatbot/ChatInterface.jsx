@@ -11,6 +11,7 @@ import {
   AlertCircle,
   RefreshCw,
   Bot,
+  Layers,
   FileText
 } from 'lucide-react';
 import Message from './Message';
@@ -34,23 +35,23 @@ const ChatInterface = () => {
       color: 'indigo'
     },
     {
-      icon: TrendingUp,
-      label: 'Market Trends',
-      query: 'What are the current market trends?',
-      color: 'purple'
-    },
+    icon: Layers,
+    label: 'Asset Allocation',
+    query: 'Show my asset allocation across stocks, bonds, ETFs, and cash',
+    color: 'teal'
+  },
+  {
+    icon: RefreshCw,
+    label: 'Rebalance Suggestions',
+    query: 'Suggest how to rebalance my portfolio for better risk-adjusted returns',
+    color: 'emerald'
+  },
     {
       icon: Shield,
       label: 'Risk Analysis',
       query: 'Analyze my risk profile',
       color: 'green'
     },
-    {
-      icon: Target,
-      label: 'Recommendations',
-      query: 'Give me stock recommendations',
-      color: 'blue'
-    }
   ];
 
   // Auto-scroll to bottom when new messages arrive
@@ -71,10 +72,8 @@ const ChatInterface = () => {
   };
 
   const handleQBusinessMessage = async (query) => {
-    // Clear any previous errors
     setError(null);
 
-    // Add user message
     const userMessage = {
       role: 'user',
       content: query,
@@ -99,7 +98,6 @@ const ChatInterface = () => {
         };
         setMessages(prev => [...prev, assistantMessage]);
       } else {
-        // Handle API error
         const errorMessage = {
           role: 'assistant',
           content: response.message || 'Sorry, I encountered an error. Please try again.',
@@ -114,7 +112,7 @@ const ChatInterface = () => {
       console.error('Q Business error:', error);
       const errorMessage = {
         role: 'assistant',
-        content: 'Sorry, I encountered an error connecting to Q Business. Please ensure the backend is running.',
+        content: 'Sorry, I encountered an error connecting to Q Business.',
         timestamp: Date.now(),
         agent: 'Q Business',
         isError: true
@@ -129,7 +127,6 @@ const ChatInterface = () => {
   const handleQuickAction = (query) => {
     if (!isTyping) {
       setInputValue(query);
-      // Auto-submit after a brief delay
       setTimeout(() => {
         handleQBusinessMessage(query);
         setInputValue('');
@@ -147,9 +144,8 @@ const ChatInterface = () => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
+    <div className="h-full w-full flex flex-col bg-gray-50">
+      <div className="flex-none bg-white border-b border-gray-200 px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg flex items-center justify-center">
@@ -165,9 +161,6 @@ const ChatInterface = () => {
             <div className="flex items-center space-x-2 px-3 py-1.5 bg-purple-50 text-purple-700 rounded-lg border border-purple-200">
               <Bot className="w-4 h-4" />
               <span className="text-sm font-medium">Q Business</span>
-              <span className="px-2 py-0.5 bg-purple-100 text-purple-700 text-xs rounded-full">
-                📄 Docs
-              </span>
             </div>
             
             {messages.length > 0 && (
@@ -176,13 +169,12 @@ const ChatInterface = () => {
                 className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
               >
                 <RefreshCw className="w-4 h-4" />
-                <span>Clear Chat</span>
+                <span className="hidden sm:inline">Clear</span>
               </button>
             )}
           </div>
         </div>
 
-        {/* Error Banner */}
         {error && (
           <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start space-x-2">
             <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
@@ -200,85 +192,73 @@ const ChatInterface = () => {
         )}
       </div>
 
-      {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
-        {messages.length === 0 ? (
-          // Empty State
-          <div className="h-full flex flex-col items-center justify-center text-center px-4">
-            <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-indigo-100 rounded-full flex items-center justify-center mb-6">
-              <Bot className="w-10 h-10 text-purple-600" />
-            </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-3">
-              Welcome back, {currentUser?.name || 'Investor'}!
-            </h3>
-            <p className="text-gray-600 mb-2 max-w-md">
-              I'm Amazon Q Business, trained on your company's documents and data. Ask me about your indexed portfolio documents, strategies, and specific holdings.
-            </p>
-            <p className="text-sm text-gray-500 mb-8">
-              💡 I can search through your uploaded documents and provide specific insights.
-            </p>
+      <div className="flex-1 overflow-y-auto">
+        <div className="px-6 py-6 space-y-6">
+          {messages.length === 0 ? (
+            <div className="h-full flex flex-col items-center justify-center text-center px-4 min-h-[400px]">
+              <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-indigo-100 rounded-full flex items-center justify-center mb-6">
+                <Bot className="w-10 h-10 text-purple-600" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-3">
+                Welcome back, {currentUser?.name || 'Investor'}!
+              </h3>
+              <p className="text-gray-600 mb-2 max-w-md">
+                I'm Amazon Q Business, trained on our company's documents and data. Ask me about your indexed portfolio documents, strategies, and specific holdings.
+              </p>
+              <p className="text-sm text-gray-500 mb-8">
+                💡 I can search through your uploaded documents and provide specific insights.
+              </p>
 
-            {/* Quick Actions */}
-            <div className="w-full max-w-2xl">
-              <p className="text-sm font-medium text-gray-700 mb-4">Quick Actions:</p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {quickActions.map((action, index) => (
-                  <button
-                    key={index}
-                    onClick={() => handleQuickAction(action.query)}
-                    className="flex items-center space-x-3 p-4 bg-white border-2 border-gray-200 rounded-xl hover:border-purple-500 hover:bg-purple-50 transition-all group"
-                  >
-                    <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center group-hover:bg-purple-200 transition-colors">
-                      <action.icon className="w-5 h-5 text-purple-600" />
-                    </div>
-                    <div className="flex-1 text-left">
-                      <p className="font-medium text-gray-900">{action.label}</p>
-                      <p className="text-xs text-gray-500 mt-0.5">{action.query}</p>
-                    </div>
-                  </button>
-                ))}
+              {/* Quick Actions */}
+              <div className="w-full max-w-2xl">
+                <p className="text-sm font-medium text-gray-700 mb-4">Quick Actions:</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {quickActions.map((action, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleQuickAction(action.query)}
+                      className="flex items-center space-x-3 p-4 bg-white border-2 border-gray-200 rounded-xl hover:border-purple-500 hover:bg-purple-50 transition-all group"
+                    >
+                      <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center group-hover:bg-purple-200 transition-colors">
+                        <action.icon className="w-5 h-5 text-purple-600" />
+                      </div>
+                      <div className="flex-1 text-left">
+                        <p className="font-medium text-gray-900">{action.label}</p>
+                        <p className="text-xs text-gray-500 mt-0.5">{action.query}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
-        ) : (
-          // Messages
-          <>
-            {messages.map((message, index) => (
-              <Message key={index} message={message} />
-            ))}
+          ) : (
+            
+            <>
+              {messages.map((message, index) => (
+                <Message key={index} message={message} />
+              ))}
 
-            {/* Typing Indicator */}
-            {isTyping && (
-              <div className="flex items-start space-x-3">
-                <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center flex-shrink-0">
-                  <Bot className="w-4 h-4 text-white" />
-                </div>
-                <div className="bg-white rounded-2xl rounded-tl-none px-4 py-3 shadow-sm border border-gray-200">
-                  <div className="flex items-center space-x-2">
-                    <Loader2 className="w-4 h-4 text-purple-600 animate-spin" />
-                    <span className="text-sm text-gray-600">Searching documents...</span>
+              {isTyping && (
+                <div className="flex items-start space-x-3">
+                  <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Bot className="w-4 h-4 text-white" />
+                  </div>
+                  <div className="bg-white rounded-2xl rounded-tl-none px-4 py-3 shadow-sm border border-gray-200">
+                    <div className="flex items-center space-x-2">
+                      <Loader2 className="w-4 h-4 text-purple-600 animate-spin" />
+                      <span className="text-sm text-gray-600">Thinking....</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            <div ref={messagesEndRef} />
-          </>
-        )}
+              <div ref={messagesEndRef} />
+            </>
+          )}
+        </div>
       </div>
 
-      {/* Input Area */}
-      <div className="bg-white border-t border-gray-200 px-6 py-4">
-        {/* Context Indicator */}
-        {messages.length > 0 && qBusinessService.getConversationId() && (
-          <div className="mb-3 flex items-center space-x-2 text-xs text-gray-500">
-            <FileText className="w-3 h-3" />
-            <span>
-              Conversation ID: {qBusinessService.getConversationId()?.substring(0, 8)}...
-            </span>
-          </div>
-        )}
-
+      <div className="flex-none bg-white border-t border-gray-200 px-6 py-4">
         <form onSubmit={handleSubmit} className="flex items-end space-x-3">
           <div className="flex-1">
             <textarea
@@ -314,22 +294,6 @@ const ChatInterface = () => {
             <span className="hidden sm:inline">Send</span>
           </button>
         </form>
-
-        {/* Quick Tips */}
-        {messages.length === 0 && (
-          <div className="mt-3 flex flex-wrap gap-2">
-            <span className="text-xs text-gray-500">Try asking:</span>
-            {['What documents do I have?', 'Search for stock analysis', 'Find bond information'].map((tip, index) => (
-              <button
-                key={index}
-                onClick={() => setInputValue(tip)}
-                className="text-xs px-3 py-1 bg-purple-50 text-purple-600 rounded-full hover:bg-purple-100 transition-colors"
-              >
-                {tip}
-              </button>
-            ))}
-          </div>
-        )}
       </div>
     </div>
   );
