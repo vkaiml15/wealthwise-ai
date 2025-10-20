@@ -1,13 +1,14 @@
 import boto3
 from typing import Dict, Optional
 from decimal import Decimal
+import os
 
 
 class SmartQBusinessService:
     def __init__(self, users_table, portfolios_table, region_name='us-east-1'):
         """Initialize with existing DynamoDB table references"""
         self.q_business = boto3.client('qbusiness', region_name=region_name)
-        self.application_id = '5ec5ed78-be26-4395-afdf-75c9a6a09e3a'
+        self.application_id = os.getenv('Q_BUSINESS_APPLICATION_ID')
         
         self.users_table = users_table
         self.portfolios_table = portfolios_table
