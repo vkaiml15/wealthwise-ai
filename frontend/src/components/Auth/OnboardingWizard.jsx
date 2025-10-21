@@ -68,30 +68,22 @@ const ExtendedOnboardingWizard = () => {
 
   // Mock data for dropdowns
   const bondOptions = [
-  // Gilt Funds (Government Securities - Safest)
-  { value: 'IDFC_GILT', label: 'IDFC Gilt Fund - Government Securities' },
-  { value: 'ICICI_GILT', label: 'ICICI Prudential Gilt Fund' },
-  { value: 'SBI_GILT', label: 'SBI Magnum Gilt Fund' },
+  // Government Securities ETFs (These work on Yahoo Finance)
+  { value: 'CPSEETF.NS', label: 'CPSE ETF (Government PSU Companies)' },
+  { value: 'BHARTBOND.NS', label: 'Bharat Bond ETF' },
   
-  // Short Duration Debt Funds (Low Risk)
-  { value: 'HDFC_SHORT_DEBT', label: 'HDFC Short Term Debt Fund' },
-  { value: 'ICICI_SHORT_DEBT', label: 'ICICI Prudential Short Term Fund' },
-  { value: 'SBI_SHORT_DEBT', label: 'SBI Short Term Debt Fund' },
+  // Note: Most mutual fund debt funds are NOT on Yahoo Finance
+  // They use different identifiers and are not publicly traded
   
-  // Corporate Bond Funds (Moderate Risk)
-  { value: 'HDFC_CORP_BOND', label: 'HDFC Corporate Bond Fund' },
-  { value: 'ICICI_CORP_BOND', label: 'ICICI Corporate Bond Fund' },
-  { value: 'AXIS_CORP_BOND', label: 'Axis Corporate Debt Fund' },
+  // Alternative: Use these as "Bond-like" investments
+  { value: 'LIQUIDBEES.NS', label: 'Liquid BeES (Ultra Short Term)' },
+  { value: 'PSUBNKBEES.NS', label: 'PSU Bank BeES (Banking Sector)' },
   
-  // Liquid Funds (Ultra Short-term, Cash Equivalent)
-  { value: 'HDFC_LIQUID', label: 'HDFC Liquid Fund' },
-  { value: 'ICICI_LIQUID', label: 'ICICI Liquid Fund' },
-  { value: 'SBI_LIQUID', label: 'SBI Liquid Fund' },
-  
-  // Banking & PSU Debt Funds
-  { value: 'AXIS_BANKING_DEBT', label: 'Axis Banking & PSU Debt Fund' },
-  { value: 'ICICI_BANKING_DEBT', label: 'ICICI Banking & PSU Debt Fund' }
+  // Government Bond ETFs
+  { value: 'SETFGILT.NS', label: 'SBI ETF 10 Year Gilt' },
+  { value: 'ICICIGILT.NS', label: 'ICICI Prudential Gilt ETF' }
 ];
+
 
 // ========================================
 // INDIAN STOCKS (NSE Listed)
@@ -141,44 +133,34 @@ const stockOptions = [
 // INDIAN ETFs (Exchange Traded Funds)
 // ========================================
 const etfOptions = [
-  // Index ETFs (Most Popular)
-  { 
-    value: 'NIFTYBEES.NS', 
-    label: 'Nifty BeES - Nifty 50 Index' 
-  },
-  { 
-    value: 'JUNIORBEES.NS', 
-    label: 'Junior BeES - Nifty Next 50' 
-  },
+  // Index ETFs (Most Popular & Liquid)
+  { value: 'NIFTYBEES.NS', label: 'Nippon India ETF Nifty BeES (Nifty 50)' },
+  { value: 'JUNIORBEES.NS', label: 'Nippon India ETF Junior BeES (Nifty Next 50)' },
+  { value: 'BANKBEES.NS', label: 'Nippon India ETF Bank BeES (Nifty Bank)' },
+  { value: 'GOLDBEES.NS', label: 'Nippon India ETF Gold BeES' },
+  { value: 'LIQUIDBEES.NS', label: 'Nippon India ETF Liquid BeES' },
+  
+  // HDFC ETFs
+  { value: 'HDFCNIFTY.NS', label: 'HDFC Nifty 50 ETF' },
+  { value: 'HDFCSENSEX.NS', label: 'HDFC Sensex ETF' },
+  
+  // ICICI ETFs  
+  { value: 'ICICIB22.NS', label: 'ICICI Prudential Nifty ETF' },
+  { value: 'ICICINIFTY.NS', label: 'ICICI Prudential Nifty 50 ETF' },
+  
+  // SBI ETFs
+  { value: 'SETFNIFTY.NS', label: 'SBI ETF Nifty 50' },
+  { value: 'SETFSENSEX.NS', label: 'SBI ETF Sensex' },
   
   // Sectoral ETFs
-  { 
-    value: 'BANKBEES.NS', 
-    label: 'Bank BeES - Banking Sector' 
-  },
-  { 
-    value: 'ITBEES.NS', 
-    label: 'IT BeES - Technology Sector' 
-  },
+  { value: 'ITBEES.NS', label: 'Nippon India ETF IT BeES (Nifty IT)' },
+  { value: 'PSUBNKBEES.NS', label: 'Nippon India ETF PSU Bank BeES' },
   
-  // Commodity ETFs
-  { 
-    value: 'GOLDBEES.NS', 
-    label: 'Gold BeES - Gold ETF' 
-  },
-  
-  // Liquid/Safe ETFs
-  { 
-    value: 'LIQUIDBEES.NS', 
-    label: 'Liquid BeES - Overnight Fund' 
-  },
-  
-  // PSU ETFs
-  { 
-    value: 'CPSEETF.NS', 
-    label: 'CPSE ETF - Public Sector Companies' 
-  }
+  // International ETFs
+  { value: 'MOTN100.NS', label: 'Motilal Oswal Nasdaq 100 ETF' },
+  { value: 'MOSL500.NS', label: 'Motilal Oswal S&P 500 ETF' }
 ];
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
