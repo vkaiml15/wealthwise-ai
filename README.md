@@ -5,19 +5,34 @@
 ## 🚀 Features
 
 ### Core Capabilities
-- **AI-Powered Portfolio Analysis** - Comprehensive portfolio health scoring and recommendations
-- **Real-Time Market Data** - Live market data integration with intelligent fallback systems
-- **Personalized Recommendations** - AI-generated investment advice tailored to user profiles
-- **Risk Assessment** - Advanced risk profiling and tolerance analysis
-- **Conversational Interface** - Natural language chat with AI agents
-- **Q Business Integration** - AWS Q Business for enhanced financial insights
+- **🤖 Explainable AI (XAI) Recommendations** - Transparent, interpretable investment advice with detailed reasoning
+- **📊 AI-Powered Portfolio Analysis** - Comprehensive portfolio health scoring with confidence metrics
+- **📈 Real-Time Market Data** - Live market data integration with intelligent fallback systems
+- **🎯 Personalized Risk Assessment** - Advanced risk profiling with explainable factors
+- **💬 Conversational AI Interface** - Natural language chat with multi-agent orchestration
+- **☁️ AWS Q Business Integration** - Enterprise-grade financial insights and document analysis
+- **📋 Comprehensive Logging** - CloudWatch integration for audit trails and performance monitoring
 
-### AI Agents (Strand SDK)
-- **Market Agent** - Real-time market data and analysis
-- **Portfolio Agent** - Portfolio health scoring and optimization
-- **Recommendation Agent** - Personalized investment recommendations
-- **Risk Agent** - Risk profiling and assessment
-- **Orchestrator Agent** - Coordinates multi-agent conversations
+### 🧠 Explainable AI (XAI) Features
+
+#### **Transparent Decision Making**
+- **Methodology Disclosure** - Clear explanation of recommendation algorithms combining Modern Portfolio Theory and behavioral finance
+- **Factor Attribution** - Detailed breakdown of factors influencing each recommendation (age, risk tolerance, market conditions, etc.)
+- **Confidence Scoring** - Quantified confidence levels for all recommendations with explanations
+- **Personalization Transparency** - Clear indication of how user profile affects recommendations
+
+#### **Comprehensive Audit Trail**
+- **CloudWatch Integration** - All AI decisions logged with timestamps and reasoning
+- **Recommendation Lineage** - Full traceability from input data to final recommendations  
+- **Performance Metrics** - Confidence scores, data quality assessments, and model performance tracking
+- **User Context Logging** - Detailed logging of user interactions and AI responses for compliance
+
+#### **AI Agents (Strand SDK)**
+- **Market Agent** - Real-time market data analysis with explainable market sentiment
+- **Portfolio Agent** - Portfolio health scoring with detailed factor breakdown
+- **Recommendation Agent** - Personalized investment advice with XAI insights and confidence metrics
+- **Risk Agent** - Risk profiling with transparent factor analysis and scoring methodology
+- **Orchestrator Agent** - Multi-agent coordination with conversation context and decision routing
 
 ## 🏗️ Architecture
 
@@ -70,7 +85,52 @@ WealthWise/
   - Alpha Vantage API key (free tier available)
   - Finnhub API key (free tier available)
 
-## 🚀 Complete Setup Guide
+## 🚀 Quick Start (Cross-Platform)
+
+### Option 1: Local Development Setup
+
+#### **Recommended: Cross-Platform Python Script**
+```bash
+# Works on Windows, macOS, and Linux with Python 3.6+
+python infrastructure/scripts/setup-local.py
+```
+
+#### **Alternative: Platform-Specific Scripts**
+
+**Windows (Command Prompt)**
+```cmd
+infrastructure\scripts\setup-local.bat
+```
+
+**macOS/Linux (Bash)**
+```bash
+chmod +x infrastructure/scripts/setup-local.sh
+./infrastructure/scripts/setup-local.sh
+```
+
+### Option 2: CloudFormation Deployment
+```bash
+# Deploy complete AWS infrastructure
+chmod +x infrastructure/scripts/deploy-cloudformation.sh
+./infrastructure/scripts/deploy-cloudformation.sh dev us-east-1
+```
+
+### Option 3: Terraform Deployment
+```bash
+# Deploy with Terraform (infrastructure versioning)
+chmod +x infrastructure/scripts/deploy-terraform.sh
+./infrastructure/scripts/deploy-terraform.sh dev us-east-1
+```
+
+### Option 4: Docker Compose (Local Development)
+```bash
+# Run everything in containers
+cd infrastructure/docker
+cp .env.example .env  # Edit with your AWS credentials
+docker-compose up -d
+```
+
+## 🛠️ Manual Setup Guide
 
 ### Step 1: Clone the Repository
 ```bash
@@ -296,6 +356,33 @@ The application will be available at:
 - **Backend API**: http://localhost:8000
 - **API Documentation**: http://localhost:8000/docs
 
+## 📁 Infrastructure as Code
+
+This project includes complete Infrastructure as Code (IaC) templates for easy deployment:
+
+### Available IaC Options
+- **CloudFormation**: AWS-native infrastructure templates
+- **Terraform**: Cross-platform infrastructure with state management  
+- **Docker Compose**: Containerized local development
+- **Deployment Scripts**: Automated setup and deployment
+
+### Quick Commands
+```bash
+# Complete local setup
+./infrastructure/scripts/setup-local.sh
+
+# Deploy to AWS (CloudFormation)
+./infrastructure/scripts/deploy-cloudformation.sh dev
+
+# Deploy to AWS (Terraform) 
+./infrastructure/scripts/deploy-terraform.sh dev
+
+# Clean up AWS resources
+./infrastructure/scripts/cleanup.sh dev
+```
+
+**📚 Detailed IaC Documentation**: See [infrastructure/README.md](infrastructure/README.md)
+
 ## 🔧 Configuration
 
 ### Environment Variables
@@ -351,12 +438,45 @@ The application uses AWS credentials in this order:
 - `GET /api/portfolio/{email}/dashboard` - Complete dashboard data
 - `PUT /api/portfolio/{email}` - Update portfolio
 
-#### AI-Powered Analysis (Strand SDK)
-- `POST /api/chat` - Conversational interface
-- `GET /api/portfolio/{email}/analysis` - Portfolio analysis
-- `GET /api/portfolio/{email}/recommendations` - AI recommendations
-- `GET /api/portfolio/{email}/risk-analysis` - Risk assessment
-- `POST /api/portfolio/{email}/ask` - Ask specific questions
+#### AI-Powered Analysis with Explainable AI (Strand SDK)
+- `POST /api/chat` - Conversational interface with XAI explanations
+- `GET /api/portfolio/{email}/analysis` - Portfolio analysis with confidence metrics
+- `GET /api/portfolio/{email}/recommendations` - AI recommendations with detailed reasoning
+- `GET /api/portfolio/{email}/risk-analysis` - Risk assessment with factor attribution
+- `POST /api/portfolio/{email}/ask` - Ask specific questions with explainable responses
+
+#### XAI-Enhanced Response Format
+All AI endpoints return explainable responses with:
+```json
+{
+  "success": true,
+  "recommendations": [...],
+  "ai_insights": "Personalized explanation generated by Claude Sonnet 4",
+  "explainability": {
+    "methodology": "Modern Portfolio Theory + Behavioral Finance",
+    "factors_considered": [
+      "User age and risk profile",
+      "Portfolio allocation and diversification", 
+      "Market conditions and timing",
+      "Investment horizon and goals"
+    ]
+  },
+  "confidence": {
+    "recommendation_confidence": "high",
+    "data_quality": {
+      "risk_assessment": "high",
+      "market_data": "medium", 
+      "user_profile": "high"
+    },
+    "explanation": "Confidence based on data completeness and model certainty"
+  },
+  "metadata": {
+    "user": {...},
+    "portfolio": {...},
+    "market_context": {...}
+  }
+}
+```
 
 #### Q Business Integration
 - `POST /api/qbusiness/chat` - Q Business chat interface
@@ -378,37 +498,79 @@ const chatResponse = await fetch('/api/chat?user_email=user@example.com', {
 });
 ```
 
-## 🤖 AI Agents
+## 🤖 AI Agents with Explainable AI
 
 ### Market Agent
-- Fetches real-time market data
-- Provides market analysis and trends
-- Supports multiple data sources with fallback
+- **Real-time Data Analysis** - Fetches and analyzes live market data with confidence scoring
+- **Market Sentiment Analysis** - Provides explainable market condition assessments
+- **Multi-source Integration** - Intelligent fallback systems with data quality metrics
+- **Audit Logging** - All market data requests and responses logged to CloudWatch
 
-### Portfolio Agent
-- Analyzes portfolio health and performance
-- Calculates diversification metrics
-- Provides optimization recommendations
+### Portfolio Agent  
+- **Health Scoring** - Transparent portfolio health calculations with factor breakdown
+- **Diversification Analysis** - Explainable diversification metrics and recommendations
+- **Performance Attribution** - Clear explanation of portfolio performance drivers
+- **Risk-Return Analysis** - Detailed risk-adjusted return calculations with methodology disclosure
 
-### Recommendation Agent
-- Generates personalized investment advice
-- Considers user risk profile and goals
-- Provides explainable AI insights
+### Recommendation Agent (XAI-Enhanced)
+- **Personalized Advice Generation** - AI-powered recommendations with detailed reasoning
+- **Confidence Metrics** - Quantified confidence scores for each recommendation
+- **Factor Attribution** - Clear breakdown of recommendation drivers:
+  - User age and investment horizon
+  - Risk tolerance and investment goals  
+  - Current portfolio allocation
+  - Market conditions and timing
+  - Historical performance data
+- **Methodology Transparency** - Disclosure of Modern Portfolio Theory and behavioral finance principles
+- **Explainable Insights** - Natural language explanations generated by Claude Sonnet 4
 
 ### Risk Agent
-- Assesses user risk tolerance
-- Analyzes portfolio risk metrics
-- Provides risk-adjusted recommendations
+- **Transparent Risk Assessment** - Clear methodology for risk tolerance evaluation
+- **Factor Analysis** - Detailed breakdown of risk factors considered
+- **Scoring Methodology** - Explainable risk scoring with confidence intervals
+- **Behavioral Finance Integration** - Consideration of behavioral biases with explanations
 
-## 🔒 Security
+### Orchestrator Agent
+- **Conversation Management** - Context-aware multi-agent coordination
+- **Decision Routing** - Transparent routing of queries to appropriate agents
+- **Response Synthesis** - Coherent combination of multi-agent responses
+- **Audit Trail** - Complete logging of agent interactions and decision paths
 
+## 🔒 Security & Compliance
+
+### Security Features
 - Password hashing with bcrypt
 - AWS IAM role-based access control
 - Environment variable configuration
 - Input validation with Pydantic models
 
+### Explainable AI Compliance
+- **Regulatory Compliance** - Meets requirements for transparent AI in financial services
+- **Audit Trail** - Complete logging of all AI decisions for regulatory review
+- **Bias Monitoring** - Continuous monitoring for algorithmic bias and fairness
+- **Model Governance** - Version control and change management for AI models
+- **Right to Explanation** - Users can request detailed explanations for any AI recommendation
+- **Data Lineage** - Full traceability of data sources used in AI decisions
+
+### Financial Services Compliance
+- **GDPR Compliance** - Right to explanation and data portability for AI decisions
+- **MiFID II Compliance** - Transparent investment advice with documented reasoning
+- **Fiduciary Standards** - AI recommendations include disclosure of methodology and limitations
+- **Risk Disclosure** - Clear communication of AI model limitations and confidence levels
+
 ## 🧪 Testing
 
+### Automated Local Environment Testing
+```bash
+# Cross-platform comprehensive testing (recommended)
+python infrastructure/scripts/test-local.py
+
+# Unix/Linux/macOS testing
+chmod +x infrastructure/scripts/test-local.sh
+./infrastructure/scripts/test-local.sh
+```
+
+### Manual Testing
 ```bash
 # Backend tests
 cd backend
@@ -417,6 +579,46 @@ python -m pytest
 # Frontend tests
 cd frontend
 npm test
+```
+
+### What the Automated Tests Check
+- ✅ Environment file configuration
+- ✅ Dependencies installation
+- ✅ Backend service startup and health
+- ✅ Frontend service startup and accessibility
+- ✅ API endpoint functionality
+- ✅ Cross-platform compatibility
+
+## � Monityoring & Explainable AI Logging
+
+### CloudWatch Integration
+- **AI Decision Logging** - All recommendation decisions logged with full context
+- **Performance Metrics** - Real-time monitoring of AI agent performance and response times
+- **Confidence Tracking** - Historical tracking of recommendation confidence scores
+- **Error Analysis** - Detailed logging of AI failures with root cause analysis
+
+### Audit Trail Features
+- **Recommendation Lineage** - Complete traceability from user input to AI recommendation
+- **Factor Attribution Logs** - Detailed logging of all factors considered in recommendations
+- **Model Performance Tracking** - Continuous monitoring of AI model accuracy and drift
+- **Compliance Logging** - Regulatory-compliant audit trails for financial recommendations
+
+### XAI Transparency Reports
+- **Decision Explanations** - Automated generation of human-readable decision explanations
+- **Confidence Intervals** - Statistical confidence bounds for all AI predictions
+- **Bias Detection** - Monitoring for algorithmic bias in recommendations
+- **Model Interpretability** - SHAP-style feature importance for recommendation factors
+
+### Real-time Monitoring
+```bash
+# View AI decision logs
+aws logs filter-log-events --log-group-name "/aws/wealthwise/prod/ai-decisions"
+
+# Monitor recommendation confidence
+aws logs filter-log-events --log-group-name "/aws/wealthwise/prod/confidence-metrics"
+
+# Track XAI explanations
+aws logs filter-log-events --log-group-name "/aws/wealthwise/prod/explainability"
 ```
 
 ## 📈 Deployment
@@ -455,7 +657,79 @@ For support and questions:
 
 ## 🔧 Troubleshooting
 
-### Common Issues
+### Common Issues by Platform
+
+#### **Windows-Specific Issues**
+
+1. **PowerShell Execution Policy**
+   ```powershell
+   # If you get execution policy error
+   Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+   
+   # Or run with bypass
+   powershell -ExecutionPolicy Bypass -File .\infrastructure\scripts\setup-local.ps1
+   ```
+
+2. **Python Command Not Found**
+   ```cmd
+   # Try different Python commands
+   python --version
+   python3 --version
+   py --version
+   
+   # Add Python to PATH or reinstall from python.org
+   ```
+
+3. **Long Path Issues**
+   ```cmd
+   # Enable long paths in Windows
+   # Run as Administrator in Command Prompt:
+   reg add HKLM\SYSTEM\CurrentControlSet\Control\FileSystem /v LongPathsEnabled /t REG_DWORD /d 1
+   ```
+
+#### **macOS-Specific Issues**
+
+1. **Permission Denied on Scripts**
+   ```bash
+   # Make scripts executable
+   chmod +x infrastructure/scripts/*.sh
+   
+   # Or run with bash directly
+   bash infrastructure/scripts/setup-local.sh
+   ```
+
+2. **Node.js/npm Issues**
+   ```bash
+   # Install using Homebrew
+   brew install node
+   
+   # Or use Node Version Manager
+   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+   nvm install node
+   ```
+
+#### **Linux-Specific Issues**
+
+1. **Permission Issues**
+   ```bash
+   # Fix permissions
+   sudo chown -R $USER:$USER ~/.npm
+   
+   # Or use node version manager to avoid sudo
+   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+   ```
+
+2. **Missing Dependencies**
+   ```bash
+   # Ubuntu/Debian
+   sudo apt update
+   sudo apt install python3-venv python3-pip nodejs npm git curl
+   
+   # CentOS/RHEL
+   sudo yum install python3 python3-pip nodejs npm git curl
+   ```
+
+#### **Cross-Platform Issues**
 
 1. **AWS Credentials Issues**
    ```bash
