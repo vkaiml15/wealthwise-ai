@@ -53,6 +53,14 @@ export const AuthProvider = ({ children }) => {
         etfsValue
       });
 
+      // Debug: Log all holdings with their types
+      console.log('All holdings with types:', holdings.map(h => ({
+        symbol: h.symbol,
+        type: h.type,
+        quantity: h.quantity,
+        currentValue: h.currentValue
+      })));
+
       // Calculate total invested amount from holdings
       const totalInvested = holdings.reduce((sum, h) => {
         return sum + (h.avgPrice * h.quantity);

@@ -140,6 +140,582 @@ class StrandMarketDataAgent:
         """Update cache with new data"""
         self.cache[symbol] = (time.time(), data)
     
+    def _get_fallback_data(self, symbol: str) -> Optional[Dict]:
+        """
+        Comprehensive fallback data for when all APIs fail
+        Provides realistic estimates for common ETFs, stocks, and funds
+        """
+        symbol_upper = symbol.upper()
+        
+        # ETF Fallback Data - Common US ETFs
+        etf_fallbacks = {
+            'SPY': {
+                'currentPrice': 445.0,
+                'sector': 'ETF - Large Cap',
+                'industry': 'Index Fund',
+                'beta': 1.0,
+                'week52High': 470.0,
+                'week52Low': 380.0,
+                'dayChange': 2.5,
+                'dayChangePct': 0.56,
+                'dividendYield': 1.3,
+                'ytdReturn': 12.5
+            },
+            'QQQ': {
+                'currentPrice': 385.0,
+                'sector': 'ETF - Technology',
+                'industry': 'Index Fund',
+                'beta': 1.15,
+                'week52High': 410.0,
+                'week52Low': 310.0,
+                'dayChange': 3.2,
+                'dayChangePct': 0.84,
+                'dividendYield': 0.6,
+                'ytdReturn': 18.2
+            },
+            'VTI': {
+                'currentPrice': 250.0,
+                'sector': 'ETF - Total Market',
+                'industry': 'Index Fund',
+                'beta': 1.0,
+                'week52High': 265.0,
+                'week52Low': 210.0,
+                'dayChange': 1.8,
+                'dayChangePct': 0.72,
+                'dividendYield': 1.4,
+                'ytdReturn': 11.8
+            },
+            'BND': {
+                'currentPrice': 78.5,
+                'sector': 'ETF - Bonds',
+                'industry': 'Bond Fund',
+                'beta': 0.1,
+                'week52High': 82.0,
+                'week52Low': 75.0,
+                'dayChange': 0.1,
+                'dayChangePct': 0.13,
+                'dividendYield': 3.8,
+                'ytdReturn': 2.1
+            },
+            'VXUS': {
+                'currentPrice': 62.0,
+                'sector': 'ETF - International',
+                'industry': 'Index Fund',
+                'beta': 0.85,
+                'week52High': 68.0,
+                'week52Low': 55.0,
+                'dayChange': 0.8,
+                'dayChangePct': 1.31,
+                'dividendYield': 2.8,
+                'ytdReturn': 8.4
+            },
+            'VNQ': {
+                'currentPrice': 95.0,
+                'sector': 'ETF - Real Estate',
+                'industry': 'REIT Fund',
+                'beta': 1.2,
+                'week52High': 105.0,
+                'week52Low': 80.0,
+                'dayChange': 1.2,
+                'dayChangePct': 1.28,
+                'dividendYield': 3.5,
+                'ytdReturn': 6.8
+            },
+            'IWM': {
+                'currentPrice': 220.0,
+                'sector': 'ETF - Small Cap',
+                'industry': 'Index Fund',
+                'beta': 1.3,
+                'week52High': 240.0,
+                'week52Low': 180.0,
+                'dayChange': 2.8,
+                'dayChangePct': 1.29,
+                'dividendYield': 1.1,
+                'ytdReturn': 9.2
+            },
+            'EFA': {
+                'currentPrice': 75.0,
+                'sector': 'ETF - International Developed',
+                'industry': 'Index Fund',
+                'beta': 0.9,
+                'week52High': 82.0,
+                'week52Low': 65.0,
+                'dayChange': 0.9,
+                'dayChangePct': 1.22,
+                'dividendYield': 2.9,
+                'ytdReturn': 7.8
+            },
+            'EEM': {
+                'currentPrice': 42.0,
+                'sector': 'ETF - Emerging Markets',
+                'industry': 'Index Fund',
+                'beta': 1.1,
+                'week52High': 48.0,
+                'week52Low': 36.0,
+                'dayChange': 0.6,
+                'dayChangePct': 1.45,
+                'dividendYield': 2.4,
+                'ytdReturn': 5.2
+            },
+            'GLD': {
+                'currentPrice': 185.0,
+                'sector': 'ETF - Commodities',
+                'industry': 'Gold Fund',
+                'beta': 0.2,
+                'week52High': 210.0,
+                'week52Low': 170.0,
+                'dayChange': -0.8,
+                'dayChangePct': -0.43,
+                'dividendYield': 0.0,
+                'ytdReturn': -2.1
+            },
+            'TLT': {
+                'currentPrice': 92.0,
+                'sector': 'ETF - Long Term Bonds',
+                'industry': 'Bond Fund',
+                'beta': -0.3,
+                'week52High': 105.0,
+                'week52Low': 85.0,
+                'dayChange': 0.3,
+                'dayChangePct': 0.33,
+                'dividendYield': 4.2,
+                'ytdReturn': -8.5
+            },
+            'XLF': {
+                'currentPrice': 38.0,
+                'sector': 'ETF - Financial',
+                'industry': 'Sector Fund',
+                'beta': 1.2,
+                'week52High': 42.0,
+                'week52Low': 32.0,
+                'dayChange': 0.5,
+                'dayChangePct': 1.33,
+                'dividendYield': 1.8,
+                'ytdReturn': 14.2
+            },
+            'XLK': {
+                'currentPrice': 175.0,
+                'sector': 'ETF - Technology',
+                'industry': 'Sector Fund',
+                'beta': 1.1,
+                'week52High': 190.0,
+                'week52Low': 140.0,
+                'dayChange': 2.1,
+                'dayChangePct': 1.22,
+                'dividendYield': 0.7,
+                'ytdReturn': 22.8
+            }
+        }
+        
+        # Indian ETF/Mutual Fund Fallbacks
+        indian_fund_fallbacks = {
+            'NIFTYBEES': {
+                'currentPrice': 250.0,
+                'sector': 'ETF - Indian Large Cap',
+                'industry': 'Index Fund',
+                'beta': 1.0,
+                'week52High': 280.0,
+                'week52Low': 220.0,
+                'dayChange': 3.5,
+                'dayChangePct': 1.42,
+                'dividendYield': 1.2,
+                'ytdReturn': 15.8
+            },
+            'NIFTYBEES.NS': {
+                'currentPrice': 250.0,
+                'sector': 'ETF - Indian Large Cap',
+                'industry': 'Index Fund',
+                'beta': 1.0,
+                'week52High': 280.0,
+                'week52Low': 220.0,
+                'dayChange': 3.5,
+                'dayChangePct': 1.42,
+                'dividendYield': 1.2,
+                'ytdReturn': 15.8
+            },
+            'JUNIORBEES': {
+                'currentPrice': 450.0,
+                'sector': 'ETF - Indian Small Cap',
+                'industry': 'Index Fund',
+                'beta': 1.4,
+                'week52High': 520.0,
+                'week52Low': 380.0,
+                'dayChange': 8.2,
+                'dayChangePct': 1.85,
+                'dividendYield': 0.8,
+                'ytdReturn': 18.5
+            },
+            'JUNIORBEES.NS': {
+                'currentPrice': 450.0,
+                'sector': 'ETF - Indian Small Cap',
+                'industry': 'Index Fund',
+                'beta': 1.4,
+                'week52High': 520.0,
+                'week52Low': 380.0,
+                'dayChange': 8.2,
+                'dayChangePct': 1.85,
+                'dividendYield': 0.8,
+                'ytdReturn': 18.5
+            },
+            'BANKBEES': {
+                'currentPrice': 520.0,
+                'sector': 'ETF - Indian Banking',
+                'industry': 'Sector Fund',
+                'beta': 1.3,
+                'week52High': 580.0,
+                'week52Low': 450.0,
+                'dayChange': 7.8,
+                'dayChangePct': 1.52,
+                'dividendYield': 1.5,
+                'ytdReturn': 12.4
+            },
+            'BANKBEES.NS': {
+                'currentPrice': 520.0,
+                'sector': 'ETF - Indian Banking',
+                'industry': 'Sector Fund',
+                'beta': 1.3,
+                'week52High': 580.0,
+                'week52Low': 450.0,
+                'dayChange': 7.8,
+                'dayChangePct': 1.52,
+                'dividendYield': 1.5,
+                'ytdReturn': 12.4
+            },
+            'MOSL500.NS': {
+                'currentPrice': 45.0,
+                'sector': 'ETF - Indian Large Cap',
+                'industry': 'Index Fund',
+                'beta': 1.0,
+                'week52High': 52.0,
+                'week52Low': 38.0,
+                'dayChange': 0.6,
+                'dayChangePct': 1.35,
+                'dividendYield': 1.1,
+                'ytdReturn': 14.2
+            },
+            'CPSEETF.NS': {
+                'currentPrice': 94.0,
+                'sector': 'ETF - Indian Bonds',
+                'industry': 'Bond Fund',
+                'beta': 0.1,
+                'week52High': 98.0,
+                'week52Low': 90.0,
+                'dayChange': 0.1,
+                'dayChangePct': 0.11,
+                'dividendYield': 6.8,
+                'ytdReturn': 4.2
+            },
+            'LIQUIDBEES.NS': {
+                'currentPrice': 1000.0,
+                'sector': 'ETF - Liquid Fund',
+                'industry': 'Money Market',
+                'beta': 0.01,
+                'week52High': 1002.0,
+                'week52Low': 998.0,
+                'dayChange': 0.2,
+                'dayChangePct': 0.02,
+                'dividendYield': 6.5,
+                'ytdReturn': 6.8
+            },
+            'GOLDBEES.NS': {
+                'currentPrice': 55.0,
+                'sector': 'ETF - Gold',
+                'industry': 'Commodity Fund',
+                'beta': 0.2,
+                'week52High': 62.0,
+                'week52Low': 48.0,
+                'dayChange': -0.3,
+                'dayChangePct': -0.54,
+                'dividendYield': 0.0,
+                'ytdReturn': -1.8
+            }
+        }
+        
+        # Stock Fallbacks for common symbols
+        stock_fallbacks = {
+            'AAPL': {
+                'currentPrice': 175.0,
+                'sector': 'Technology',
+                'industry': 'Consumer Electronics',
+                'beta': 1.2,
+                'week52High': 195.0,
+                'week52Low': 140.0,
+                'dayChange': 2.1,
+                'dayChangePct': 1.22,
+                'dividendYield': 0.5,
+                'ytdReturn': 18.5
+            },
+            'MSFT': {
+                'currentPrice': 380.0,
+                'sector': 'Technology',
+                'industry': 'Software',
+                'beta': 0.9,
+                'week52High': 420.0,
+                'week52Low': 310.0,
+                'dayChange': 4.2,
+                'dayChangePct': 1.12,
+                'dividendYield': 0.7,
+                'ytdReturn': 16.8
+            },
+            'GOOGL': {
+                'currentPrice': 140.0,
+                'sector': 'Technology',
+                'industry': 'Internet Services',
+                'beta': 1.1,
+                'week52High': 155.0,
+                'week52Low': 115.0,
+                'dayChange': 1.8,
+                'dayChangePct': 1.31,
+                'dividendYield': 0.0,
+                'ytdReturn': 12.2
+            },
+            'TSLA': {
+                'currentPrice': 220.0,
+                'sector': 'Consumer Cyclical',
+                'industry': 'Auto Manufacturers',
+                'beta': 2.0,
+                'week52High': 280.0,
+                'week52Low': 140.0,
+                'dayChange': 8.5,
+                'dayChangePct': 4.01,
+                'dividendYield': 0.0,
+                'ytdReturn': 28.5
+            },
+            'NVDA': {
+                'currentPrice': 450.0,
+                'sector': 'Technology',
+                'industry': 'Semiconductors',
+                'beta': 1.8,
+                'week52High': 500.0,
+                'week52Low': 200.0,
+                'dayChange': 12.5,
+                'dayChangePct': 2.85,
+                'dividendYield': 0.1,
+                'ytdReturn': 85.2
+            },
+            'AMZN': {
+                'currentPrice': 145.0,
+                'sector': 'Consumer Cyclical',
+                'industry': 'Internet Retail',
+                'beta': 1.3,
+                'week52High': 170.0,
+                'week52Low': 120.0,
+                'dayChange': 2.8,
+                'dayChangePct': 1.97,
+                'dividendYield': 0.0,
+                'ytdReturn': 14.8
+            }
+        }
+        
+        # Indian Stock Fallbacks
+        indian_stock_fallbacks = {
+            'RELIANCE': {
+                'currentPrice': 2850.0,
+                'sector': 'Energy',
+                'industry': 'Oil & Gas Integrated',
+                'beta': 0.8,
+                'week52High': 3100.0,
+                'week52Low': 2400.0,
+                'dayChange': 25.5,
+                'dayChangePct': 0.90,
+                'dividendYield': 0.4,
+                'ytdReturn': 8.5
+            },
+            'TCS': {
+                'currentPrice': 3950.0,
+                'sector': 'Technology',
+                'industry': 'IT Services',
+                'beta': 0.7,
+                'week52High': 4200.0,
+                'week52Low': 3200.0,
+                'dayChange': 42.0,
+                'dayChangePct': 1.08,
+                'dividendYield': 1.2,
+                'ytdReturn': 12.8
+            },
+            'INFY': {
+                'currentPrice': 1750.0,
+                'sector': 'Technology',
+                'industry': 'IT Services',
+                'beta': 0.8,
+                'week52High': 1900.0,
+                'week52Low': 1400.0,
+                'dayChange': 18.5,
+                'dayChangePct': 1.07,
+                'dividendYield': 2.1,
+                'ytdReturn': 15.2
+            },
+            'HDFCBANK': {
+                'currentPrice': 1680.0,
+                'sector': 'Financial Services',
+                'industry': 'Banks',
+                'beta': 1.1,
+                'week52High': 1800.0,
+                'week52Low': 1450.0,
+                'dayChange': 22.5,
+                'dayChangePct': 1.36,
+                'dividendYield': 1.0,
+                'ytdReturn': 9.8
+            }
+        }
+        
+        # Bond/Treasury Fallbacks
+        bond_fallbacks = {
+            'US_TREASURY_10Y': {
+                'currentPrice': 95.5,
+                'sector': 'Government Bonds',
+                'industry': 'Treasury Securities',
+                'beta': -0.2,
+                'week52High': 98.0,
+                'week52Low': 92.0,
+                'dayChange': 0.1,
+                'dayChangePct': 0.10,
+                'dividendYield': 4.2,
+                'ytdReturn': -2.1
+            },
+            'US_TREASURY_2Y': {
+                'currentPrice': 98.2,
+                'sector': 'Government Bonds',
+                'industry': 'Treasury Securities',
+                'beta': -0.1,
+                'week52High': 99.5,
+                'week52Low': 96.8,
+                'dayChange': 0.05,
+                'dayChangePct': 0.05,
+                'dividendYield': 4.8,
+                'ytdReturn': -0.8
+            },
+            'US_TREASURY_30Y': {
+                'currentPrice': 88.5,
+                'sector': 'Government Bonds',
+                'industry': 'Treasury Securities',
+                'beta': -0.4,
+                'week52High': 95.0,
+                'week52Low': 82.0,
+                'dayChange': 0.2,
+                'dayChangePct': 0.23,
+                'dividendYield': 4.5,
+                'ytdReturn': -8.2
+            },
+            'CORPORATE_AAA': {
+                'currentPrice': 92.0,
+                'sector': 'Corporate Bonds',
+                'industry': 'Investment Grade',
+                'beta': 0.1,
+                'week52High': 96.0,
+                'week52Low': 88.0,
+                'dayChange': 0.15,
+                'dayChangePct': 0.16,
+                'dividendYield': 5.2,
+                'ytdReturn': -1.5
+            },
+            'CORPORATE_BBB': {
+                'currentPrice': 89.5,
+                'sector': 'Corporate Bonds',
+                'industry': 'Investment Grade',
+                'beta': 0.2,
+                'week52High': 94.0,
+                'week52Low': 85.0,
+                'dayChange': 0.2,
+                'dayChangePct': 0.22,
+                'dividendYield': 6.1,
+                'ytdReturn': -2.8
+            },
+            'HIGH_YIELD_CORP': {
+                'currentPrice': 85.0,
+                'sector': 'Corporate Bonds',
+                'industry': 'High Yield',
+                'beta': 0.4,
+                'week52High': 92.0,
+                'week52Low': 78.0,
+                'dayChange': 0.3,
+                'dayChangePct': 0.35,
+                'dividendYield': 8.5,
+                'ytdReturn': -5.2
+            }
+        }
+        
+        # Debt Fund Fallbacks
+        debt_fund_keywords = [
+            'GILT', 'DEBT', 'BOND', 'LIQUID', 
+            'IDFC', 'ICICI', 'HDFC', 'SBI', 'AXIS',
+            'CORP', 'BANKING', 'PSU', 'SHORT', 'ULTRA',
+            'TREASURY', 'AAA', 'BBB', 'YIELD'
+        ]
+        
+        # Check fallback databases in order of preference
+        fallback_sources = [
+            (etf_fallbacks, "ETF"),
+            (bond_fallbacks, "Bond/Treasury"),
+            (indian_fund_fallbacks, "Indian Fund"),
+            (stock_fallbacks, "US Stock"),
+            (indian_stock_fallbacks, "Indian Stock")
+        ]
+        
+        # Try exact symbol match first
+        for fallback_db, source_type in fallback_sources:
+            if symbol_upper in fallback_db:
+                base_data = fallback_db[symbol_upper].copy()
+                print(f"💡 Using {source_type} fallback for {symbol}")
+                return self._build_fallback_response(base_data)
+        
+        # Check for debt fund patterns
+        is_debt_fund = any(keyword in symbol_upper for keyword in debt_fund_keywords)
+        if is_debt_fund:
+            print(f"💡 {symbol} appears to be debt fund - using generic debt fallback")
+            base_data = {
+                'currentPrice': 25.0,
+                'sector': 'Debt Fund',
+                'industry': 'Mutual Fund',
+                'beta': 0.05,
+                'week52High': 26.0,
+                'week52Low': 24.5,
+                'dayChange': 0.02,
+                'dayChangePct': 0.08,
+                'dividendYield': 6.5,
+                'ytdReturn': 5.2
+            }
+            return self._build_fallback_response(base_data)
+        
+        # Generic fallback based on symbol characteristics
+        if any(etf_keyword in symbol_upper for etf_keyword in ['ETF', 'FUND', 'INDEX', 'SPDR', 'ISHARES', 'VANGUARD']):
+            print(f"💡 {symbol} appears to be ETF - using generic ETF fallback")
+            base_data = {
+                'currentPrice': 100.0,
+                'sector': 'ETF - Mixed',
+                'industry': 'Index Fund',
+                'beta': 1.0,
+                'week52High': 115.0,
+                'week52Low': 85.0,
+                'dayChange': 0.8,
+                'dayChangePct': 0.81,
+                'dividendYield': 1.5,
+                'ytdReturn': 8.5
+            }
+            return self._build_fallback_response(base_data)
+        
+        # No specific fallback found
+        return None
+    
+    def _build_fallback_response(self, base_data: Dict) -> Dict:
+        """Build standardized fallback response with all required fields"""
+        return {
+            'currentPrice': base_data['currentPrice'],
+            'marketCap': base_data.get('marketCap'),
+            'sector': base_data['sector'],
+            'industry': base_data['industry'],
+            'beta': base_data.get('beta'),
+            'week52High': base_data.get('week52High'),
+            'week52Low': base_data.get('week52Low'),
+            'dayChange': base_data.get('dayChange'),
+            'dayChangePct': base_data.get('dayChangePct'),
+            'volume': base_data.get('volume'),
+            'peRatio': base_data.get('peRatio'),
+            'dividendYield': base_data.get('dividendYield'),
+            'ytdReturn': base_data.get('ytdReturn'),
+            '_fallback': True  # Flag to indicate this is fallback data
+        }
+    
     def fetch_from_alpha_vantage(self, symbol: str) -> Optional[Dict]:
         """Fetch from Alpha Vantage API"""
         if not self.apis['alpha_vantage']['enabled']:
@@ -547,47 +1123,18 @@ class StrandMarketDataAgent:
                 self._update_cache(symbol, data)
                 return data
         
-        # ⚠️ All APIs failed - try fallback for Indian debt funds
-        print(f"⚠️  All APIs failed for {symbol}")
+        # ⚠️ All APIs failed - use comprehensive fallback system
+        print(f"⚠️  All APIs failed for {symbol} - using fallback data")
         
-        # Check if this is an Indian debt fund (custom identifier)
-        indian_debt_keywords = [
-            'GILT', 'DEBT', 'BOND', 'LIQUID', 
-            'IDFC', 'ICICI', 'HDFC', 'SBI', 'AXIS',
-            'CORP', 'BANKING', 'PSU', 'SHORT'
-        ]
-        
-        # Check if symbol contains any debt fund keyword
-        is_indian_debt = any(keyword in symbol.upper() for keyword in indian_debt_keywords)
-        
-        if is_indian_debt:
-            print(f"💡 {symbol} appears to be Indian debt fund - using estimated NAV")
-            
-            # Return estimated NAV for debt fund
-            fallback_data = {
-                'currentPrice': 25.0,  # Typical debt fund NAV
-                'marketCap': None,
-                'sector': 'Debt Fund',
-                'industry': 'Mutual Fund',
-                'beta': 0.05,  # Very low beta for debt
-                'week52High': 26.0,
-                'week52Low': 24.5,
-                'dayChange': 0.02,
-                'dayChangePct': 0.08,
-                'volume': None,
-                'peRatio': None,
-                'dividendYield': 6.5,  # Typical debt fund return
-                'ytdReturn': 5.2
-            }
-            
+        fallback_data = self._get_fallback_data(symbol)
+        if fallback_data:
             # Cache the fallback data
             self._update_cache(symbol, fallback_data)
-            
-            print(f"✅ Using fallback NAV: {symbol} @ ₹{fallback_data['currentPrice']:.2f}")
+            print(f"✅ Using fallback data: {symbol} @ ${fallback_data['currentPrice']:.2f}")
             return fallback_data
         
-        # Not a debt fund and all APIs failed
-        print(f"❌ Cannot fetch data for {symbol}")
+        # No fallback available
+        print(f"❌ Cannot fetch data for {symbol} - no fallback available")
         return None
     
     def get_portfolio(self, user_email: str) -> Optional[Dict]:
@@ -695,8 +1242,13 @@ class StrandMarketDataAgent:
             'volume': market_data['volume'],
             'peRatio': round(market_data['peRatio'], 2) if market_data['peRatio'] else None,
             'dividendYield': round(market_data['dividendYield'], 2) if market_data['dividendYield'] else None,
-            'ytdReturn': round(market_data['ytdReturn'], 2) if market_data['ytdReturn'] else None
+            'ytdReturn': round(market_data['ytdReturn'], 2) if market_data['ytdReturn'] else None,
+            'dataSource': 'fallback' if market_data.get('_fallback') else 'live'
         }
+        
+        # Add warning for fallback data
+        if market_data.get('_fallback'):
+            enriched['warning'] = 'Using estimated data - live market data unavailable'
         
         return enriched
     
@@ -789,11 +1341,20 @@ class StrandMarketDataAgent:
                 }
             
             enriched_holdings = []
+            fallback_count = 0
+            live_count = 0
+            
             for holding in holdings:
                 symbol = holding['symbol']
                 if symbol in market_data_map:
                     enriched = self.enrich_holding(holding, market_data_map[symbol])
                     enriched_holdings.append(enriched)
+                    
+                    # Count data sources
+                    if market_data_map[symbol].get('_fallback'):
+                        fallback_count += 1
+                    else:
+                        live_count += 1
             
             if not enriched_holdings:
                 return {
@@ -806,8 +1367,11 @@ class StrandMarketDataAgent:
             
             print("=" * 60)
             print(f"✅ [Strand Market Agent] Report Generated Successfully")
-            print(f"📈 Total Portfolio Value: ₹{portfolio_metrics['totalValue']:,.2f}")
+            print(f"📈 Total Portfolio Value: ${portfolio_metrics['totalValue']:,.2f}")
             print(f"📊 Holdings Processed: {len(enriched_holdings)}/{len(holdings)}")
+            print(f"📡 Live Data: {live_count} | 🔄 Fallback Data: {fallback_count}")
+            if fallback_count > 0:
+                print(f"⚠️  {fallback_count} holdings using estimated data due to API unavailability")
             print("=" * 60)
             
             return {
@@ -817,6 +1381,12 @@ class StrandMarketDataAgent:
                 'holdings': enriched_holdings,
                 'portfolioMetrics': portfolio_metrics,
                 'cashSavings': float(portfolio.get('cashSavings', 0)),
+                'dataQuality': {
+                    'totalHoldings': len(enriched_holdings),
+                    'liveDataCount': live_count,
+                    'fallbackDataCount': fallback_count,
+                    'dataReliability': 'high' if fallback_count == 0 else 'medium' if fallback_count < live_count else 'estimated'
+                },
                 'agent': 'StrandMarketDataAgent',
                 'version': '1.0.0-strand'
             }

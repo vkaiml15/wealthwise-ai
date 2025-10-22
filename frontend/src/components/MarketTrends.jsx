@@ -136,6 +136,12 @@ const MarketTrends = () => {
   const handleRefresh = async () => {
     console.log('🔄 Manual refresh triggered');
     setIsRefreshing(true);
+    
+    // Clear the cache to force fresh data
+    const cacheKey = `market_trends_${userEmail}`;
+    localStorage.removeItem(cacheKey);
+    console.log('🗑️ Cleared market trends cache');
+    
     await fetchMarketData(true);
     setIsRefreshing(false);
   };
