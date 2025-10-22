@@ -47,8 +47,7 @@
 
 ## 🏗️ Production-Ready Architecture
 
-<img width="2865" height="3171" alt="final drawio" src="https://github.com/user-attachments/assets/ebaf9fd2-112e-43a2-90c2-ad452713c459" />
-
+<img width="2981" height="3251" alt="wel drawio" src="https://github.com/user-attachments/assets/d1cf5d19-a1b5-472e-966c-0b7494f7f936" />
 
 ### **Cloud Infrastructure (AWS Well-Architected)**
 
