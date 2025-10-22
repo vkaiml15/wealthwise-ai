@@ -29,11 +29,11 @@ const formatIndianCurrency = (amount) => {
 };
 
 const Dashboard = () => {
-  const { currentUser, portfolio, refreshPortfolio } = useAuth();
+  const { currentUser, portfolio, refreshPortfolio, refreshUserData } = useAuth();
   const navigate = useNavigate();
   const [isRefreshing, setIsRefreshing] = React.useState(false);
 
-  // Auto-refresh portfolio data on mount
+  // Auto-refresh portfolio and user data on mount
   useEffect(() => {
     if (currentUser?.hasPortfolio && currentUser?.email) {
       handleRefresh();
@@ -42,7 +42,11 @@ const Dashboard = () => {
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    await refreshPortfolio();
+    // Refresh both user data (for risk score) and portfolio data
+    await Promise.all([
+      refreshUserData(),
+      refreshPortfolio()
+    ]);
     setIsRefreshing(false);
   };
 
@@ -137,17 +141,6 @@ const Dashboard = () => {
           icon={Wallet}
           iconColor="purple"
           subtitle={totalValue > 0 ? `${((cashReserve / totalValue) * 100).toFixed(1)}% of portfolio` : '0% of portfolio'}
-        />
-        <StatCard
-          title="Risk Score"
-          value={`${riskScore}/10`}
-          icon={Shield}
-          iconColor="yellow"
-          subtitle={
-            riskScore < 4 ? "Conservative" : 
-            riskScore < 7 ? "Moderate" : 
-            "Aggressive"
-          }
         />
       </div>
 

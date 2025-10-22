@@ -28,6 +28,36 @@ def convert_decimal_to_float(obj):
         return obj
 
 
+def parse_investment_horizon(horizon_str):
+    """
+    Safely parse investment horizon string to extract numeric value
+    
+    Args:
+        horizon_str: String like '5-10', '10+', '1-3', etc.
+    
+    Returns:
+        int: The first/lower bound number from the horizon
+    """
+    if not horizon_str:
+        return 5  # Default fallback
+    
+    horizon_str = str(horizon_str).strip()
+    
+    # Handle '10+' case
+    if '+' in horizon_str:
+        return int(horizon_str.replace('+', ''))
+    
+    # Handle '5-10' case
+    if '-' in horizon_str:
+        return int(horizon_str.split('-')[0])
+    
+    # Handle pure number case
+    try:
+        return int(horizon_str)
+    except ValueError:
+        return 5  # Default fallback
+
+
 def analyze_market_context(market_data: Dict[str, Any]) -> Dict[str, Any]:
     """
     Analyze current market conditions to contextualize recommendations
@@ -380,7 +410,7 @@ Asset allocation determines 90% of portfolio returns. Your current misalignment 
 - India VIX: {market_context.get('volatility', {}).get('vix', 'N/A')} - {"Consider dollar-cost averaging" if market_context.get('volatility', {}).get('level') == 'high' else "Market conditions favorable"}
 
 **Impact on Your Goals:**
-For your {user_metadata['investment_horizon']} year horizon, keeping this cash idle means missing ₹{net_opportunity * int(user_metadata['investment_horizon'].split('-')[0]):,.0f} in potential compounded gains.
+For your {user_metadata['investment_horizon']} year horizon, keeping this cash idle means missing ₹{net_opportunity * parse_investment_horizon(user_metadata['investment_horizon']):,.0f} in potential compounded gains.
 """
         
         recommendations['immediate'].append({
@@ -431,7 +461,7 @@ For your {user_metadata['investment_horizon']} year horizon, keeping this cash i
                 f'Given {market_context.get("volatility", {}).get("level", "moderate")} volatility, {"invest in 3 tranches over 4 weeks" if market_context.get("volatility", {}).get("level") == "high" else "invest ₹" + f"{deployable_cash:,.0f} immediately"}',
                 f'Set up monthly SIP of ₹{user_metadata["monthly_contribution"]:,.0f} for future savings'
             ],
-            'expectedOutcome': f'Deploying ₹{deployable_cash:,.0f} generates ₹{potential_gain:,.0f}/year at {expected_market_return*100:.1f}% returns vs losing ₹{inflation_loss_annual:,.0f} to inflation. Net annual benefit: ₹{net_opportunity:,.0f}. Over {user_metadata["investment_horizon"]} years: ₹{net_opportunity * int(user_metadata["investment_horizon"].split("-")[0]):,.0f} total!'
+            'expectedOutcome': f'Deploying ₹{deployable_cash:,.0f} generates ₹{potential_gain:,.0f}/year at {expected_market_return*100:.1f}% returns vs losing ₹{inflation_loss_annual:,.0f} to inflation. Net annual benefit: ₹{net_opportunity:,.0f}. Over {user_metadata["investment_horizon"]} years: ₹{net_opportunity * parse_investment_horizon(user_metadata["investment_horizon"]):,.0f} total!'
         })
     
     elif cash_percent < 5 and total_value > 100000:

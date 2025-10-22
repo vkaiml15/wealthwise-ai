@@ -88,7 +88,7 @@ export const AuthProvider = ({ children }) => {
           value: returnsValue,           // ✅ FIXED
           percentage: returnsPercentage  // ✅ FIXED
         },
-        riskScore: 5,
+        riskScore: currentUser?.riskAnalysis?.riskScore ?? 5,
         allocation: [
           { name: "Stocks", value: stocksValue, percentage: calculatePercentage(stocksValue), color: "#4F46E5" },
           { name: "ETFs", value: etfsValue, percentage: calculatePercentage(etfsValue), color: "#8B5CF6" },
@@ -127,7 +127,7 @@ export const AuthProvider = ({ children }) => {
       cashReserve: parseFloat(backendPortfolio.cashSavings || 0),
       invested: 0,
       returns: { value: 0, percentage: 0 },
-      riskScore: 5,
+      riskScore: currentUser?.riskAnalysis?.riskScore ?? 5,
       allocation: [],
       performance: [],
       holdings: [],
@@ -343,6 +343,25 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('currentUser', JSON.stringify(updatedUser));
   };
 
+  // Refresh user data from database
+  const refreshUserData = async () => {
+    if (!currentUser?.email) return null;
+    
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/user/${currentUser.email}`);
+      const data = await response.json();
+      
+      if (data.success) {
+        setCurrentUser(data.user);
+        localStorage.setItem('currentUser', JSON.stringify(data.user));
+        return data.user;
+      }
+    } catch (error) {
+      console.error('Error refreshing user data:', error);
+    }
+    return null;
+  };
+
   // Refresh portfolio data
   const refreshPortfolio = async () => {
     if (currentUser?.email && currentUser?.hasPortfolio) {
@@ -361,6 +380,7 @@ export const AuthProvider = ({ children }) => {
     signup,
     completeOnboarding,
     updateUserProfile,
+    refreshUserData,
     refreshPortfolio,
     fetchPortfolioData
   };
