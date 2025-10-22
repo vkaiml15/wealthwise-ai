@@ -11,7 +11,7 @@ import {
   AlertCircle,
   Calendar,
   Target,
-  DollarSign,
+  IndianRupeeIcon,
   Clock,
   Briefcase,
   Plus,
@@ -801,7 +801,7 @@ const Settings = () => {
         <div className="space-y-2">
           {[
             { value: 'growth', label: 'Long-term Growth', icon: Target },
-            { value: 'income', label: 'Income Generation', icon: DollarSign },
+            { value: 'income', label: 'Income Generation', icon: IndianRupeeIcon },
             { value: 'preservation', label: 'Capital Preservation', icon: Shield },
             { value: 'balanced', label: 'Balanced Approach', icon: Briefcase }
           ].map((goal) => (

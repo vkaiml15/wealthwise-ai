@@ -1,7 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { ChatProvider } from './context/ChatContext';
 import { Loader2 } from 'lucide-react';
 
 // Components
@@ -84,11 +83,11 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <ChatProvider>
+       
           <NotificationProvider>
             <AppRoutes />
           </NotificationProvider>
-        </ChatProvider>
+        
       </AuthProvider>
     </Router>
   );

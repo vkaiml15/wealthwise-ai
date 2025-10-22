@@ -10,11 +10,10 @@ import {
   Activity,
   Target,
   Calendar,
-  DollarSign,
+  IndianRupeeIcon,
   BarChart3,
   Layers,
-  Clock,
-  IndianRupeeIcon
+  Clock
 } from 'lucide-react';
 import {
   RadarChart,

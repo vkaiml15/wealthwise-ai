@@ -10,7 +10,7 @@ import {
   Check, 
   ArrowRight, 
   ArrowLeft,
-  DollarSign,
+  IndianRupeeIcon,
   Clock,
   Sparkles,
   Wallet,
@@ -593,7 +593,7 @@ const etfOptions = [
         <div className="space-y-3">
           {[
             { value: 'growth', label: 'Long-term Growth', icon: TrendingUp },
-            { value: 'income', label: 'Regular Income', icon: DollarSign },
+            { value: 'income', label: 'Regular Income', icon: IndianRupeeIcon },
             { value: 'preservation', label: 'Wealth Preservation', icon: Shield },
             { value: 'retirement', label: 'Retirement Planning', icon: Clock }
           ].map((goal) => (
@@ -652,7 +652,7 @@ const etfOptions = [
     <div className="space-y-6">
       <div className="text-center mb-8">
         <div className="inline-flex items-center justify-center w-16 h-16 bg-indigo-100 rounded-full mb-4">
-          <DollarSign className="w-8 h-8 text-indigo-600" />
+          <IndianRupeeIcon className="w-8 h-8 text-indigo-600" />
         </div>
         <h2 className="text-2xl font-bold text-gray-900 mb-2">Investment Amount</h2>
         <p className="text-gray-600">How much would you like to invest?</p>

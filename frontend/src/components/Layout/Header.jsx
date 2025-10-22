@@ -60,7 +60,7 @@ const Header = ({ sidebarOpen, setSidebarOpen }) => {
             <div className="text-right">
               <p className="text-xs text-gray-600">Portfolio</p>
               <p className="text-sm font-bold text-indigo-600">
-                ${portfolio.totalValue?.toLocaleString()}
+                ₹{portfolio.totalValue?.toLocaleString()}
               </p>
             </div>
           </div>

@@ -9,7 +9,7 @@ import {
   Layers,
   Info,
   AlertCircle,
-  DollarSign,
+  IndianRupeeIcon,
   Clock
 } from 'lucide-react';
 import {
@@ -333,7 +333,7 @@ const MarketTrends = () => {
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
           <div className="flex items-center justify-between mb-3">
             <span className="text-sm text-gray-600">Total Value</span>
-            <DollarSign className="w-5 h-5 text-indigo-600" />
+            <IndianRupeeIcon className="w-5 h-5 text-indigo-600" />
           </div>
           <p className="text-2xl font-bold text-gray-900">{formatCurrency(totalValue)}</p>
           <p className="text-xs text-gray-500 mt-1">Portfolio value</p>
