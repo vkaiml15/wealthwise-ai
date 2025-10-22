@@ -1,11 +1,11 @@
 import React, { useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  IndianRupeeIcon, 
-  Wallet, 
-  Shield, 
+import {
+  TrendingUp,
+  TrendingDown,
+  IndianRupeeIcon,
+  Wallet,
+  Shield,
   Activity,
   ArrowUpRight,
   ArrowDownRight,
@@ -131,12 +131,12 @@ const Dashboard = () => {
           isPositive={isPositive}
           icon={isPositive ? TrendingUp : TrendingDown}
           iconColor={isPositive ? "green" : "red"}
-          // subtitle={`${returns.percentage}%`}
+        // subtitle={`${returns.percentage}%`}
         />
         <StatCard
           title="Cash Reserve"
           value={formatIndianCurrency(cashReserve)}
-          
+
           isPercentage={true}
           icon={Wallet}
           iconColor="purple"
@@ -203,23 +203,22 @@ const Dashboard = () => {
               </thead>
               <tbody>
                 {holdings.slice(0, 10).map((holding, index) => {
-                  const returnPercent = holding.avgPrice > 0 
+                  const returnPercent = holding.avgPrice > 0
                     ? ((holding.currentPrice - holding.avgPrice) / holding.avgPrice * 100)
                     : 0;
                   const isPositiveReturn = returnPercent > 0;
-                  
+
                   return (
                     <tr key={index} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
                       <td className="py-4 px-4">
                         <span className="font-semibold text-gray-900">{holding.symbol}</span>
                       </td>
                       <td className="py-4 px-4">
-                        <span className={`text-xs px-2 py-1 rounded-full ${
-                          holding.type === 'bond' ? 'bg-green-100 text-green-700' :
-                          holding.type === 'stock' ? 'bg-blue-100 text-blue-700' :
-                          holding.type === 'etf' ? 'bg-purple-100 text-purple-700' :
-                          'bg-gray-100 text-gray-700'
-                        }`}>
+                        <span className={`text-xs px-2 py-1 rounded-full ${holding.type === 'bond' ? 'bg-green-100 text-green-700' :
+                            holding.type === 'stock' ? 'bg-blue-100 text-blue-700' :
+                              holding.type === 'etf' ? 'bg-purple-100 text-purple-700' :
+                                'bg-gray-100 text-gray-700'
+                          }`}>
                           {holding.type || 'stock'}
                         </span>
                       </td>
@@ -236,9 +235,8 @@ const Dashboard = () => {
                         ₹{holding.value?.toLocaleString('en-IN') || 0}
                       </td>
                       <td className="py-4 px-4 text-right">
-                        <div className={`flex items-center justify-end space-x-1 ${
-                          isPositiveReturn ? 'text-green-600' : 'text-red-600'
-                        }`}>
+                        <div className={`flex items-center justify-end space-x-1 ${isPositiveReturn ? 'text-green-600' : 'text-red-600'
+                          }`}>
                           {isPositiveReturn ? (
                             <ArrowUpRight className="w-4 h-4" />
                           ) : (
@@ -287,7 +285,7 @@ const Dashboard = () => {
           </div>
         </button>
 
-         <button
+        <button
           onClick={() => navigate('/risk')}
           className="p-6 bg-white rounded-xl shadow-sm border border-gray-200 hover:border-indigo-300 hover:shadow-md transition-all group"
         >
@@ -302,9 +300,9 @@ const Dashboard = () => {
           </div>
         </button>
 
-        <button  onClick={() => navigate('/recommendations')} 
-            className="p-6 bg-white rounded-xl shadow-sm border border-gray-200 hover:border-green-300 hover:shadow-md transition-all group">
-          
+        <button onClick={() => navigate('/recommendations')}
+          className="p-6 bg-white rounded-xl shadow-sm border border-gray-200 hover:border-green-300 hover:shadow-md transition-all group">
+
           <div className="flex items-center space-x-4">
             <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200 transition-colors">
               <TrendingUp className="w-6 h-6 text-green-600" />
