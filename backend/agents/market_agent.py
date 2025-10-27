@@ -38,11 +38,11 @@ class StrandMarketDataAgent:
         self.apis = {
             # US Market APIs
             'alpha_vantage': {
-                'key': os.getenv('ALPHA_VANTAGE_API_KEY', ''),
+                'key': os.getenv('ALPHA_VANTAGE_API_KEY', 'LO1QXEUYC52A2F4J'),
                 'base_url': 'https://www.alphavantage.co/query',
                 'rate_limit': 0.5,
                 'last_call': 0,
-                'enabled': bool(os.getenv('ALPHA_VANTAGE_API_KEY')),
+                'enabled': bool(os.getenv('ALPHA_VANTAGE_API_KEY', 'LO1QXEUYC52A2F4J')),
                 'market': 'US'
             },
             'finnhub': {
@@ -50,7 +50,7 @@ class StrandMarketDataAgent:
                 'base_url': 'https://finnhub.io/api/v1',
                 'rate_limit': 1.0,
                 'last_call': 0,
-                'enabled': bool(os.getenv('FINNHUB_API_KEY')),
+                'enabled': bool(os.getenv('FINNHUB_API_KEY', 'd3p2u71r01quo6o6jlngd3p2u71r01quo6o6jlo0')),
                 'market': 'US'
             },
             'polygon': {
