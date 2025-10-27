@@ -46,7 +46,7 @@ class StrandMarketDataAgent:
                 'market': 'US'
             },
             'finnhub': {
-                'key': os.getenv('FINNHUB_API_KEY', ''),
+                'key': os.getenv('FINNHUB_API_KEY', 'd3p2u71r01quo6o6jlngd3p2u71r01quo6o6jlo0'),
                 'base_url': 'https://finnhub.io/api/v1',
                 'rate_limit': 1.0,
                 'last_call': 0,
